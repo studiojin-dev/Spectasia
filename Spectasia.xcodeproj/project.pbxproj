@@ -30,9 +30,9 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		AC7CE7642F28DFFF00E2D895 /* Spectasia */ = {
+		AC7CE7642F28DFFF00E2D895 /* Sources/SpectasiaCore */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Spectasia;
+			path = Sources/SpectasiaCore;
 			sourceTree = "<group>";
 		};
 		AC7CE7722F28E00000E2D895 /* SpectasiaTests */ = {
@@ -75,7 +75,7 @@
 		AC7CE7592F28DFFF00E2D895 = {
 			isa = PBXGroup;
 			children = (
-				AC7CE7642F28DFFF00E2D895 /* Spectasia */,
+				AC7CE7642F28DFFF00E2D895 /* Sources/SpectasiaCore */,
 				AC7CE7722F28E00000E2D895 /* SpectasiaTests */,
 				AC7CE77C2F28E00000E2D895 /* SpectasiaUITests */,
 				AC7CE7632F28DFFF00E2D895 /* Products */,
@@ -108,7 +108,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				AC7CE7642F28DFFF00E2D895 /* Spectasia */,
+				AC7CE7642F28DFFF00E2D895 /* Sources/SpectasiaCore */,
 			);
 			name = Spectasia;
 			packageProductDependencies = (
