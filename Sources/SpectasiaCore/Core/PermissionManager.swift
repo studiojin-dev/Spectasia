@@ -1,11 +1,11 @@
 import Foundation
-import SwiftUI
 import AppKit
+import Security
 import os.log
 
 // MARK: - Logging
 
-private let logger = Logger(subsystem: "com.spectasia.gui", category: "PermissionManager")
+private let logger = Logger(subsystem: "com.spectasia.core", category: "PermissionManager")
 
 /// Manager for file system permissions and security-scoped bookmarks
 @MainActor
@@ -76,10 +76,11 @@ public class PermissionManager: ObservableObject {
             }
 
             // Access directory with security scope
-            return securedURL.startAccessingSecurityScopedResource {
+            if securedURL.startAccessingSecurityScopedResource() {
                 block(securedURL)
                 return true
             }
+            return false
 
         } catch {
             logger.error("Failed to resolve bookmark: \(error.localizedDescription)")
@@ -145,57 +146,4 @@ public class PermissionManager: ObservableObject {
     }
 }
 
-/// Preferences view for managing folders
-public struct FolderPreferencesView: View {
-    @StateObject private var permissionManager = PermissionManager()
-    @State private var monitoredFolders: [String] = []
 
-    public init() {}
-
-    public var body: some View {
-        List {
-            Section("Monitored Folders") {
-                ForEach(monitoredFolders, id: \.self) { folder in
-                    HStack {
-                        Image(systemName: "folder.fill")
-                            .foregroundColor(.blue)
-                        Text((folder as NSString).lastPathComponent)
-                            .font(GypsumFont.body)
-                        Spacer()
-                        Button("Remove") {
-                            removeFolder(folder)
-                        }
-                        .font(GypsumFont.caption)
-                    }
-                }
-
-                Button("Add Folder") {
-                    addFolder()
-                }
-                .font(GypsumFont.body)
-            }
-
-            Section("Permissions") {
-                Text(permissionManager.permissionStatus)
-                    .font(GypsumFont.caption)
-                    .foregroundColor(GypsumColor.textSecondary)
-            }
-        }
-        .navigationTitle("Folders")
-    }
-
-    private func addFolder() {
-        if let url = permissionManager.requestDirectoryAccess(prompt: "Select image folder to monitor") {
-            monitoredFolders.append(url.path)
-        }
-    }
-
-    private func removeFolder(_ folder: String) {
-        monitoredFolders.removeAll { $0 == folder }
-    }
-}
-
-#Preview("Folder Preferences") {
-    FolderPreferencesView()
-        .frame(width: 400, height: 300)
-}
