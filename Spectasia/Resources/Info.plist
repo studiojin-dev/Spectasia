@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>$(DEVELOPMENT_LANGUAGE)</string>
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.spectasia.app</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>$(PRODUCT_NAME)</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>$(MACOSX_DEPLOYMENT_TARGET)</string>
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
+
+    <!-- File System Access Permissions -->
+    <key>NSDesktopFolderUsageDescription</key>
+    <string>Spectasia needs access to your Desktop folder to browse and manage images.</string>
+
+    <key>NSDocumentsFolderUsageDescription</key>
+    <string>Spectasia needs access to your Documents folder to browse and manage images.</string>
+
+    <key>NSDownloadsFolderUsageDescription</key>
+    <string>Spectasia needs access to your Downloads folder to browse and manage images.</string>
+
+    <key>NSPicturesFolderUsageDescription</key>
+    <string>Spectasia needs access to your Photos folder to browse and manage images.</string>
+
+    <key>NSRemovableVolumesUsageDescription</key>
+    <string>Spectasia needs access to external drives to browse and manage images.</string>
+
+</dict>
+</plist>
