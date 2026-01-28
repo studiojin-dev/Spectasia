@@ -9,7 +9,7 @@ public struct SingleImageView: View {
     @State private var lastOffset: CGSize = .zero
     @State private var isFullscreen = false
 
-    var body: some View {
+    public var body: some View {
         GeometryReader { geometry in
             ZStack {
                 // Background
@@ -72,7 +72,6 @@ public struct SingleImageView: View {
                     }
                 }
             }
-            .statusBar(hidden: isFullscreen)
         }
         .gesture(
             MagnificationGesture()

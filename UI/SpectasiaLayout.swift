@@ -7,16 +7,16 @@ public struct SpectasiaLayout: View {
     public init() {}
 
     public var body: some View {
-        NavigationSplitView(columnVisibility: $columnVisibility) {
-            // Sidebar: Albums & Folders
-            SidebarPanel()
-
-            // Content: Image Grid
-            ContentPanel()
-
-            // Detail: Single Image View
+        NavigationSplitView(columnVisibility: $columnVisibility, 
+                             sidebar: {
+            VStack {
+                SidebarPanel()
+                ContentPanel()
+            }
+        },
+                             detail: {
             DetailPanel()
-        }
+        })
         .navigationSplitViewStyle(.balanced)
     }
 }

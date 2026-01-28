@@ -29,23 +29,6 @@ public enum GypsumFont {
     public static let caption = Font.system(size: 13, weight: .regular)
 }
 
-/// Gypsum shadow system - soft, subtle
-public enum GypsumShadow {
-    public static let card = [
-        Shadow.color: Color.black.opacity(0.05),
-        Shadow.radius: 8,
-        Shadow.x: 0,
-        Shadow.y: 2
-    ] as [String: Any]
-
-    public static let button = [
-        Shadow.color: Color.black.opacity(0.1),
-        Shadow.radius: 4,
-        Shadow.x: 0,
-        Shadow.y: 1
-    ] as [String: Any]
-}
-
 // MARK: - Gypsum Components
 
 /// Gypsum-styled container with matte finish

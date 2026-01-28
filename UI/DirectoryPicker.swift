@@ -1,49 +1,40 @@
 import SwiftUI
 import AppKit
+import UniformTypeIdentifiers
 
 /// Directory picker for selecting folders to monitor
-public struct DirectoryPicker: NSViewRepresentable {
+public struct DirectoryPicker: View {
     @Binding var selectedURL: URL?
     let prompt: String
+    @State private var isPresented = false
 
     public init(prompt: String = "Select a folder", selectedURL: Binding<URL?>) {
         self.prompt = prompt
         self._selectedURL = selectedURL
     }
 
-    public func makeNSView(context: Context) -> NSOpenPanel {
-        let panel = NSOpenPanel()
-        panel.prompt = prompt
-        panel.canChooseFiles = false
-        panel.canChooseDirectories = true
-        panel.allowsMultipleSelection = false
-
-        return panel
-    }
-
-    public func updateNSView(_ nsView: NSOpenPanel, context: Context) {
-        // Update panel if needed
-    }
-
-    public func makeCoordinator() -> Coordinator {
-        Coordinator($selectedURL)
-    }
-
-    public class Coordinator: NSObject, NSOpenPanelDelegate {
-        @Binding var selectedURL: URL?
-
-        init(_ selectedURL: Binding<URL?>) {
-            self._selectedURL = selectedURL
+    public var body: some View {
+        Button(action: {
+            isPresented = true
+        }) {
+            Image(systemName: "folder")
+                .font(.title)
+                .padding()
         }
-
-        func panel(_ panel: NSOpenPanel, didUpdateTo url: URL?) {
-            DispatchQueue.main.async {
-                self.selectedURL = url
+        .fileImporter(
+            isPresented: $isPresented,
+            allowedContentTypes: [.folder],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case .success(let urls):
+                if let url = urls.first {
+                    selectedURL = url
+                    url.startAccessingSecurityScopedResource()
+                }
+            case .failure(let error):
+                print("Directory selection failed: \(error)")
             }
-        }
-
-        func panel(_ panel: NSOpenPanel, shouldEnable url: URL) -> Bool {
-            return url.hasDirectoryPath
         }
     }
 }

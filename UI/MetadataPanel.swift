@@ -1,5 +1,4 @@
 import SwiftUI
-import SpectasiaCore
 
 /// Right panel showing metadata, tags, and ratings
 public struct MetadataPanel: View {
@@ -90,14 +89,16 @@ struct FlowLayout: Layout {
     var spacing: CGFloat = 8
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let result = FlowResult(in: proposal.rewards.unsafeViewBounds, subviews: subviews, spacing: spacing)
+        let size = proposal.replacingUnspecifiedDimensions()
+        let bounds = CGRect(origin: .zero, size: size)
+        let result = FlowLayout.computeFlowResult(in: bounds, subviews: subviews, spacing: spacing)
         return result.size
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let result = FlowResult(in: bounds, subviews: subviews, spacing: spacing)
-        for (index, info) in result.placements {
-            subviews[index].place(at: info.origin, proposal: .unspecified)
+        let result = FlowLayout.computeFlowResult(in: bounds, subviews: subviews, spacing: spacing)
+        for (index, origin) in result.placements {
+            subviews[index].place(at: origin, proposal: .unspecified)
         }
     }
 
@@ -106,7 +107,7 @@ struct FlowLayout: Layout {
         var placements: [(index: Int, origin: CGPoint)]
     }
 
-    static func FlowResult(in bounds: CGRect, subviews: Subviews, spacing: CGFloat) -> FlowResult {
+    static func computeFlowResult(in bounds: CGRect, subviews: Subviews, spacing: CGFloat) -> FlowResult {
         var placements: [(index: Int, origin: CGPoint)] = []
         var currentX: CGFloat = 0
         var currentY: CGFloat = 0

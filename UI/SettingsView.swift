@@ -17,7 +17,8 @@ public struct SettingsView: View {
                 // Folder settings
                 Section("Folders") {
                     NavigationLink("Monitored Folders") {
-                        FolderPreferencesView()
+                        Text("Feature not yet implemented")
+                            .foregroundColor(.secondary)
                     }
                 }
 

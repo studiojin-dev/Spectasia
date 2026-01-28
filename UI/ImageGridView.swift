@@ -1,5 +1,4 @@
 import SwiftUI
-import SpectasiaCore
 
 /// Grid view for browsing images with thumbnails
 public struct ImageGridView: View {
