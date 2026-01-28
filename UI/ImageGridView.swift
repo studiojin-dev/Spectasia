@@ -2,24 +2,24 @@ import SwiftUI
 
 /// Grid view for browsing images with thumbnails
 public struct ImageGridView: View {
-    @State private var images: [SpectasiaImage] = []
-    @State private var isLoading = false
-    @State private var repository: ImageRepository?
+    let images: [SpectasiaImage]
+    let selectedImage: Binding<SpectasiaImage?>
+    let backgroundTasks: Binding<Int>
     let gridSize: CGFloat = 120
 
-    public init() {}
+    public init(
+        images: [SpectasiaImage],
+        selectedImage: Binding<SpectasiaImage?>,
+        backgroundTasks: Binding<Int>
+    ) {
+        self.images = images
+        self.selectedImage = selectedImage
+        self.backgroundTasks = backgroundTasks
+    }
 
     public var body: some View {
         ScrollView {
-            if isLoading {
-                VStack(spacing: 16) {
-                    ProgressView()
-                    Text("Loading images...")
-                        .font(GypsumFont.caption)
-                        .foregroundColor(GypsumColor.textSecondary)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else if images.isEmpty {
+            if images.isEmpty {
                 VStack(spacing: 16) {
                     Image(systemName: "photo.on.rectangle.angled")
                         .font(.system(size: 48))
@@ -44,24 +44,6 @@ public struct ImageGridView: View {
             }
         }
         .background(GypsumColor.background)
-        .onAppear {
-            setupRepository()
-        }
-    }
-
-    private func setupRepository() {
-        isLoading = true
-        let repo = ImageRepository()
-        self.repository = repo
-
-        Task {
-            // Load images from repository asynchronously
-            let loadedImages = await repo.images
-            await MainActor.run {
-                self.images = loadedImages
-                self.isLoading = false
-            }
-        }
     }
 }
 
@@ -148,5 +130,9 @@ struct ImageThumbnail: View {
 }
 
 #Preview("Image Grid") {
-    ImageGridView()
+    ImageGridView(
+        images: [],
+        selectedImage: .constant(nil),
+        backgroundTasks: .constant(0)
+    )
 }
