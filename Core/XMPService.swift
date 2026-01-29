@@ -4,10 +4,16 @@ import Foundation
 public struct ImageMetadata: Sendable {
     public var rating: Int
     public var tags: [String]
+    public var fileSize: Int64
+    public var modificationDate: Date
+    public var fileExtension: String
 
-    public init(rating: Int = 0, tags: [String] = []) {
+    public init(rating: Int = 0, tags: [String] = [], fileSize: Int64 = 0, modificationDate: Date = Date(), fileExtension: String = "") {
         self.rating = rating
         self.tags = tags
+        self.fileSize = fileSize
+        self.modificationDate = modificationDate
+        self.fileExtension = fileExtension
     }
 }
 

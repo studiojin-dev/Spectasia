@@ -3,148 +3,109 @@ import SwiftUI
 /// Three-panel layout for Spectasia: Sidebar, Content, Detail
 public struct SpectasiaLayout: View {
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
-    @State private var selectedDirectory: URL?
-    @State private var images: [SpectasiaImage] = []
-    @State private var selectedImage: SpectasiaImage?
-    @State private var backgroundTasks: Int = 0
+    @Binding private var images: [SpectasiaImage]
+    @Binding private var selectedImage: SpectasiaImage?
+    @Binding private var selectedDirectory: URL?
+    @Binding private var currentViewMode: ViewMode
+    @Binding private var isLoading: Bool
+    @Binding private var backgroundTasks: Int
 
-    public init() {}
+    /// View mode for displaying images
+    public enum ViewMode {
+        case thumbnailGrid
+        case list
+        case singleImage
+    }
+
+    public init(
+        images: Binding<[SpectasiaImage]>,
+        selectedImage: Binding<SpectasiaImage?>,
+        selectedDirectory: Binding<URL?>,
+        currentViewMode: Binding<ViewMode>,
+        isLoading: Binding<Bool>,
+        backgroundTasks: Binding<Int>
+    ) {
+        self._images = images
+        self._selectedImage = selectedImage
+        self._selectedDirectory = selectedDirectory
+        self._currentViewMode = currentViewMode
+        self._isLoading = isLoading
+        self._backgroundTasks = backgroundTasks
+    }
 
     public var body: some View {
-        NavigationSplitView(columnVisibility: $columnVisibility, 
-                             sidebar: {
-            VStack {
-                SidebarPanel(selectedDirectory: $selectedDirectory, images: $images)
-                ContentPanel(images: $images, selectedImage: $selectedImage, backgroundTasks: $backgroundTasks)
-            }
-        },
-                             detail: {
-            DetailPanel(selectedImage: $selectedImage)
-        })
-        .navigationSplitViewStyle(.balanced)
-    }
-}
-
-// MARK: - Sidebar Panel
-
-struct SidebarPanel: View {
-    @Binding var selectedDirectory: URL?
-    @Binding var images: [SpectasiaImage]
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Header
-            HStack {
-                Image(systemName: "photo.on.rectangle")
-                    .foregroundColor(GypsumColor.accent)
-                Text("Spectasia")
-                    .font(GypsumFont.headline)
-                    .foregroundColor(GypsumColor.text)
-                Spacer()
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            
-            Divider()
-            
-            // Directory list
-            if images.isEmpty {
-                VStack(spacing: 16) {
-                    Image(systemName: "folder.badge.questionmark")
-                        .font(.system(size: 32))
-                        .foregroundColor(GypsumColor.textSecondary)
-                    Text("No directory selected")
-                        .font(GypsumFont.body)
-                        .foregroundColor(GypsumColor.textSecondary)
-                    Text("Open a folder to start browsing images")
-                        .font(GypsumFont.caption)
-                        .foregroundColor(GypsumColor.textSecondary)
+        NavigationSplitView(columnVisibility: $columnVisibility,
+                              sidebar: {
+                VStack {
+                    Text("Folders")
+                        .padding()
+                    Text("Images List")
+                        .padding()
+                    Spacer()
                 }
-                .padding()
-            } else {
-                Text("Directories")
-                    .font(GypsumFont.caption)
-                    .foregroundColor(GypsumColor.textSecondary)
-                    .padding(.horizontal, 16)
-                
-                List(uniqueFolders(from: images), id: \.self, selection: $selectedDirectory) { folder in
-                    HStack {
-                        Image(systemName: "folder.fill")
-                            .foregroundColor(GypsumColor.accent)
-                        Text(folder.lastPathComponent)
-                            .font(GypsumFont.body)
-                            .foregroundColor(GypsumColor.text)
-                        Spacer()
+                .frame(minWidth: 200)
+            },
+                              content: {
+                VStack {
+                    if isLoading {
+                        ProgressView()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(Color.gray.opacity(0.1))
+                    } else {
+                        switch currentViewMode {
+                        case .thumbnailGrid:
+                            ImageGridView(
+                                images: images,
+                                selectedImage: $selectedImage,
+                                backgroundTasks: $backgroundTasks
+                            )
+                        case .list:
+                            ForEach(images) { image in
+                                HStack(spacing: 8) {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("\(image.id)")
+                                            .font(.body)
+                                        HStack(spacing: 12) {
+                                            Text("\(image.metadata.fileSize) bytes")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                            Text(image.metadata.modificationDate, style: .date)
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        }
+                                    }
+                                    Spacer()
+                                }
+                                .onTapGesture {
+                                    $selectedImage.wrappedValue = image
+                                }
+                            }
+                        case .singleImage:
+                            if let image = selectedImage {
+                                SingleImageView(imageURL: image.url)
+                            }
+                        }
                     }
-                    .padding(.vertical, 4)
                 }
-                .listStyle(.sidebar)
+                .frame(minWidth: 800, minHeight: 600)
+            },
+                              detail: {
+                Text("Detail Panel")
+                    .frame(minWidth: 200)
             }
-        }
-        .navigationTitle("Spectasia")
-    }
-    
-    private func uniqueFolders(from images: [SpectasiaImage]) -> [URL] {
-        Set(images.map { $0.url.deletingLastPathComponent() })
-            .sorted(by: { $0.lastPathComponent < $1.lastPathComponent })
-    }
-}
-
-// MARK: - Content Panel
-
-struct ContentPanel: View {
-    @Binding var images: [SpectasiaImage]
-    @Binding var selectedImage: SpectasiaImage?
-    @Binding var backgroundTasks: Int
-    
-    var body: some View {
-        ImageGridView(
-            images: images,
-            selectedImage: $selectedImage,
-            backgroundTasks: $backgroundTasks
         )
         .navigationTitle("Library")
     }
-}
 
-// MARK: - Detail Panel
-
-struct DetailPanel: View {
-    @Binding var selectedImage: SpectasiaImage?
-    
-    var body: some View {
-        if let image = selectedImage {
-            VStack(spacing: 0) {
-                SingleImageView(imageURL: image.url)
-                Divider()
-                    .padding(.vertical, 8)
-                MetadataPanel(image: image)
-            }
-            .navigationTitle("Detail")
-        } else {
-            VStack(spacing: 16) {
-                Spacer()
-                VStack(spacing: 8) {
-                    Image(systemName: "photo.on.rectangle.angled")
-                        .font(.system(size: 64))
-                        .foregroundColor(GypsumColor.textSecondary)
-                    Text("Select an image to view")
-                        .font(GypsumFont.headline)
-                        .foregroundColor(GypsumColor.textSecondary)
-                    Text("Click on any image in the grid to see details")
-                        .font(GypsumFont.caption)
-                        .foregroundColor(GypsumColor.textSecondary)
-                }
-                Spacer()
-            }
-            .navigationTitle("Detail")
-            .background(GypsumColor.background)
-        }
+    #Preview("Spectasia Layout") {
+        SpectasiaLayout(
+            images: .constant([]),
+            selectedImage: .constant(nil),
+            selectedDirectory: .constant(nil),
+            currentViewMode: .constant(.thumbnailGrid),
+            isLoading: .constant(false),
+            backgroundTasks: .constant(0)
+        )
     }
 }
 
-// MARK: - Preview
-
-#Preview("Three-Panel Layout") {
-    SpectasiaLayout()
-}

@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 /// Supported languages for the app
 public enum AppLanguage: String, Codable {
@@ -8,7 +9,7 @@ public enum AppLanguage: String, Codable {
 
 /// Application configuration manager
 /// Persists settings using UserDefaults
-public struct AppConfig {
+public class AppConfig: ObservableObject {
     // MARK: - Keys
     private enum Keys {
         static let cacheDirectory = "cacheDirectory"
@@ -17,6 +18,16 @@ public struct AppConfig {
     }
 
     // MARK: - Properties
+
+    @Published public var cacheDirectoryPublished: String {
+        didSet { UserDefaults.standard.set(cacheDirectoryPublished, forKey: Keys.cacheDirectory) }
+    }
+    @Published public var languagePublished: AppLanguage {
+        didSet { UserDefaults.standard.set(languagePublished.rawValue, forKey: Keys.appLanguage) }
+    }
+    @Published public var isAutoAIEnabledPublished: Bool {
+        didSet { UserDefaults.standard.set(isAutoAIEnabledPublished, forKey: Keys.autoAIToggle) }
+    }
 
     /// Directory for caching thumbnails and metadata
     public var cacheDirectory: String {
@@ -58,7 +69,20 @@ public struct AppConfig {
 
     // MARK: - Initialization
 
-    public init() {}
+    public init() {
+        // Initialize published values from persisted storage
+        self.cacheDirectoryPublished = UserDefaults.standard.string(forKey: Keys.cacheDirectory) ?? defaultCacheDirectory()
+        if let rawValue = UserDefaults.standard.string(forKey: Keys.appLanguage), let lang = AppLanguage(rawValue: rawValue) {
+            self.languagePublished = lang
+        } else {
+            self.languagePublished = .english
+        }
+        self.isAutoAIEnabledPublished = UserDefaults.standard.bool(forKey: Keys.autoAIToggle)
+
+        // Observe published changes and persist to UserDefaults
+        // Note: Using didSet on published-backed properties to mirror to computed properties
+        // will be implemented via property observers below.
+    }
 
     // MARK: - Private Helpers
 
@@ -68,3 +92,4 @@ public struct AppConfig {
         return (cachesDir as NSString).appendingPathComponent("Spectasia")
     }
 }
+

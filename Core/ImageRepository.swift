@@ -1,5 +1,6 @@
 import Foundation
-import os.log
+import os
+import Combine
 
 // MARK: - Logging
 
@@ -8,8 +9,8 @@ private let logger = Logger(subsystem: "com.spectasia.core", category: "ImageRep
 // MARK: - Models
 
 /// Represents an image in the repository
-public struct SpectasiaImage: Sendable {
-    public let url: URL
+public struct SpectasiaImage: Sendable, Identifiable {
+    public var url: URL
     public var metadata: ImageMetadata
     public var thumbnails: [ThumbnailSize: URL]
     public var tags: [String] {
@@ -19,6 +20,9 @@ public struct SpectasiaImage: Sendable {
     public var rating: Int {
         get { metadata.rating }
         set { metadata.rating = newValue }
+    }
+    public var id: String {
+        url.path
     }
 
     public init(url: URL, metadata: ImageMetadata = ImageMetadata(), thumbnails: [ThumbnailSize: URL] = [:]) {
@@ -147,7 +151,7 @@ public actor BackgroundCoordinator: BackgroundCoordinating {
 /// Repository for managing image collection
 public actor ImageRepository {
     private let config: AppConfig
-    private let backgroundCoordinator: BackgroundCoordinating
+    private let backgroundCoordinator: BackgroundCoordinator
     private nonisolated(unsafe) let fileMonitor: FileMonitorService
     private let xmpService: XMPService
 
@@ -155,7 +159,7 @@ public actor ImageRepository {
 
     public init(
         config: AppConfig = AppConfig(),
-        backgroundCoordinator: BackgroundCoordinating? = nil,
+        backgroundCoordinator: BackgroundCoordinator? = nil,
         fileMonitor: FileMonitorService = FileMonitorService(),
         xmpService: XMPService = XMPService()
     ) {
@@ -201,6 +205,11 @@ public actor ImageRepository {
         images.removeAll { $0.url.path == url.path }
     }
 
+    /// Get all images in the repository
+    public func getImages() async -> [SpectasiaImage] {
+        return images
+    }
+
     /// Start monitoring a directory for changes
     public nonisolated func startMonitoring(directory: String) throws {
         try fileMonitor.startMonitoring(directory: directory)
@@ -232,5 +241,31 @@ public actor ImageRepository {
                 await self.removeImage(at: url)
             }
         }
+    }
+}
+
+// MARK: - ObservableObject Wrapper
+
+/// ObservableObject wrapper for actor-based ImageRepository
+public class ObservableImageRepository: ObservableObject {
+    public let repository: ImageRepository
+    
+    @Published public var images: [SpectasiaImage] = []
+    
+    public init(repository: ImageRepository = ImageRepository()) {
+        self.repository = repository
+        objectWillChange.send()
+    }
+    
+    public func refreshImages() async {
+        self.images = await repository.images
+    }
+
+    public func updateImages(_ images: [SpectasiaImage]) {
+        self.images = images
+    }
+    
+    public func getImages() async -> [SpectasiaImage] {
+        return await repository.getImages()
     }
 }
