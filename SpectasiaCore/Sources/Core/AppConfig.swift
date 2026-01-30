@@ -3,7 +3,7 @@ import Combine
 import SwiftUI
 
 /// Supported languages for the app
-public enum AppLanguage: String, Codable {
+public enum AppLanguage: String, Codable, Sendable {
     case english = "en"
     case korean = "ko"
 }
@@ -14,7 +14,7 @@ public enum AppLanguage: String, Codable {
 @available(macOS 10.15, *)
 public class AppConfig: ObservableObject {
 
-    public struct DirectoryBookmark: Codable, Hashable {
+    public struct DirectoryBookmark: Codable, Hashable, Sendable {
         public let path: String
         public let data: Data
 
@@ -35,6 +35,7 @@ public class AppConfig: ObservableObject {
         static let cleanupExcludedPaths = "cleanupExcludedPaths"
         static let recentDirectoryBookmarks = "recentDirectoryBookmarks"
         static let favoriteDirectoryBookmarks = "favoriteDirectoryBookmarks"
+        static let monitoredDirectoryBookmarks = "monitoredDirectoryBookmarks"
     }
 
     // MARK: - Properties
@@ -65,6 +66,9 @@ public class AppConfig: ObservableObject {
     }
     @Published public var favoriteDirectoryBookmarks: [DirectoryBookmark] {
         didSet { persistDirectoryBookmarks(favoriteDirectoryBookmarks, key: Keys.favoriteDirectoryBookmarks) }
+    }
+    @Published public var monitoredDirectoryBookmarks: [DirectoryBookmark] {
+        didSet { persistDirectoryBookmarks(monitoredDirectoryBookmarks, key: Keys.monitoredDirectoryBookmarks) }
     }
 
     /// Directory for caching thumbnails and metadata
@@ -180,6 +184,7 @@ public class AppConfig: ObservableObject {
         }
         self.recentDirectoryBookmarks = Self.loadDirectoryBookmarks(key: Keys.recentDirectoryBookmarks)
         self.favoriteDirectoryBookmarks = Self.loadDirectoryBookmarks(key: Keys.favoriteDirectoryBookmarks)
+        self.monitoredDirectoryBookmarks = Self.loadDirectoryBookmarks(key: Keys.monitoredDirectoryBookmarks)
     }
 
     // MARK: - Recent/Favorites
@@ -222,6 +227,22 @@ public class AppConfig: ObservableObject {
             return match.data
         }
         return nil
+    }
+
+    // MARK: - Monitored Directories
+
+    public func addMonitoredDirectory(_ bookmark: DirectoryBookmark) {
+        var updated = monitoredDirectoryBookmarks.filter { $0.path != bookmark.path }
+        updated.append(bookmark)
+        monitoredDirectoryBookmarks = updated
+    }
+
+    public func removeMonitoredDirectory(path: String) {
+        monitoredDirectoryBookmarks.removeAll { $0.path == path }
+    }
+
+    public func isMonitoredDirectory(_ path: String) -> Bool {
+        monitoredDirectoryBookmarks.contains(where: { $0.path == path })
     }
 
     public func addCleanupExcludedPath(_ path: String) {

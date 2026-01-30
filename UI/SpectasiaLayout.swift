@@ -5,19 +5,17 @@ import SpectasiaCore
 public struct SpectasiaLayout: View {
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
     @EnvironmentObject private var repository: ObservableImageRepository
+    @EnvironmentObject private var directoryScanManager: DirectoryScanManager
     @State private var showSettings: Bool = false
+    @State private var directoryToAdd: URL? = nil
     @Binding private var images: [SpectasiaImage]
     @Binding private var selectedImage: SpectasiaImage?
     @Binding private var selectedDirectory: URL?
     @Binding private var currentViewMode: ViewMode
     @Binding private var isLoading: Bool
     @Binding private var backgroundTasks: Int
-    @Binding private var isMonitoring: Bool
-    @Binding private var recentDirectories: [AppConfig.DirectoryBookmark]
-    @Binding private var favoriteDirectories: [AppConfig.DirectoryBookmark]
 
     private let onSelectDirectory: (AppConfig.DirectoryBookmark) -> Void
-    private let onToggleFavorite: (URL) -> Void
 
     /// View mode for displaying images
     public enum ViewMode {
@@ -26,47 +24,6 @@ public struct SpectasiaLayout: View {
         case singleImage
     }
 
-#if DEBUG
-struct SpectasiaLayout_Previews: PreviewProvider {
-    static var previews: some View {
-        let metadataManager = MetadataStoreManager(rootDirectory: URL(fileURLWithPath: NSTemporaryDirectory()))
-        let repository = ObservableImageRepository(metadataStore: metadataManager.store)
-        repository.updateImages([
-            SpectasiaImage(
-                url: URL(fileURLWithPath: "/tmp/sample1.jpg"),
-                metadata: ImageMetadata(rating: 3, tags: ["preview", "landscape"], fileSize: 1024, modificationDate: Date(), fileExtension: "jpg")
-            ),
-            SpectasiaImage(
-                url: URL(fileURLWithPath: "/tmp/sample2.png"),
-                metadata: ImageMetadata(rating: 5, tags: ["portrait"], fileSize: 2048, modificationDate: Date(), fileExtension: "png")
-            )
-        ])
-
-        let recentBookmark = AppConfig.DirectoryBookmark(path: "/tmp", data: Data())
-        let favoriteBookmark = AppConfig.DirectoryBookmark(path: "/Volumes/shared", data: Data())
-        let appConfig = AppConfig()
-        appConfig.recentDirectoryBookmarks = [recentBookmark]
-        appConfig.favoriteDirectoryBookmarks = [favoriteBookmark]
-
-        return SpectasiaLayout(
-            images: .constant(repository.images),
-            selectedImage: .constant(repository.images.first),
-            selectedDirectory: .constant(URL(fileURLWithPath: "/tmp")),
-            currentViewMode: .constant(.thumbnailGrid),
-            isLoading: .constant(false),
-            backgroundTasks: .constant(1),
-            isMonitoring: .constant(true),
-            recentDirectories: .constant(appConfig.recentDirectoryBookmarks),
-            favoriteDirectories: .constant(appConfig.favoriteDirectoryBookmarks),
-            onSelectDirectory: { _ in },
-            onToggleFavorite: { _ in }
-        )
-        .environmentObject(repository)
-        .environmentObject(appConfig)
-    }
-}
-#endif
-
     public init(
         images: Binding<[SpectasiaImage]>,
         selectedImage: Binding<SpectasiaImage?>,
@@ -74,11 +31,7 @@ struct SpectasiaLayout_Previews: PreviewProvider {
         currentViewMode: Binding<ViewMode>,
         isLoading: Binding<Bool>,
         backgroundTasks: Binding<Int>,
-        isMonitoring: Binding<Bool>,
-        recentDirectories: Binding<[AppConfig.DirectoryBookmark]>,
-        favoriteDirectories: Binding<[AppConfig.DirectoryBookmark]>,
-        onSelectDirectory: @escaping (AppConfig.DirectoryBookmark) -> Void,
-        onToggleFavorite: @escaping (URL) -> Void
+        onSelectDirectory: @escaping (AppConfig.DirectoryBookmark) -> Void
     ) {
         self._images = images
         self._selectedImage = selectedImage
@@ -86,161 +39,168 @@ struct SpectasiaLayout_Previews: PreviewProvider {
         self._currentViewMode = currentViewMode
         self._isLoading = isLoading
         self._backgroundTasks = backgroundTasks
-        self._isMonitoring = isMonitoring
-        self._recentDirectories = recentDirectories
-        self._favoriteDirectories = favoriteDirectories
         self.onSelectDirectory = onSelectDirectory
-        self.onToggleFavorite = onToggleFavorite
     }
 
     public var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility,
                               sidebar: {
                 ScrollView {
-                    VStack {
-                    Text("Folders")
-                        .padding()
-                    Button(action: {
-                        showSettings = true
-                    }) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "gearshape")
-                            Text("Settings")
+                    VStack(alignment: .leading, spacing: 16) {
+                        HStack {
+                            Text("Library")
+                                .font(.title3)
+                                .foregroundColor(GypsumColor.text)
+                            Spacer()
+                            Button(action: {
+                                showSettings = true
+                            }) {
+                                Label("Settings", systemImage: "gearshape")
+                                    .font(.caption)
+                            }
+                            .buttonStyle(.bordered)
                         }
-                        .font(.caption)
-                    }
-                    .buttonStyle(.plain)
-                    .padding(.bottom, 8)
-                    DirectoryPicker(prompt: "Select Folder", selectedURL: $selectedDirectory)
-                        .padding(.bottom, 8)
-                    Toggle("Monitoring", isOn: $isMonitoring)
-                        .toggleStyle(.switch)
-                        .padding(.horizontal)
-                    if let directory = selectedDirectory {
-                        HStack(spacing: 6) {
-                            Text(directory.path)
-                                .font(.caption)
+
+                        Divider()
+
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Watch folders")
+                                .font(.caption2)
                                 .foregroundColor(.secondary)
-                                .lineLimit(2)
-                            Button(action: {
-                                onToggleFavorite(directory)
-                            }) {
-                                Image(systemName: favoriteDirectories.contains(where: { $0.path == directory.path }) ? "star.fill" : "star")
-                                    .foregroundColor(.yellow)
+
+                            HStack(spacing: 8) {
+                                DirectoryPicker(prompt: "Add Directory", selectedURL: $directoryToAdd)
+                                Text("Add a directory to index and monitor. Tap to scan the folder once it appears in the tree.")
+                                    .font(GypsumFont.caption)
+                                    .foregroundColor(.secondary)
                             }
-                            .buttonStyle(.plain)
-                        }
-                        .padding(.horizontal)
-                    } else {
-                        Text("No folder selected")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .padding(.horizontal)
-                    }
-                    if !favoriteDirectories.isEmpty {
-                        Text("Favorites")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .padding(.top, 8)
-                        ForEach(favoriteDirectories, id: \.self) { bookmark in
-                            Button(action: {
-                                onSelectDirectory(bookmark)
-                            }) {
-                                HStack(spacing: 6) {
-                                    Image(systemName: "star.fill")
-                                        .foregroundColor(.yellow)
-                                    Text(bookmark.path)
-                                        .font(.caption)
-                                        .lineLimit(1)
+                            .onChange(of: directoryToAdd) { oldValue, newValue in
+                                guard let url = newValue else { return }
+                                Task {
+                                    await directoryScanManager.addDirectory(url)
+                                    // Hop to the main actor to access UI-bound state safely
+                                    let bookmark = await MainActor.run { directoryScanManager.bookmark(for: url.path) }
+                                    if let bookmark {
+                                        await MainActor.run {
+                                            onSelectDirectory(bookmark)
+                                        }
+                                    }
                                 }
+                                directoryToAdd = nil
                             }
-                            .buttonStyle(.plain)
-                            .padding(.horizontal)
                         }
-                    }
-                    if !recentDirectories.isEmpty {
-                        Text("Recent")
-                            .font(.caption)
+
+                        Divider()
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Directory tree")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                            DirectoryTreeView(
+                                selectedPath: selectedDirectory?.path,
+                                onSelectDirectory: onSelectDirectory
+                            )
+                            .frame(maxHeight: 360)
+                            .background(GypsumColor.surface)
+                            .cornerRadius(8)
+                        }
+
+                        Spacer()
+
+                        Text("Live indexing always runs in the background.")
+                            .font(GypsumFont.caption)
                             .foregroundColor(.secondary)
-                            .padding(.top, 8)
-                        ForEach(recentDirectories, id: \.self) { bookmark in
-                            Button(action: {
-                                onSelectDirectory(bookmark)
-                            }) {
-                                HStack(spacing: 6) {
-                                    Image(systemName: "clock")
-                                        .foregroundColor(.secondary)
-                                    Text(bookmark.path)
-                                        .font(.caption)
-                                        .lineLimit(1)
-                                }
-                            }
-                            .buttonStyle(.plain)
-                            .padding(.horizontal)
-                        }
+                        Text("Images: \(images.count)")
+                            .font(GypsumFont.caption)
+                            .foregroundColor(.secondary)
                     }
-                    Text("Images: \(images.count)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .padding(.top, 8)
-                    Spacer()
-                    }
-                    .frame(minWidth: 200)
+                    .padding()
+                    .frame(minWidth: 240)
                 }
             },
                               content: {
-                VStack {
-                    HStack {
-                        if isLoading || repository.isBusy {
-                            ProgressView()
-                                .scaleEffect(0.8)
+                Group {
+                    if selectedDirectory == nil {
+                        VStack(spacing: 12) {
+                            Image(systemName: "folder.badge.plus")
+                                .font(.system(size: 48))
+                                .foregroundColor(GypsumColor.textSecondary)
+                            Text("Add or load a folder")
+                                .font(.headline)
+                            Text("Watch folders in the sidebar to begin indexing and viewing their images.")
+                                .font(GypsumFont.caption)
+                                .foregroundColor(GypsumColor.textSecondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 32)
                         }
-                        Text(isLoading ? "Loading…" : (repository.activityMessage ?? "Ready"))
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text(isMonitoring ? "Monitoring On" : "Monitoring Off")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        if backgroundTasks > 0 {
-                            Text("Tasks: \(backgroundTasks)")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    .padding(.horizontal)
-                    .padding(.top, 8)
-
-                    if isLoading {
-                        ProgressView()
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .background(Color.gray.opacity(0.1))
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(GypsumColor.background)
                     } else {
-                        switch currentViewMode {
-                        case .thumbnailGrid:
-                            ImageGridView(
-                                images: images,
-                                selectedImage: $selectedImage,
-                                backgroundTasks: $backgroundTasks
-                            )
-                        case .list:
-                            ImageListView(
-                                images: images,
-                                selectedImage: $selectedImage
-                            )
-                        case .singleImage:
-                            if let image = selectedImage {
-                                SingleImageView(imageURL: image.url)
-                            } else {
-                                VStack(spacing: 12) {
-                                    Image(systemName: "photo")
-                                        .font(.system(size: 32))
-                                        .foregroundColor(.secondary)
-                                    Text("No image selected")
+                        let indexingCount = directoryScanManager.activeIndexingPaths.count
+                        let activityStatus: String = {
+                            if isLoading {
+                                return "Loading…"
+                            }
+                            if indexingCount > 0 {
+                                return "Indexing \(indexingCount) folders…"
+                            }
+                            return repository.activityMessage ?? "Ready"
+                        }()
+
+                        VStack {
+                            HStack {
+                                if isLoading || repository.isBusy {
+                                    ProgressView()
+                                        .scaleEffect(0.8)
+                                }
+                                Text(activityStatus)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text("Live indexing")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                if backgroundTasks > 0 {
+                                    Text("Tasks: \(backgroundTasks)")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
-                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            }
+                            .padding(.horizontal)
+                            .padding(.top, 8)
+
+                            if isLoading {
+                                ProgressView()
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                    .background(GypsumColor.background.opacity(0.3))
+                            } else {
+                                switch currentViewMode {
+                                case .thumbnailGrid:
+                                    ImageGridView(
+                                        images: images,
+                                        selectedImage: $selectedImage,
+                                        backgroundTasks: $backgroundTasks
+                                    )
+                                case .list:
+                                    ImageListView(
+                                        images: images,
+                                        selectedImage: $selectedImage
+                                    )
+                                case .singleImage:
+                                    if let image = selectedImage {
+                                        SingleImageView(imageURL: image.url)
+                                    } else {
+                                        VStack(spacing: 12) {
+                                            Image(systemName: "photo")
+                                                .font(.system(size: 32))
+                                                .foregroundColor(.secondary)
+                                            Text("No image selected")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        }
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                    }
+                                }
                             }
                         }
                     }
@@ -250,6 +210,7 @@ struct SpectasiaLayout_Previews: PreviewProvider {
                               detail: {
                 if let image = selectedImage {
                     MetadataPanel(image: image)
+                        .id(image.url)
                         .frame(minWidth: 240)
                 } else {
                     VStack(spacing: 8) {
@@ -270,18 +231,37 @@ struct SpectasiaLayout_Previews: PreviewProvider {
     }
 
     #Preview("Spectasia Layout") {
-        SpectasiaLayout(
-            images: .constant([]),
-            selectedImage: .constant(nil),
-            selectedDirectory: .constant(nil),
+        let metadataManager = MetadataStoreManager(rootDirectory: URL(fileURLWithPath: NSTemporaryDirectory()))
+        let repository = ObservableImageRepository(metadataStore: metadataManager.store)
+        repository.updateImages([
+            SpectasiaImage(
+                url: URL(fileURLWithPath: "/tmp/sample1.jpg"),
+                metadata: ImageMetadata(rating: 3, tags: ["preview", "landscape"], fileSize: 1024, modificationDate: Date(), fileExtension: "jpg")
+            ),
+            SpectasiaImage(
+                url: URL(fileURLWithPath: "/tmp/sample2.png"),
+                metadata: ImageMetadata(rating: 5, tags: ["portrait"], fileSize: 2048, modificationDate: Date(), fileExtension: "png")
+            )
+        ])
+        let appConfig = AppConfig()
+        let permissionManager = PermissionManager()
+        let scanManager = DirectoryScanManager(
+            metadataStore: metadataManager.store,
+            metadataStoreRoot: metadataManager.rootDirectory,
+            appConfig: appConfig,
+            permissionManager: permissionManager
+        )
+
+        return SpectasiaLayout(
+            images: .constant(repository.images),
+            selectedImage: .constant(repository.images.first),
+            selectedDirectory: .constant(URL(fileURLWithPath: "/tmp")),
             currentViewMode: .constant(.thumbnailGrid),
             isLoading: .constant(false),
             backgroundTasks: .constant(0),
-            isMonitoring: .constant(true),
-            recentDirectories: .constant([]),
-            favoriteDirectories: .constant([]),
-            onSelectDirectory: { _ in },
-            onToggleFavorite: { _ in }
+            onSelectDirectory: { _ in }
         )
+        .environmentObject(repository)
+        .environmentObject(scanManager)
     }
 }

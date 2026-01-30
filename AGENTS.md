@@ -69,8 +69,9 @@ macOS image viewer & manager with AI-powered tagging, non-destructive XMP metada
 #### UI 연결 (Phase 1)
 
 - [x] ContentView-ImageRepository 연결
-- [x] 이미지 목록 표시
-- [ ] 파일 모니터링 이벤트 UI 자동 갱신 (미완)
+- [x] DirectoryScanManager 기반 디렉토리 트리 + 자동 스캔 도구 추가
+- [x] 파일 모니터링 이벤트와 이미지 선택 상태 정합성 확보
+- [x] "모니터링" 토글 제거 및 기본 감시(항상 켬) 전환
 - [ ] 데이터 바인딩 최적화 (선택/상태 분리 미완)
 
 #### 설정 화면

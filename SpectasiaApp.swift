@@ -14,6 +14,7 @@ struct SpectasiaApp: App {
     @StateObject private var repository: ObservableImageRepository
     @StateObject private var permissionManager: PermissionManager
     @StateObject private var metadataStoreManager: MetadataStoreManager
+    @StateObject private var directoryScanManager: DirectoryScanManager
     @StateObject private var toastCenter = ToastCenter()
 
     init() {
@@ -22,7 +23,15 @@ struct SpectasiaApp: App {
         let metadataManager = MetadataStoreManager(rootDirectory: URL(fileURLWithPath: config.metadataStoreDirectory))
         _metadataStoreManager = StateObject(wrappedValue: metadataManager)
         _repository = StateObject(wrappedValue: ObservableImageRepository(metadataStore: metadataManager.store))
-        _permissionManager = StateObject(wrappedValue: PermissionManager())
+        let permissionMgr = PermissionManager()
+        _permissionManager = StateObject(wrappedValue: permissionMgr)
+        let scanManager = DirectoryScanManager(
+            metadataStore: metadataManager.store,
+            metadataStoreRoot: metadataManager.rootDirectory,
+            appConfig: config,
+            permissionManager: permissionMgr
+        )
+        _directoryScanManager = StateObject(wrappedValue: scanManager)
     }
 
     var body: some Scene {
@@ -32,6 +41,7 @@ struct SpectasiaApp: App {
                 .environmentObject(appConfig)
                 .environmentObject(permissionManager)
                 .environmentObject(metadataStoreManager)
+                .environmentObject(directoryScanManager)
                 .environmentObject(toastCenter)
         }
         .commands {

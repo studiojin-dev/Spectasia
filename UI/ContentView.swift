@@ -16,7 +16,6 @@ struct ContentView: View {
     @State private var currentViewMode: SpectasiaLayout.ViewMode = .thumbnailGrid
     @State private var isLoading: Bool = false
     @State private var errorMessage: String? = nil
-    @State private var isMonitoring: Bool = true
     @State private var accessToken: SecurityScopeToken? = nil
     @State private var didRunStartupCleanup = false
 
@@ -35,9 +34,6 @@ struct ContentView: View {
                 currentViewMode: $currentViewMode,
                 isLoading: $isLoading,
                 backgroundTasks: $backgroundTasks,
-                isMonitoring: $isMonitoring,
-                recentDirectories: $appConfig.recentDirectoryBookmarks,
-                favoriteDirectories: $appConfig.favoriteDirectoryBookmarks,
                 onSelectDirectory: { bookmark in
                     if let url = permissionManager.resolveBookmark(bookmark.data) {
                         selectedDirectory = url
@@ -46,14 +42,6 @@ struct ContentView: View {
                         appConfig.removeRecentDirectory(path: bookmark.path)
                         appConfig.removeFavoriteDirectory(path: bookmark.path)
                     }
-                },
-                onToggleFavorite: { url in
-                    guard let data = permissionManager.storeBookmark(for: url) else {
-                        errorMessage = "Failed to save folder permission."
-                        return
-                    }
-                    let bookmark = AppConfig.DirectoryBookmark(path: url.path, data: data)
-                    appConfig.toggleFavoriteDirectory(bookmark)
                 }
             )
             .onAppear {
@@ -69,11 +57,8 @@ struct ContentView: View {
                     await loadDirectory(url)
                 }
             }
-            .onChange(of: isMonitoring) { _, newValue in
-                guard let url = selectedDirectory else { return }
-                Task {
-                    await loadDirectory(url, monitor: newValue)
-                }
+            .onChange(of: repository.images) { _, images in
+                alignSelectedImage(with: images)
             }
             .alert("Error", isPresented: Binding(
                 get: { errorMessage != nil },
@@ -130,11 +115,6 @@ struct ContentView: View {
 
     @MainActor
     private func loadDirectory(_ url: URL) async {
-        await loadDirectory(url, monitor: isMonitoring)
-    }
-
-    @MainActor
-    private func loadDirectory(_ url: URL, monitor: Bool) async {
         isLoading = true
         defer { isLoading = false }
 
@@ -143,20 +123,13 @@ struct ContentView: View {
                 errorMessage = "Failed to save folder permission."
                 return
             }
-            if monitor {
-                accessToken = nil
-                accessToken = permissionManager.beginAccess(to: url)
-                guard let token = accessToken else {
-                    errorMessage = "Failed to access folder."
-                    return
-                }
-                try await repository.loadDirectory(token.url, monitor: monitor)
-            } else {
-                accessToken = nil
-                _ = try await permissionManager.withAccess(to: url) { securedURL in
-                    try await repository.loadDirectory(securedURL, monitor: monitor)
-                }
+            accessToken = nil
+            accessToken = permissionManager.beginAccess(to: url)
+            guard let token = accessToken else {
+                errorMessage = "Failed to access folder."
+                return
             }
+            try await repository.loadDirectory(token.url, monitor: true)
             let bookmark = AppConfig.DirectoryBookmark(path: url.path, data: data)
             appConfig.addRecentDirectory(bookmark)
         } catch {
@@ -190,6 +163,16 @@ struct ContentView: View {
                 )
                 toastCenter.show(message)
             }
+        }
+    }
+
+    @MainActor
+    private func alignSelectedImage(with images: [SpectasiaImage]) {
+        guard let current = selectedImage else { return }
+        if let updated = images.first(where: { $0.url == current.url }) {
+            selectedImage = updated
+        } else {
+            selectedImage = nil
         }
     }
 }

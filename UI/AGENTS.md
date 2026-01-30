@@ -44,15 +44,16 @@ UI/
 - **Component library**: Reusable `GypsumCard`, `GypsumButton` with shadows
 - **Three-panel layout**: Sidebar (folders) + Grid (thumbnails) + Detail (metadata)
 
-## CURRENT IMPLEMENTATION STATUS (2026-01-30)
-- **Wired**: `ContentView` drives `SpectasiaLayout`, handles directory selection, monitoring toggle, and uses `ObservableImageRepository`.
+- ## CURRENT IMPLEMENTATION STATUS (2026-01-30)
+- **Wired**: `ContentView` drives `SpectasiaLayout`, now wired to `DirectoryScanManager` so selections stay in sync while directories auto-scan.
+- **Sidebar**: Gypsum-style “add directory” picker + `DirectoryTreeView` show watch folder state; monitoring toggle removed in favor of always-on background indexing.
 - **Grid**: `ImageGridView` renders thumbnails via `ThumbnailService`; selection now binds to `selectedImage`.
-- **Single Image**: Displays a file via `Data(contentsOf:)` with basic error handling; no zoom/pan/filmstrip.
+- **Single Image**: Displays a file via `Data(contentsOf:)` with basic error handling; no zoom/pan/filmstrip yet.
 - **Metadata**: Shows tags and writes rating to XMP; no tag editing, EXIF, or album support.
 - **Settings**: `SettingsView` implemented with AppConfig bindings and opened from sidebar.
 - **Detail Panel**: `MetadataPanel` renders in detail pane when selection exists.
 
 ## NEAR-TERM PLAN
 - Remove any remaining selection edge cases (e.g., list/grid sync) and refresh on file monitor events.
-- Implement real list view (table columns, sorting) and single-image zoom/pan/filmstrip.
+- Finish list view (columns, sorting) plus single-image zoom/pan/filmstrip.
 - Add tag editing + EXIF display in `MetadataPanel`.

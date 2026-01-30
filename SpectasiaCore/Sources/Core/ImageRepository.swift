@@ -8,7 +8,7 @@ private let logCategory = "ImageRepository"
 // MARK: - Models
 
 /// Represents an image in the repository
-public struct SpectasiaImage: Sendable, Identifiable {
+public struct SpectasiaImage: Sendable, Identifiable, Equatable {
     public var url: URL
     public var metadata: ImageMetadata
     public var thumbnails: [ThumbnailSize: URL]
@@ -28,6 +28,10 @@ public struct SpectasiaImage: Sendable, Identifiable {
         self.url = url
         self.metadata = metadata
         self.thumbnails = thumbnails
+    }
+
+    public static func ==(lhs: SpectasiaImage, rhs: SpectasiaImage) -> Bool {
+        lhs.url == rhs.url && lhs.metadata == rhs.metadata && lhs.thumbnails == rhs.thumbnails
     }
 }
 

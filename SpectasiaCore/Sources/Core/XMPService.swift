@@ -1,7 +1,7 @@
 import Foundation
 
 /// Image metadata read from XMP sidecar
-public struct ImageMetadata: Sendable {
+public struct ImageMetadata: Sendable, Equatable {
     public var rating: Int
     public var tags: [String]
     public var fileSize: Int64
