@@ -22,10 +22,12 @@ public class PermissionManager: ObservableObject {
     // MARK: - Bookmark Helpers
 
     public func storeBookmark(for url: URL) -> Data? {
-        guard let _ = SecurityScopeToken(url: url) else {
-            CoreLog.error("Failed to access directory before creating bookmark: \(url.path)", category: logCategory)
-            return nil
+        // Retain token to ensure access remains active while creating bookmark
+        let token = SecurityScopeToken(url: url)
+        if token == nil {
+             CoreLog.warning("Could not start accessing security scoped resource for \(url.path), but proceeding as it might be an open panel URL which doesn't require it.", category: logCategory)
         }
+
         do {
             let bookmarkData = try url.bookmarkData(options: [.withSecurityScope, .securityScopeAllowOnlyReadAccess])
             saveBookmark(url: url, data: bookmarkData)

@@ -52,13 +52,14 @@ public struct SettingsView: View {
                 Button("Run Cleanup Now") {
                     Task { [metadataStoreManager, toastCenter, repository] in
                         let excludedPaths = await MainActor.run { appConfig.cleanupExcludedPathsPublished }
+                        let safeExcludedPaths = excludedPaths
                         let removeMissing = await MainActor.run { appConfig.cleanupRemoveMissingOriginalsPublished }
                         await repository.startActivity(message: NSLocalizedString("Cleaning metadata…", comment: "Cleanup in progress"))
                         toastCenter.setStatus(NSLocalizedString("Cleaning metadata…", comment: "Cleanup in progress"))
                         let result = await metadataStoreManager.store.cleanupMissingFiles(
                             removeMissingOriginals: removeMissing,
-                            isOriginalSafeToRemove: { url in
-                                !excludedPaths.contains(where: { url.path.hasPrefix($0) })
+                            isOriginalSafeToRemove: { @Sendable (url: URL) -> Bool in
+                                !safeExcludedPaths.contains(where: { url.path.hasPrefix($0) })
                             }
                         )
                         await repository.finishActivity()

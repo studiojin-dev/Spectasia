@@ -85,7 +85,7 @@ public actor MetadataStore {
 
     public func cleanupMissingFiles(
         removeMissingOriginals: Bool = true,
-        isOriginalSafeToRemove: ((URL) -> Bool)? = nil
+        isOriginalSafeToRemove: (@Sendable (URL) -> Bool)? = nil
     ) -> (removedRecords: Int, removedFiles: Int) {
         var removedRecords = 0
         var removedFiles = 0

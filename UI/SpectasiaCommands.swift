@@ -56,10 +56,11 @@ struct SpectasiaCommands: Commands {
                     let removeMissing = await MainActor.run { appConfig.cleanupRemoveMissingOriginalsPublished }
                     await repository.startActivity(message: NSLocalizedString("Cleaning metadata…", comment: "Cleanup in progress"))
                     toastCenter.setStatus(NSLocalizedString("Cleaning metadata…", comment: "Cleanup in progress"))
+                    let excludedPathsSnapshot = excludedPaths
                     let result = await metadataStoreManager.store.cleanupMissingFiles(
                         removeMissingOriginals: removeMissing,
-                        isOriginalSafeToRemove: { url in
-                            !excludedPaths.contains(where: { url.path.hasPrefix($0) })
+                        isOriginalSafeToRemove: { @Sendable (url: URL) -> Bool in
+                            !excludedPathsSnapshot.contains(where: { url.path.hasPrefix($0) })
                         }
                     )
                     await repository.finishActivity()

@@ -17,6 +17,10 @@
 		AC0E7D2B2F2C84EC0083D923 /* ImageListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0E7D202F2C84EC0083D923 /* ImageListView.swift */; };
 		AC0E7D5D2F2C89E10083D923 /* SpectasiaCore in Frameworks */ = {isa = PBXBuildFile; productRef = AC0E7D5C2F2C89E10083D923 /* SpectasiaCore */; };
 		AC0E7D5F2F2C89E90083D923 /* SpectasiaCore in Frameworks */ = {isa = PBXBuildFile; productRef = AC0E7D5E2F2C89E90083D923 /* SpectasiaCore */; };
+		AC0E7D612F2C9B0B0083D923 /* DirectoryTreeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0E7D602F2C9B0B0083D923 /* DirectoryTreeView.swift */; };
+		AC0E7D682F2CD8CC0083D923 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = AC0E7D672F2CD8CC0083D923 /* Info.plist */; };
+		AC0E7D692F2CD8CC0083D923 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = AC0E7D672F2CD8CC0083D923 /* Info.plist */; };
+		AC0E7D6A2F2CD8CC0083D923 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = AC0E7D672F2CD8CC0083D923 /* Info.plist */; };
 		ACEDCA682F29AB7700B1E22C /* DirectoryPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA602F29AB7700B1E22C /* DirectoryPicker.swift */; };
 		ACEDCA6C2F29AB7700B1E22C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA502F29AB7700B1E22C /* ContentView.swift */; };
 		ACEDCA6D2F29AB7700B1E22C /* SpectasiaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA5E2F29AB7700B1E22C /* SpectasiaApp.swift */; };
@@ -27,13 +31,10 @@
 		ACEDCA7A2F29AB7700B1E22C /* SpectasiaLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA662F29AB7700B1E22C /* SpectasiaLayout.swift */; };
 		ACEDCA7B2F29AB7700B1E22C /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = ACEDCA5B2F29AB7700B1E22C /* Localizable.xcstrings */; };
 		ACEDCA7C2F29AB7700B1E22C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ACEDCA4F2F29AB7700B1E22C /* Assets.xcassets */; };
-		ACEDCA7D2F29AB7700B1E22C /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = ACEDCA5A2F29AB7700B1E22C /* Info.plist */; };
 		ACEDCA7E2F29AB7700B1E22C /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = ACEDCA5B2F29AB7700B1E22C /* Localizable.xcstrings */; };
 		ACEDCA7F2F29AB7700B1E22C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ACEDCA4F2F29AB7700B1E22C /* Assets.xcassets */; };
-		ACEDCA802F29AB7700B1E22C /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = ACEDCA5A2F29AB7700B1E22C /* Info.plist */; };
 		ACEDCA942F29AB7700B1E22C /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = ACEDCA5B2F29AB7700B1E22C /* Localizable.xcstrings */; };
 		ACEDCA952F29AB7700B1E22C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ACEDCA4F2F29AB7700B1E22C /* Assets.xcassets */; };
-		ACEDCA962F29AB7700B1E22C /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = ACEDCA5A2F29AB7700B1E22C /* Info.plist */; };
 		ACFCE2FE2F2C2AFC001B9220 /* SpectasiaCore in Frameworks */ = {isa = PBXBuildFile; productRef = ACFCE2FD2F2C2AFC001B9220 /* SpectasiaCore */; };
 		ACFCEF012F2C2AFC001B9220 /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ACFCEF002F2C2AFC001B9220 /* AppIntents.framework */; };
 /* End PBXBuildFile section */
@@ -60,13 +61,14 @@
 		AC0E7D212F2C84EC0083D923 /* SingleImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleImageView.swift; sourceTree = "<group>"; };
 		AC0E7D222F2C84EC0083D923 /* SpectasiaCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectasiaCommands.swift; sourceTree = "<group>"; };
 		AC0E7D232F2C84EC0083D923 /* ToastCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastCenter.swift; sourceTree = "<group>"; };
+		AC0E7D602F2C9B0B0083D923 /* DirectoryTreeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryTreeView.swift; sourceTree = "<group>"; };
+		AC0E7D672F2CD8CC0083D923 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AC7CE7622F28DFFF00E2D895 /* Spectasia.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Spectasia.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC7CE76F2F28E00000E2D895 /* SpectasiaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpectasiaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC7CE7792F28E00000E2D895 /* SpectasiaUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpectasiaUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		ACB87DC42F29B26700DC38B0 /* Spectasia.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = Spectasia.entitlements; path = Spectasia/Spectasia.entitlements; sourceTree = "<group>"; };
 		ACEDCA4F2F29AB7700B1E22C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		ACEDCA502F29AB7700B1E22C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		ACEDCA5A2F29AB7700B1E22C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		ACEDCA5B2F29AB7700B1E22C /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		ACEDCA5E2F29AB7700B1E22C /* SpectasiaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectasiaApp.swift; sourceTree = "<group>"; };
 		ACEDCA602F29AB7700B1E22C /* DirectoryPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryPicker.swift; sourceTree = "<group>"; };
@@ -123,6 +125,7 @@
 		AC7CE7592F28DFFF00E2D895 = {
 			isa = PBXGroup;
 			children = (
+				AC0E7D672F2CD8CC0083D923 /* Info.plist */,
 				AC7CE7722F28E00000E2D895 /* SpectasiaTests */,
 				AC7CE77C2F28E00000E2D895 /* SpectasiaUITests */,
 				AC7CE7632F28DFFF00E2D895 /* Products */,
@@ -148,7 +151,6 @@
 		ACEDCA5C2F29AB7700B1E22C /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				ACEDCA5A2F29AB7700B1E22C /* Info.plist */,
 				ACEDCA5B2F29AB7700B1E22C /* Localizable.xcstrings */,
 			);
 			path = Resources;
@@ -168,6 +170,7 @@
 				ACEDCA632F29AB7700B1E22C /* MetadataPanel.swift */,
 				ACEDCA642F29AB7700B1E22C /* SettingsView.swift */,
 				ACEDCA662F29AB7700B1E22C /* SpectasiaLayout.swift */,
+				AC0E7D602F2C9B0B0083D923 /* DirectoryTreeView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -305,7 +308,7 @@
 			files = (
 				ACEDCA7B2F29AB7700B1E22C /* Localizable.xcstrings in Resources */,
 				ACEDCA7C2F29AB7700B1E22C /* Assets.xcassets in Resources */,
-				ACEDCA7D2F29AB7700B1E22C /* Info.plist in Resources */,
+				AC0E7D682F2CD8CC0083D923 /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -315,7 +318,7 @@
 			files = (
 				ACEDCA7E2F29AB7700B1E22C /* Localizable.xcstrings in Resources */,
 				ACEDCA7F2F29AB7700B1E22C /* Assets.xcassets in Resources */,
-				ACEDCA802F29AB7700B1E22C /* Info.plist in Resources */,
+				AC0E7D692F2CD8CC0083D923 /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -325,7 +328,7 @@
 			files = (
 				ACEDCA942F29AB7700B1E22C /* Localizable.xcstrings in Resources */,
 				ACEDCA952F29AB7700B1E22C /* Assets.xcassets in Resources */,
-				ACEDCA962F29AB7700B1E22C /* Info.plist in Resources */,
+				AC0E7D6A2F2CD8CC0083D923 /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -336,6 +339,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AC0E7D612F2C9B0B0083D923 /* DirectoryTreeView.swift in Sources */,
 				ACEDCA682F29AB7700B1E22C /* DirectoryPicker.swift in Sources */,
 				ACEDCA6C2F29AB7700B1E22C /* ContentView.swift in Sources */,
 				ACEDCA6D2F29AB7700B1E22C /* SpectasiaApp.swift in Sources */,
@@ -530,8 +534,10 @@
 				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readwrite;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Spectasia/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Spectasia;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSRemovableVolumesUsageDescription = "Spectasia needs access to external drives to browse and manage images.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -563,7 +569,7 @@
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Debug;
 		};
@@ -597,8 +603,10 @@
 				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readwrite;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Spectasia/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Spectasia;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSRemovableVolumesUsageDescription = "Spectasia needs access to external drives to browse and manage images.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -630,7 +638,7 @@
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Release;
 		};

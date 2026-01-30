@@ -8,5 +8,14 @@
    Copyright (c) 2026 ___ORGANIZATIONNAME___. All rights reserved.
 -->
 <plist version="1.0">
-<dict/>
+<dict>
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<key>com.apple.security.files.user-selected.read-write</key>
+	<true/>
+	<key>com.apple.security.files.bookmarks.app-scope</key>
+	<true/>
+   <key>com.apple.security.files.removable.read-write</key>
+  <true/>
+</dict>
 </plist>

@@ -163,24 +163,37 @@ struct ContentView: View {
         // Capture current settings on the main actor before doing background work
         let excludedPaths = appConfig.cleanupExcludedPathsPublished
         let removeMissing = appConfig.cleanupRemoveMissingOriginalsPublished
-        Task { [metadataStoreManager, toastCenter, repository, excludedPaths, removeMissing] in
+
+        // Perform cleanup work off the main actor while keeping UI updates on the main actor
+        let capturedExcludedPaths = excludedPaths
+        let capturedRemoveMissing = removeMissing
+
+        Task { [capturedExcludedPaths, capturedRemoveMissing] in
+            // We are on the main actor when called from SwiftUI lifecycle; perform initial UI updates directly
             await repository.startActivity(message: NSLocalizedString("Cleaning metadata…", comment: "Cleanup in progress"))
             toastCenter.setStatus(NSLocalizedString("Cleaning metadata…", comment: "Cleanup in progress"))
+
+            // Run the cleanup asynchronously
             let result = await metadataStoreManager.store.cleanupMissingFiles(
-                removeMissingOriginals: removeMissing,
-                isOriginalSafeToRemove: { url in
-                    !excludedPaths.contains(where: { url.path.hasPrefix($0) })
+                removeMissingOriginals: capturedRemoveMissing,
+                isOriginalSafeToRemove: { (url: URL) -> Bool in
+                    // Only capture immutable value types from this context
+                    !capturedExcludedPaths.contains(where: { path in url.path.hasPrefix(path) })
                 }
             )
+
+            // Finish UI updates back on the main actor
             await repository.finishActivity()
-            toastCenter.setStatus(nil)
-            if result.removedRecords > 0 || result.removedFiles > 0 {
-                let message = String(
-                    format: NSLocalizedString("Cleaned metadata: %lld records, %lld files", comment: "Cleanup summary"),
-                    result.removedRecords,
-                    result.removedFiles
-                )
-                toastCenter.show(message)
+            await MainActor.run {
+                toastCenter.setStatus(nil)
+                if result.removedRecords > 0 || result.removedFiles > 0 {
+                    let message = String(
+                        format: NSLocalizedString("Cleaned metadata: %lld records, %lld files", comment: "Cleanup summary"),
+                        result.removedRecords,
+                        result.removedFiles
+                    )
+                    toastCenter.show(message)
+                }
             }
         }
     }
@@ -198,3 +211,4 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
+
