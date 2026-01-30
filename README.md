@@ -31,23 +31,23 @@ For commercial use, a separate license is required. Please see our [End-User Lic
 
 The `SpectasiaCore` library contains the backend logic for the application.
 
-1.  **AppConfig**: Manages application settings via `UserDefaults`.
-2.  **PermissionManager**: Handles directory access using Security-Scoped Bookmarks.
-3.  **FileMonitorService**: Monitors directories for changes using FSEvents.
-4.  **XMPService**: Reads and writes XMP sidecar files for metadata.
-5.  **ThumbnailService**: Generates thumbnails of various sizes using ImageIO.
-6.  **AIService**: Performs image classification with the Vision Framework.
-7.  **ImageRepository**: An actor-based coordinator for all background processing tasks.
-8.  **MetadataStore**: Manages the index and storage paths for thumbnails and XMP files.
+1. **AppConfig**: Manages application settings via `UserDefaults`.
+2. **PermissionManager**: Handles directory access using Security-Scoped Bookmarks.
+3. **FileMonitorService**: Monitors directories for changes using FSEvents.
+4. **XMPService**: Reads and writes XMP sidecar files for metadata.
+5. **ThumbnailService**: Generates thumbnails of various sizes using ImageIO.
+6. **AIService**: Performs image classification with the Vision Framework.
+7. **ImageRepository**: An actor-based coordinator for all background processing tasks.
+8. **MetadataStore**: Manages the index and storage paths for thumbnails and XMP files.
 
 ### UI (`UI/` Directory)
 
 The user interface is built with SwiftUI and follows our custom Gypsum design system.
 
--   **Gypsum Design System**: A custom set of SwiftUI components, colors, and fonts providing a unique matte finish aesthetic.
--   **Three-Panel Layout**: A classic sidebar, main content view, and detail panel layout.
--   **Image Views**: Includes a lazy-loading grid view, a list view, and a single image viewer.
--   **Metadata Panel**: Displays and allows editing of image metadata like ratings and tags.
+- **Gypsum Design System**: A custom set of SwiftUI components, colors, and fonts providing a unique matte finish aesthetic.
+- **Three-Panel Layout**: A classic sidebar, main content view, and detail panel layout.
+- **Image Views**: Includes a lazy-loading grid view, a list view, and a single image viewer.
+- **Metadata Panel**: Displays and allows editing of image metadata like ratings and tags.
 
 ## File Structure
 
@@ -72,8 +72,8 @@ Ensure you have Xcode 15.0 or later installed.
 
 ### Build from Xcode
 
-1.  Open `Spectasia.xcodeproj`.
-2.  Press `⌘R` to build and run the application.
+1. Open `Spectasia.xcodeproj`.
+2. Press `⌘R` to build and run the application.
 
 ### Run Tests
 
@@ -84,13 +84,10 @@ You can run tests from Xcode or the command line:
 swift test
 ```
 
-## Contributing
-
-Contributions are welcome! Please feel free to fork the repository, make changes, and submit a pull request.
-
 ## Credits
 
 Built with ❤️ using:
+
 - Swift & SwiftUI
 - Apple Vision Framework
 - ImageIO, CoreGraphics, and FSEvents
