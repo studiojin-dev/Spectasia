@@ -294,6 +294,26 @@ public actor ImageRepository {
                 await self.removeImage(at: url)
             }
         }
+
+        fileMonitor.onFileModified = { [weak self] url in
+            guard let self = self else { return }
+            Task {
+                await self.refreshImageMetadata(at: url)
+            }
+        }
+    }
+
+    private func refreshImageMetadata(at url: URL) async {
+        guard let index = images.firstIndex(where: { $0.url.path == url.path }) else {
+            return
+        }
+        do {
+            let metadata = try await xmpService.readMetadata(url: url)
+            images[index].metadata = metadata
+            notifyChange()
+        } catch {
+            CoreLog.error("Failed to refresh metadata for \(url.path): \(error.localizedDescription)", category: logCategory)
+        }
     }
 
     private func notifyChange() {

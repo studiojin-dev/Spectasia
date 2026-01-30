@@ -43,12 +43,12 @@ public class XMPService {
 
         guard fileManager.fileExists(atPath: sidecarURL.path) else {
             // No sidecar exists, return empty metadata
-            return ImageMetadata()
+            return metadataWithFileInfo(from: ImageMetadata(), url: url)
         }
 
         // Parse XMP from sidecar
         let xmpContent = try String(contentsOf: sidecarURL, encoding: .utf8)
-        return parseXMP(xmpContent)
+        return metadataWithFileInfo(from: parseXMP(xmpContent), url: url)
     }
 
     /// Write rating to XMP sidecar
@@ -115,6 +115,20 @@ public class XMPService {
         }
 
         return ImageMetadata(rating: rating, tags: tags)
+    }
+
+    private func metadataWithFileInfo(from metadata: ImageMetadata, url: URL) -> ImageMetadata {
+        var updated = metadata
+        if let attrs = try? fileManager.attributesOfItem(atPath: url.path) {
+            if let size = attrs[.size] as? NSNumber {
+                updated.fileSize = size.int64Value
+            }
+            if let modDate = attrs[.modificationDate] as? Date {
+                updated.modificationDate = modDate
+            }
+        }
+        updated.fileExtension = url.pathExtension.lowercased()
+        return updated
     }
 
     private func generateXMP(metadata: ImageMetadata, imageURL: URL) -> String {

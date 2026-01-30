@@ -13,6 +13,7 @@ public class FileMonitorService {
     private var fileDescriptor: Int32 = -1
     private var monitoredDirectory: String?
     private var knownFiles: Set<String> = []
+    private var knownModificationDates: [String: Date] = [:]
     private let fileManager = FileManager.default
     private let queue = DispatchQueue(label: "com.spectasia.fileMonitor", attributes: .concurrent)
     private let callbackQueue = DispatchQueue.main
@@ -59,10 +60,12 @@ public class FileMonitorService {
 
         // Initialize known files
         if let contents = try? fileManager.contentsOfDirectory(atPath: directory) {
-            knownFiles = Set(contents.filter { filename in
+            let imageFiles = contents.filter { filename in
                 let path = (directory as NSString).appendingPathComponent(filename)
                 return isImageFile(URL(fileURLWithPath: path))
-            })
+            }
+            knownFiles = Set(imageFiles)
+            knownModificationDates = loadModificationDates(directory: directory, filenames: imageFiles)
         }
 
         // Create file descriptor for the directory
@@ -100,6 +103,7 @@ public class FileMonitorService {
 
         monitoredDirectory = nil
         knownFiles.removeAll()
+        knownModificationDates.removeAll()
     }
 
     // MARK: - Private Methods
@@ -116,6 +120,7 @@ public class FileMonitorService {
             let path = (directory as NSString).appendingPathComponent(filename)
             return isImageFile(URL(fileURLWithPath: path))
         })
+        let currentModificationDates = loadModificationDates(directory: directory, filenames: Array(currentImageFiles))
 
         // Detect new files
         let newFiles = currentImageFiles.subtracting(knownFiles)
@@ -137,13 +142,40 @@ public class FileMonitorService {
             }
         }
 
+        // Detect modified files
+        let commonFiles = knownFiles.intersection(currentImageFiles)
+        for filename in commonFiles {
+            let previousDate = knownModificationDates[filename]
+            let currentDate = currentModificationDates[filename]
+            if let previousDate, let currentDate, currentDate > previousDate {
+                let path = (directory as NSString).appendingPathComponent(filename)
+                let fileURL = URL(fileURLWithPath: path)
+                callbackQueue.async { [weak self] in
+                    self?.onFileModified?(fileURL)
+                }
+            }
+        }
+
         // Update known files
         knownFiles = currentImageFiles
+        knownModificationDates = currentModificationDates
     }
 
     private func isImageFile(_ url: URL) -> Bool {
         let fileExtension = url.pathExtension.lowercased()
         return imageExtensions.contains(fileExtension)
+    }
+
+    private func loadModificationDates(directory: String, filenames: [String]) -> [String: Date] {
+        var results: [String: Date] = [:]
+        for filename in filenames {
+            let path = (directory as NSString).appendingPathComponent(filename)
+            if let attrs = try? fileManager.attributesOfItem(atPath: path),
+               let modified = attrs[.modificationDate] as? Date {
+                results[filename] = modified
+            }
+        }
+        return results
     }
 }
 
