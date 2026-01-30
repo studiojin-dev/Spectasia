@@ -20,6 +20,10 @@ public struct SettingsView: View {
     @State private var draftAutoCleanup: Bool = false
     @State private var draftRemoveMissing: Bool = false
 
+    private var languageColumns: [GridItem] {
+        Array(repeating: .init(.flexible(), spacing: 12), count: 2)
+    }
+
     public init() {}
 
     public var body: some View {
@@ -42,16 +46,15 @@ public struct SettingsView: View {
                                     .textSelection(.enabled)
                             }
                             Spacer()
-                            Button("Choose folder…") {
+                            GypsumButton(title: "Choose folder…", style: .secondary) {
                                 isStorePickerPresented = true
                             }
-                            .buttonStyle(.borderedProminent)
                         }
 
                         VStack(alignment: .leading, spacing: 6) {
                             Text("App language")
                                 .font(GypsumFont.headline)
-                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 2), spacing: 8) {
+                            LazyVGrid(columns: languageColumns, spacing: 8) {
                                 LanguageButton(title: "English", language: .english, selected: draftLanguage == .english) {
                                     draftLanguage = .english
                                 }
@@ -73,10 +76,9 @@ public struct SettingsView: View {
                         Toggle("Auto cleanup missing metadata", isOn: $draftAutoCleanup)
                         Toggle("Remove missing originals", isOn: $draftRemoveMissing)
 
-                        Button("Run cleanup now") {
+                        GypsumButton(title: "Run cleanup now") {
                             runCleanup()
                         }
-                        .buttonStyle(.borderedProminent)
 
                         if let summary = lastCleanupSummary {
                             Text(summary)
@@ -116,26 +118,23 @@ public struct SettingsView: View {
                             }
                         }
 
-                        Button("Protect directory…") {
+                        GypsumButton(title: "Protect directory…", style: .secondary) {
                             isProtectedDirectoryPickerPresented = true
                         }
-                        .buttonStyle(.bordered)
                         Text("Cleanup will never delete metadata inside protected directories.")
                             .font(GypsumFont.caption)
                             .foregroundColor(.secondary)
                     }
                 }
 
-                HStack {
-                    Spacer()
-                    Button("Cancel") {
+                HStack(spacing: 12) {
+                    GypsumButton(title: "Cancel", style: .secondary) {
                         resetDrafts()
                     }
-                    Button("Apply") {
+                    GypsumButton(title: "Apply") {
                         commitChanges()
                     }
-                    .buttonStyle(.borderedProminent)
-                    Button("Save") {
+                    GypsumButton(title: "Save") {
                         commitChanges()
                         dismiss()
                     }

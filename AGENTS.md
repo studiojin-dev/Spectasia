@@ -90,9 +90,9 @@ If create new file(s), tell the user to add the files to the xcode project manua
 #### 설정 화면
 
 - [x] `SettingsView` 기본 구현
-- [ ] **일반적인 3버튼 패턴 없음** (저장/취소/적용)
-- [ ] **Gypsum 디자인 미적용**
-- [ ] **App Language Grid 레이아웃 이상**
+- [x] **일반적인 3버튼 패턴 없음** (저장/취소/적용)
+- [x] **Gypsum 디자인 미적용**
+- [x] **App Language Grid 레이아웃 이상**
 
 ---
 
