@@ -71,10 +71,10 @@ struct ContentView: View {
                     await loadDirectory(url)
                 }
             }
-            .onChange(of: repository.images.map(\.id)) { _ in
+            .onChange(of: repository.images.map(\.id)) { _, _ in
                 alignSelectedImage(with: repository.images)
             }
-            .onChange(of: directoryScanManager.scanCompletionMessage) { message in
+            .onChange(of: directoryScanManager.scanCompletionMessage) { _, message in
                 if let message {
                     toastCenter.show(message)
                 }

@@ -7,6 +7,9 @@ public struct SpectasiaLayout: View {
     @EnvironmentObject private var repository: ObservableImageRepository
     @EnvironmentObject private var directoryScanManager: DirectoryScanManager
     @EnvironmentObject private var permissionManager: PermissionManager
+    private var accessibleDirectories: [String] {
+        permissionManager.grantedDirectories.sorted()
+    }
     @State private var showSettings: Bool = false
     @State private var directoryToAdd: URL? = nil
     @Binding private var images: [SpectasiaImage]
@@ -79,21 +82,22 @@ public struct SpectasiaLayout: View {
                             }
                         }
 
-                        if !permissionManager.grantedDirectories.isEmpty {
+                        if !accessibleDirectories.isEmpty {
                             GypsumCard {
                                 VStack(alignment: .leading, spacing: 6) {
                                     Text("Accessible directories")
                                         .font(GypsumFont.headline)
                                         .foregroundColor(GypsumColor.text)
-                                    ForEach(Array(permissionManager.grantedDirectories).sorted(), id: \.self) { path in
+                                    ForEach(accessibleDirectories, id: \.self) { path in
+                                        let directoryName = (path as NSString).lastPathComponent
                                         VStack(alignment: .leading, spacing: 2) {
-                                            Text((path as NSString).lastPathComponent.isEmpty ? path : (path as NSString).lastPathComponent)
+                                            Text(directoryName.isEmpty ? path : directoryName)
                                                 .font(GypsumFont.caption)
                                                 .foregroundColor(GypsumColor.textSecondary)
                                                 .lineLimit(1)
                                                 .truncationMode(.middle)
                                             Text(path)
-                                                .font(GypsumFont.caption2)
+                                                .font(GypsumFont.caption)
                                                 .foregroundColor(.secondary)
                                                 .lineLimit(1)
                                                 .truncationMode(.middle)
