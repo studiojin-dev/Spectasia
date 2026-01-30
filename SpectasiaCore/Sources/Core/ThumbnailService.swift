@@ -36,7 +36,7 @@ public enum ThumbnailSize: String, Sendable, Codable {
 
 /// Service for generating and caching image thumbnails
 @available(macOS 10.15, *)
-public class ThumbnailService {
+public final class ThumbnailService: @unchecked Sendable {
     private let metadataStore: MetadataStore
     private let fileManager = FileManager.default
 

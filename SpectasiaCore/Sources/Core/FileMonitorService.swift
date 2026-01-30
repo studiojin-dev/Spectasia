@@ -16,8 +16,10 @@ public class FileMonitorService {
     private var knownModificationDates: [String: Date] = [:]
     private var knownSizes: [String: Int64] = [:]
     private let fileManager = FileManager.default
-    private let queue = DispatchQueue(label: "com.spectasia.fileMonitor", attributes: .concurrent)
+    private let queue = DispatchQueue(label: "com.spectasia.fileMonitor")
     private let callbackQueue = DispatchQueue.main
+    private let fullScanCooldown: TimeInterval = 5.0
+    private var lastFullScanDate: Date?
 
     /// Callback invoked when a file is created
     public var onFileCreated: FileEventCallback?
@@ -74,8 +76,16 @@ public class FileMonitorService {
         var context = FSEventStreamContext(
             version: 0,
             info: Unmanaged.passUnretained(self).toOpaque(),
-            retain: nil,
-            release: nil,
+            retain: { pointer in
+                guard let pointer else { return nil }
+                let unmanaged = Unmanaged<FileMonitorService>.fromOpaque(pointer)
+                _ = unmanaged.retain()
+                return UnsafeRawPointer(unmanaged.toOpaque())
+            },
+            release: { pointer in
+                guard let pointer else { return }
+                Unmanaged<FileMonitorService>.fromOpaque(pointer).release()
+            },
             copyDescription: nil
         )
 
@@ -128,6 +138,11 @@ public class FileMonitorService {
         if flags & FSEventStreamEventFlags(kFSEventStreamEventFlagMustScanSubDirs) != 0 ||
             flags & FSEventStreamEventFlags(kFSEventStreamEventFlagUserDropped) != 0 ||
             flags & FSEventStreamEventFlags(kFSEventStreamEventFlagKernelDropped) != 0 {
+            let now = Date()
+            guard shouldPerformFullScan(at: now) else {
+                return
+            }
+            lastFullScanDate = now
             performFullScan()
             return
         }
@@ -279,6 +294,11 @@ public class FileMonitorService {
             }
         }
         return results
+    }
+
+    private func shouldPerformFullScan(at now: Date) -> Bool {
+        guard let last = lastFullScanDate else { return true }
+        return now.timeIntervalSince(last) >= fullScanCooldown
     }
 }
 

@@ -24,8 +24,8 @@ public actor MetadataStore {
     public init(rootDirectory: URL) {
         self.rootDirectory = rootDirectory
         self.indexURL = rootDirectory.appendingPathComponent("metadata-index.json")
-        createDirectoryIfNeeded(rootDirectory)
-        loadIndex()
+        Self.createDirectoryIfNeeded(rootDirectory)
+        self.records = Self.loadIndex(from: indexURL)
     }
 
     // MARK: - Public API
@@ -33,8 +33,8 @@ public actor MetadataStore {
     public func updateRoot(_ newRoot: URL) {
         rootDirectory = newRoot
         indexURL = newRoot.appendingPathComponent("metadata-index.json")
-        createDirectoryIfNeeded(newRoot)
-        loadIndex()
+        Self.createDirectoryIfNeeded(newRoot)
+        records = Self.loadIndex(from: indexURL)
     }
 
     public func xmpURL(for originalURL: URL) -> URL {
@@ -43,7 +43,7 @@ public actor MetadataStore {
         let xmpURL = xmpRoot
             .appendingPathComponent(relativeBase)
             .appendingPathExtension("xmp")
-        createDirectoryIfNeeded(xmpURL.deletingLastPathComponent())
+        Self.createDirectoryIfNeeded(xmpURL.deletingLastPathComponent())
         updateRecord(for: originalURL) { record in
             record.xmpPath = xmpURL.path
         }
@@ -71,7 +71,7 @@ public actor MetadataStore {
         let baseDir = thumbRoot.appendingPathComponent(relativeBase)
         let uniqueName = "\(size.suffix)-\(UUID().uuidString).jpg"
         let thumbURL = baseDir.appendingPathComponent(uniqueName)
-        createDirectoryIfNeeded(baseDir)
+        Self.createDirectoryIfNeeded(baseDir)
         return thumbURL
     }
 
@@ -172,20 +172,21 @@ public actor MetadataStore {
         }
     }
 
-    private func loadIndex() {
-        guard fileManager.fileExists(atPath: indexURL.path) else {
-            records = [:]
-            return
+    private static func loadIndex(from url: URL) -> [String: Record] {
+        let fileManager = FileManager.default
+        guard fileManager.fileExists(atPath: url.path) else {
+            return [:]
         }
         do {
-            let data = try Data(contentsOf: indexURL)
-            records = try JSONDecoder().decode([String: Record].self, from: data)
+            let data = try Data(contentsOf: url)
+            return try JSONDecoder().decode([String: Record].self, from: data)
         } catch {
-            records = [:]
+            return [:]
         }
     }
 
-    private func createDirectoryIfNeeded(_ url: URL) {
+    private static func createDirectoryIfNeeded(_ url: URL) {
+        let fileManager = FileManager.default
         if !fileManager.fileExists(atPath: url.path) {
             try? fileManager.createDirectory(at: url, withIntermediateDirectories: true)
         }
