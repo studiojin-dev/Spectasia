@@ -22,6 +22,10 @@ public class PermissionManager: ObservableObject {
     // MARK: - Bookmark Helpers
 
     public func storeBookmark(for url: URL) -> Data? {
+        guard let _ = SecurityScopeToken(url: url) else {
+            CoreLog.error("Failed to access directory before creating bookmark: \(url.path)", category: logCategory)
+            return nil
+        }
         guard let bookmarkData = try? url.bookmarkData(options: [.withSecurityScope, .securityScopeAllowOnlyReadAccess]) else {
             CoreLog.error("Failed to create bookmark for \(url.path)", category: logCategory)
             return nil
