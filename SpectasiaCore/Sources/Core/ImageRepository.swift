@@ -161,6 +161,7 @@ public actor ImageRepository {
     private let thumbnailService: ThumbnailService
 
     public private(set) var images: [SpectasiaImage] = []
+    private var changeContinuations: [UUID: AsyncStream<Void>.Continuation] = [:]
 
     public init(
         metadataStore: MetadataStore,
@@ -201,6 +202,7 @@ public actor ImageRepository {
         // Create image
         let image = SpectasiaImage(url: url, metadata: metadata)
         images.append(image)
+        notifyChange()
 
         // Queue background tasks
         await backgroundCoordinator.queueThumbnailGeneration(for: url, size: .small, priority: .high)
@@ -215,6 +217,7 @@ public actor ImageRepository {
     /// Remove an image from the repository
     public func removeImage(at url: URL) {
         images.removeAll { $0.url.path == url.path }
+        notifyChange()
     }
 
     /// Get all images in the repository
@@ -243,6 +246,7 @@ public actor ImageRepository {
         for url in imageURLs {
             try await addImage(at: url)
         }
+        notifyChange()
     }
 
     /// Load images and start monitoring a directory for changes
@@ -291,6 +295,34 @@ public actor ImageRepository {
             }
         }
     }
+
+    private func notifyChange() {
+        for continuation in changeContinuations.values {
+            continuation.yield()
+        }
+    }
+
+    public nonisolated func changes() -> AsyncStream<Void> {
+        AsyncStream { continuation in
+            let id = UUID()
+            Task { [weak self] in
+                await self?.addContinuation(continuation, id: id)
+            }
+            continuation.onTermination = { _ in
+                Task { [weak self] in
+                    await self?.removeContinuation(id: id)
+                }
+            }
+        }
+    }
+
+    private func addContinuation(_ continuation: AsyncStream<Void>.Continuation, id: UUID) {
+        changeContinuations[id] = continuation
+    }
+
+    private func removeContinuation(id: UUID) {
+        changeContinuations[id] = nil
+    }
 }
 
 // MARK: - ObservableObject Wrapper
@@ -302,11 +334,15 @@ public class ObservableImageRepository: ObservableObject {
     public let repository: ImageRepository
     
     @Published public var images: [SpectasiaImage] = []
+    private var refreshTask: Task<Void, Never>?
     
     public init(metadataStore: MetadataStore, repository: ImageRepository? = nil) {
         let repo = repository ?? ImageRepository(metadataStore: metadataStore)
         self.repository = repo
         objectWillChange.send()
+        Task {
+            await observeChanges()
+        }
     }
     
     public func refreshImages() async {
@@ -342,6 +378,22 @@ public class ObservableImageRepository: ObservableObject {
 
     public func thumbnailURL(for url: URL, size: ThumbnailSize) async throws -> URL {
         return try await repository.thumbnailURL(for: url, size: size)
+    }
+
+    private func observeChanges() async {
+        let stream = repository.changes()
+        for await _ in stream {
+            scheduleRefresh()
+        }
+    }
+
+    private func scheduleRefresh() {
+        refreshTask?.cancel()
+        refreshTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: 200_000_000)
+            guard let self else { return }
+            await self.refreshImages()
+        }
     }
 }
 

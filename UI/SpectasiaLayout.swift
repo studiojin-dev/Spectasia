@@ -182,26 +182,10 @@ public struct SpectasiaLayout: View {
                                 backgroundTasks: $backgroundTasks
                             )
                         case .list:
-                            ForEach(images) { image in
-                                HStack(spacing: 8) {
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text("\(image.id)")
-                                            .font(.body)
-                                        HStack(spacing: 12) {
-                                            Text("\(image.metadata.fileSize) bytes")
-                                                .font(.caption)
-                                                .foregroundColor(.secondary)
-                                            Text(image.metadata.modificationDate, style: .date)
-                                                .font(.caption)
-                                                .foregroundColor(.secondary)
-                                        }
-                                    }
-                                    Spacer()
-                                }
-                                .onTapGesture {
-                                    $selectedImage.wrappedValue = image
-                                }
-                            }
+                            ImageListView(
+                                images: images,
+                                selectedImage: $selectedImage
+                            )
                         case .singleImage:
                             if let image = selectedImage {
                                 SingleImageView(imageURL: image.url)

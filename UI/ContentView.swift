@@ -17,6 +17,7 @@ struct ContentView: View {
     @State private var isLoading: Bool = false
     @State private var errorMessage: String? = nil
     @State private var isMonitoring: Bool = true
+    @State private var accessToken: SecurityScopeToken? = nil
 
     @EnvironmentObject var repository: ObservableImageRepository
     @EnvironmentObject var permissionManager: PermissionManager
@@ -106,8 +107,19 @@ struct ContentView: View {
                 errorMessage = "Failed to save folder permission."
                 return
             }
-            _ = try await permissionManager.withAccess(to: url) { securedURL in
-                try await repository.loadDirectory(securedURL, monitor: monitor)
+            if monitor {
+                accessToken = nil
+                accessToken = permissionManager.beginAccess(to: url)
+                guard let token = accessToken else {
+                    errorMessage = "Failed to access folder."
+                    return
+                }
+                try await repository.loadDirectory(token.url, monitor: monitor)
+            } else {
+                accessToken = nil
+                _ = try await permissionManager.withAccess(to: url) { securedURL in
+                    try await repository.loadDirectory(securedURL, monitor: monitor)
+                }
             }
             let bookmark = AppConfig.DirectoryBookmark(path: url.path, data: data)
             appConfig.addRecentDirectory(bookmark)

@@ -9,6 +9,7 @@ UI/
 ├── GypsumDesignSystem.swift    # Design tokens + reusable components
 ├── ContentView.swift            # Main view (wired to Core)
 ├── ImageGridView.swift         # Thumbnail grid gallery
+├── ImageListView.swift         # Table list view (columns)
 ├── SingleImageView.swift        # Single image viewer (basic load/display)
 ├── MetadataPanel.swift        # Rating, tags panel (partial)
 ├── SettingsView.swift         # App settings (AppConfig bindings)

@@ -146,6 +146,27 @@ public class PermissionManager: ObservableObject {
         return try await perform(securedURL)
     }
 
+    public func beginAccess(to url: URL) -> SecurityScopeToken? {
+        var isStale = false
+        guard let bookmarkData = loadBookmark(for: url) else {
+            return nil
+        }
+        guard let securedURL = try? URL(
+            resolvingBookmarkData: bookmarkData,
+            options: .withSecurityScope,
+            relativeTo: nil,
+            bookmarkDataIsStale: &isStale
+        ) else {
+            return nil
+        }
+        if isStale {
+            removeBookmark(for: url)
+            grantedDirectories.remove(url.path)
+            return nil
+        }
+        return SecurityScopeToken(url: securedURL)
+    }
+
     // MARK: - Private Helpers
 
     private func saveBookmark(url: URL, data: Data) {
@@ -203,4 +224,20 @@ public enum PermissionError: Error {
     case bookmarkNotFound
     case staleBookmark
     case accessDenied
+}
+
+@MainActor
+public final class SecurityScopeToken {
+    public let url: URL
+
+    public init?(url: URL) {
+        guard url.startAccessingSecurityScopedResource() else {
+            return nil
+        }
+        self.url = url
+    }
+
+    deinit {
+        url.stopAccessingSecurityScopedResource()
+    }
 }
