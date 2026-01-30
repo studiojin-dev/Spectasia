@@ -16,9 +16,11 @@ struct ContentView: View {
     @State private var currentViewMode: SpectasiaLayout.ViewMode = .thumbnailGrid
     @State private var isLoading: Bool = false
     @State private var errorMessage: String? = nil
+    @State private var isMonitoring: Bool = true
 
     @EnvironmentObject var repository: ObservableImageRepository
     @EnvironmentObject var permissionManager: PermissionManager
+    @EnvironmentObject var appConfig: AppConfig
 
     var body: some View {
         SpectasiaLayout(
@@ -27,7 +29,27 @@ struct ContentView: View {
             selectedDirectory: $selectedDirectory,
             currentViewMode: $currentViewMode,
             isLoading: $isLoading,
-            backgroundTasks: $backgroundTasks
+            backgroundTasks: $backgroundTasks,
+            isMonitoring: $isMonitoring,
+            recentDirectories: $appConfig.recentDirectoryBookmarks,
+            favoriteDirectories: $appConfig.favoriteDirectoryBookmarks,
+            onSelectDirectory: { bookmark in
+                if let url = permissionManager.resolveBookmark(bookmark.data) {
+                    selectedDirectory = url
+                } else {
+                    errorMessage = "Unable to access saved folder."
+                    appConfig.removeRecentDirectory(path: bookmark.path)
+                    appConfig.removeFavoriteDirectory(path: bookmark.path)
+                }
+            },
+            onToggleFavorite: { url in
+                guard let data = permissionManager.storeBookmark(for: url) else {
+                    errorMessage = "Failed to save folder permission."
+                    return
+                }
+                let bookmark = AppConfig.DirectoryBookmark(path: url.path, data: data)
+                appConfig.toggleFavoriteDirectory(bookmark)
+            }
         )
         .onAppear {
             requestInitialDirectoryAccess()
@@ -36,6 +58,12 @@ struct ContentView: View {
             guard let url = newValue else { return }
             Task {
                 await loadDirectory(url)
+            }
+        }
+        .onChange(of: isMonitoring) { _, newValue in
+            guard let url = selectedDirectory else { return }
+            Task {
+                await loadDirectory(url, monitor: newValue)
             }
         }
         .task {
@@ -66,11 +94,21 @@ struct ContentView: View {
     }
 
     private func loadDirectory(_ url: URL) async {
+        await loadDirectory(url, monitor: isMonitoring)
+    }
+
+    private func loadDirectory(_ url: URL, monitor: Bool) async {
         isLoading = true
         defer { isLoading = false }
 
         do {
-            try await repository.loadDirectory(url)
+            try await repository.loadDirectory(url, monitor: monitor)
+            if let data = permissionManager.storeBookmark(for: url) {
+                let bookmark = AppConfig.DirectoryBookmark(path: url.path, data: data)
+                await MainActor.run {
+                    appConfig.addRecentDirectory(bookmark)
+                }
+            }
         } catch {
             errorMessage = "Failed to load directory: \(url.path)"
             CoreLog.error("Failed to load directory \(url.path): \(error.localizedDescription)", category: "ContentView")

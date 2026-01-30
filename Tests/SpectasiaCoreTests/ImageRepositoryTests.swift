@@ -21,15 +21,12 @@ final class ImageRepositoryTests: XCTestCase {
             try FileManager.default.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
 
             // Configure services
-            let config = AppConfig()
-            config.cacheDirectory = cacheDirectory.path
-
             // Create mock background coordinator
             mockCoordinator = MockBackgroundCoordinator()
 
             // Create repository
             repository = ImageRepository(
-                config: config,
+                cacheDirectory: cacheDirectory.path,
                 backgroundCoordinator: mockCoordinator
             )
         } catch {
@@ -39,7 +36,6 @@ final class ImageRepositoryTests: XCTestCase {
 
     override func tearDown() {
         // Clean up
-        repository.stopMonitoring()
         if let tempDir = tempDirectory, FileManager.default.fileExists(atPath: tempDir.path) {
             try? FileManager.default.removeItem(at: tempDir)
         }
@@ -169,14 +165,7 @@ final class ImageRepositoryTests: XCTestCase {
         return imageURL
     }
 
-    static let allTests = [
-        ("testRepositoryStartsEmpty", testRepositoryStartsEmpty),
-        ("testRepositoryAddsImage", testRepositoryAddsImage),
-        ("testRepositoryRemovesImage", testRepositoryRemovesImage),
-        ("testBackgroundTasksQueuedWhenImageAdded", testBackgroundTasksQueuedWhenImageAdded),
-        ("testRepositoryUpdatesStatus", testRepositoryUpdatesStatus),
-        ("testMonitorIntegration", testMonitorIntegration),
-    ]
+    // Linux test manifest not needed for Swift Package Manager on macOS.
 }
 
 // MARK: - Mock Background Coordinator

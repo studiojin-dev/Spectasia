@@ -7,6 +7,7 @@ public struct ImageGridView: View {
     let selectedImage: Binding<SpectasiaImage?>
     let backgroundTasks: Binding<Int>
     let gridSize: CGFloat = 120
+    @EnvironmentObject private var appConfig: AppConfig
 
     public init(
         images: [SpectasiaImage],
@@ -55,8 +56,11 @@ struct ImageThumbnail: View {
     @State private var thumbnail: Image?
     @State private var isSelected = false
     @State private var isLoading = true
+    @EnvironmentObject private var appConfig: AppConfig
 
-    private let thumbnailService = ThumbnailService()
+    private var thumbnailService: ThumbnailService {
+        ThumbnailService(cacheDirectory: appConfig.cacheDirectory)
+    }
 
     var body: some View {
         ZStack {

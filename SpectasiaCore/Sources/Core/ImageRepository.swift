@@ -68,7 +68,7 @@ public actor BackgroundCoordinator: BackgroundCoordinating {
     private let xmpService: XMPService
 
     public init(
-        thumbnailService: ThumbnailService = ThumbnailService(),
+        thumbnailService: ThumbnailService,
         aiService: AIService = AIService(),
         xmpService: XMPService = XMPService()
     ) {
@@ -155,7 +155,6 @@ public actor ImageRepository {
     private let imageExtensions: Set<String> = [
         "jpg", "jpeg", "png", "gif", "heic", "heif", "tiff", "bmp", "webp"
     ]
-    private let config: AppConfig
     private let backgroundCoordinator: any BackgroundCoordinating
     private nonisolated(unsafe) let fileMonitor: FileMonitorService
     private let xmpService: XMPService
@@ -163,13 +162,15 @@ public actor ImageRepository {
     public private(set) var images: [SpectasiaImage] = []
 
     public init(
-        config: AppConfig = AppConfig(),
+        cacheDirectory: String,
         backgroundCoordinator: (any BackgroundCoordinating)? = nil,
         fileMonitor: FileMonitorService = FileMonitorService(),
         xmpService: XMPService = XMPService()
     ) {
-        self.config = config
-        self.backgroundCoordinator = backgroundCoordinator ?? BackgroundCoordinator()
+        let coordinator = backgroundCoordinator ?? BackgroundCoordinator(
+            thumbnailService: ThumbnailService(cacheDirectory: cacheDirectory)
+        )
+        self.backgroundCoordinator = coordinator
         self.fileMonitor = fileMonitor
         self.xmpService = xmpService
 
@@ -244,6 +245,10 @@ public actor ImageRepository {
         try await loadImages(in: directory)
     }
 
+    public func stopMonitoringDirectory() {
+        stopMonitoring()
+    }
+
     /// Start monitoring a directory for changes
     public nonisolated func startMonitoring(directory: String) throws {
         try fileMonitor.startMonitoring(directory: directory)
@@ -282,13 +287,15 @@ public actor ImageRepository {
 
 /// ObservableObject wrapper for actor-based ImageRepository
 @available(macOS 10.15, *)
+@MainActor
 public class ObservableImageRepository: ObservableObject {
     public let repository: ImageRepository
     
     @Published public var images: [SpectasiaImage] = []
     
-    public init(repository: ImageRepository = ImageRepository()) {
-        self.repository = repository
+    public init(cacheDirectory: String, repository: ImageRepository? = nil) {
+        let repo = repository ?? ImageRepository(cacheDirectory: cacheDirectory)
+        self.repository = repo
         objectWillChange.send()
     }
     
@@ -307,6 +314,20 @@ public class ObservableImageRepository: ObservableObject {
     public func loadDirectory(_ url: URL) async throws {
         try await repository.loadAndMonitor(directory: url)
         await refreshImages()
+    }
+
+    public func loadDirectory(_ url: URL, monitor: Bool) async throws {
+        if monitor {
+            try await repository.loadAndMonitor(directory: url)
+        } else {
+            await repository.stopMonitoringDirectory()
+            try await repository.loadImages(in: url)
+        }
+        await refreshImages()
+    }
+
+    public func stopMonitoring() async {
+        await repository.stopMonitoringDirectory()
     }
 }
 

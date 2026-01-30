@@ -1,6 +1,7 @@
 import XCTest
 @testable import SpectasiaCore
 
+@MainActor
 final class AppConfigTests: XCTestCase {
 
     override func setUpWithError() throws {
@@ -8,6 +9,8 @@ final class AppConfigTests: XCTestCase {
         UserDefaults.standard.removeObject(forKey: "cacheDirectory")
         UserDefaults.standard.removeObject(forKey: "appLanguage")
         UserDefaults.standard.removeObject(forKey: "autoAIToggle")
+        UserDefaults.standard.removeObject(forKey: "recentDirectoryBookmarks")
+        UserDefaults.standard.removeObject(forKey: "favoriteDirectoryBookmarks")
     }
 
     override func tearDownWithError() throws {
@@ -15,6 +18,8 @@ final class AppConfigTests: XCTestCase {
         UserDefaults.standard.removeObject(forKey: "cacheDirectory")
         UserDefaults.standard.removeObject(forKey: "appLanguage")
         UserDefaults.standard.removeObject(forKey: "autoAIToggle")
+        UserDefaults.standard.removeObject(forKey: "recentDirectoryBookmarks")
+        UserDefaults.standard.removeObject(forKey: "favoriteDirectoryBookmarks")
     }
 
     func testDefaultCacheDirectory() throws {
@@ -80,12 +85,48 @@ final class AppConfigTests: XCTestCase {
         XCTAssertTrue(newConfig.isAutoAIEnabled, "Auto AI toggle should persist")
     }
 
-    static let allTests = [
-        ("testDefaultCacheDirectory", testDefaultCacheDirectory),
-        ("testCacheDirectoryPersists", testCacheDirectoryPersists),
-        ("testDefaultLanguage", testDefaultLanguage),
-        ("testLanguagePersists", testLanguagePersists),
-        ("testDefaultAutoAI", testDefaultAutoAI),
-        ("testAutoAIPersists", testAutoAIPersists),
-    ]
+    func testRecentDirectoriesPersist() throws {
+        // Given: Recent directories
+        let config = AppConfig()
+        let first = AppConfig.DirectoryBookmark(path: "/tmp/a", data: Data([1, 2, 3]))
+        let second = AppConfig.DirectoryBookmark(path: "/tmp/b", data: Data([4, 5, 6]))
+        config.addRecentDirectory(first)
+        config.addRecentDirectory(second)
+
+        // When: Creating new instance
+        let newConfig = AppConfig()
+
+        // Then: Should load the same order
+        XCTAssertEqual(newConfig.recentDirectoryBookmarks.count, 2)
+        XCTAssertEqual(newConfig.recentDirectoryBookmarks.first?.path, "/tmp/b")
+    }
+
+    func testRecentDirectoriesMaxCount() throws {
+        // Given: More than maxCount
+        let config = AppConfig()
+        for index in 0..<12 {
+            let bookmark = AppConfig.DirectoryBookmark(path: "/tmp/\(index)", data: Data([UInt8(index)]))
+            config.addRecentDirectory(bookmark, maxCount: 10)
+        }
+
+        // Then: Should be capped
+        XCTAssertEqual(config.recentDirectoryBookmarks.count, 10)
+        XCTAssertEqual(config.recentDirectoryBookmarks.first?.path, "/tmp/11")
+    }
+
+    func testToggleFavoriteDirectory() throws {
+        // Given: A bookmark
+        let config = AppConfig()
+        let bookmark = AppConfig.DirectoryBookmark(path: "/tmp/fav", data: Data([9, 9, 9]))
+
+        // When: Toggling on
+        config.toggleFavoriteDirectory(bookmark)
+        XCTAssertTrue(config.isFavoriteDirectory(bookmark.path))
+
+        // When: Toggling off
+        config.toggleFavoriteDirectory(bookmark)
+        XCTAssertFalse(config.isFavoriteDirectory(bookmark.path))
+    }
+
+    // Linux test manifest not needed for Swift Package Manager on macOS.
 }

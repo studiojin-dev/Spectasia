@@ -10,15 +10,27 @@ public enum AppLanguage: String, Codable {
 
 /// Application configuration manager
 /// Persists settings using UserDefaults
+@MainActor
 @available(macOS 10.15, *)
 public class AppConfig: ObservableObject {
-    public var objectWillChange = ObservableObjectPublisher()
+
+    public struct DirectoryBookmark: Codable, Hashable {
+        public let path: String
+        public let data: Data
+
+        public init(path: String, data: Data) {
+            self.path = path
+            self.data = data
+        }
+    }
     
     // MARK: - Keys
     private enum Keys {
         static let cacheDirectory = "cacheDirectory"
         static let appLanguage = "appLanguage"
         static let autoAIToggle = "autoAIToggle"
+        static let recentDirectoryBookmarks = "recentDirectoryBookmarks"
+        static let favoriteDirectoryBookmarks = "favoriteDirectoryBookmarks"
     }
 
     // MARK: - Properties
@@ -31,6 +43,12 @@ public class AppConfig: ObservableObject {
     }
     @Published public var isAutoAIEnabledPublished: Bool {
         didSet { UserDefaults.standard.set(isAutoAIEnabledPublished, forKey: Keys.autoAIToggle) }
+    }
+    @Published public var recentDirectoryBookmarks: [DirectoryBookmark] {
+        didSet { persistDirectoryBookmarks(recentDirectoryBookmarks, key: Keys.recentDirectoryBookmarks) }
+    }
+    @Published public var favoriteDirectoryBookmarks: [DirectoryBookmark] {
+        didSet { persistDirectoryBookmarks(favoriteDirectoryBookmarks, key: Keys.favoriteDirectoryBookmarks) }
     }
 
     /// Directory for caching thumbnails and metadata
@@ -82,6 +100,71 @@ public class AppConfig: ObservableObject {
             self.languagePublished = .english
         }
         self.isAutoAIEnabledPublished = UserDefaults.standard.bool(forKey: Keys.autoAIToggle)
+        self.recentDirectoryBookmarks = Self.loadDirectoryBookmarks(key: Keys.recentDirectoryBookmarks)
+        self.favoriteDirectoryBookmarks = Self.loadDirectoryBookmarks(key: Keys.favoriteDirectoryBookmarks)
+    }
+
+    // MARK: - Recent/Favorites
+
+    public func addRecentDirectory(_ bookmark: DirectoryBookmark, maxCount: Int = 10) {
+        var updated = recentDirectoryBookmarks.filter { $0.path != bookmark.path }
+        updated.insert(bookmark, at: 0)
+        if updated.count > maxCount {
+            updated = Array(updated.prefix(maxCount))
+        }
+        recentDirectoryBookmarks = updated
+    }
+
+    public func toggleFavoriteDirectory(_ bookmark: DirectoryBookmark) {
+        if favoriteDirectoryBookmarks.contains(where: { $0.path == bookmark.path }) {
+            favoriteDirectoryBookmarks.removeAll { $0.path == bookmark.path }
+        } else {
+            favoriteDirectoryBookmarks.append(bookmark)
+        }
+        favoriteDirectoryBookmarks.sort { $0.path < $1.path }
+    }
+
+    public func isFavoriteDirectory(_ path: String) -> Bool {
+        return favoriteDirectoryBookmarks.contains(where: { $0.path == path })
+    }
+
+    public func removeRecentDirectory(path: String) {
+        recentDirectoryBookmarks.removeAll { $0.path == path }
+    }
+
+    public func removeFavoriteDirectory(path: String) {
+        favoriteDirectoryBookmarks.removeAll { $0.path == path }
+    }
+
+    public func bookmarkData(for path: String) -> Data? {
+        if let match = recentDirectoryBookmarks.first(where: { $0.path == path }) {
+            return match.data
+        }
+        if let match = favoriteDirectoryBookmarks.first(where: { $0.path == path }) {
+            return match.data
+        }
+        return nil
+    }
+
+    // MARK: - Persistence
+
+    private func persistDirectoryBookmarks(_ bookmarks: [DirectoryBookmark], key: String) {
+        do {
+            let data = try JSONEncoder().encode(bookmarks)
+            UserDefaults.standard.set(data, forKey: key)
+        } catch {
+            CoreLog.error("Failed to encode directory bookmarks: \(error.localizedDescription)", category: "AppConfig")
+        }
+    }
+
+    private static func loadDirectoryBookmarks(key: String) -> [DirectoryBookmark] {
+        guard let data = UserDefaults.standard.data(forKey: key) else { return [] }
+        do {
+            return try JSONDecoder().decode([DirectoryBookmark].self, from: data)
+        } catch {
+            CoreLog.error("Failed to decode directory bookmarks: \(error.localizedDescription)", category: "AppConfig")
+            return []
+        }
     }
 
     // MARK: - Private Helpers

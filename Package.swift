@@ -23,7 +23,7 @@ let package = Package(
         .target(
             name: "SpectasiaCore",
             dependencies: [],
-            path: "Core",
+            path: "SpectasiaCore/Sources/Core",
             exclude: ["AGENTS.md"]),
         // Test target
         .testTarget(

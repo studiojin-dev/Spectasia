@@ -37,11 +37,16 @@ public enum ThumbnailSize: Sendable {
 /// Service for generating and caching image thumbnails
 @available(macOS 10.15, *)
 public class ThumbnailService {
-    private let config: AppConfig
+    private let cacheDirectory: String
     private let fileManager = FileManager.default
 
-    public init(config: AppConfig = AppConfig()) {
-        self.config = config
+    public init(cacheDirectory: String) {
+        self.cacheDirectory = cacheDirectory
+    }
+
+    @MainActor
+    public convenience init(config: AppConfig) {
+        self.init(cacheDirectory: config.cacheDirectory)
     }
 
     // MARK: - Public Methods
@@ -74,7 +79,7 @@ public class ThumbnailService {
     // MARK: - Private Methods
 
     private func cacheURL(for url: URL, size: ThumbnailSize) -> URL {
-        let cacheDir = URL(fileURLWithPath: config.cacheDirectory)
+        let cacheDir = URL(fileURLWithPath: cacheDirectory)
 
         // Create subdirectory structure: cache/<filename>/<size>.jpg
         let filename = url.deletingPathExtension().lastPathComponent

@@ -17,9 +17,7 @@ final class ThumbnailServiceTests: XCTestCase {
         try FileManager.default.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
 
         // Configure thumbnail service with cache directory
-        let config = AppConfig()
-        config.cacheDirectory = cacheDirectory.path
-        thumbnailService = ThumbnailService(config: config)
+        thumbnailService = ThumbnailService(cacheDirectory: cacheDirectory.path)
 
         // Create a test image file using CoreGraphics
         testImageFile = tempDirectory.appendingPathComponent("test.jpg")
@@ -151,12 +149,5 @@ final class ThumbnailServiceTests: XCTestCase {
         try data.write(to: url)
     }
 
-    static let allTests = [
-        ("testGenerateSmallThumbnail", testGenerateSmallThumbnail),
-        ("testGenerateMediumThumbnail", testGenerateMediumThumbnail),
-        ("testGenerateLargeThumbnail", testGenerateLargeThumbnail),
-        ("testCacheHitReturnsExistingThumbnail", testCacheHitReturnsExistingThumbnail),
-        ("testThumbnailStoredInCacheDirectory", testThumbnailStoredInCacheDirectory),
-        ("testGenerateThumbnailForNonExistentFile", testGenerateThumbnailForNonExistentFile),
-    ]
+    // Linux test manifest not needed for Swift Package Manager on macOS.
 }

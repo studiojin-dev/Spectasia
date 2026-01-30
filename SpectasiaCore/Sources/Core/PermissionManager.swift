@@ -19,6 +19,37 @@ public class PermissionManager: ObservableObject {
         loadBookmarks()
     }
 
+    // MARK: - Bookmark Helpers
+
+    public func storeBookmark(for url: URL) -> Data? {
+        guard let bookmarkData = try? url.bookmarkData(options: [.withSecurityScope, .securityScopeAllowOnlyReadAccess]) else {
+            CoreLog.error("Failed to create bookmark for \(url.path)", category: logCategory)
+            return nil
+        }
+        saveBookmark(url: url, data: bookmarkData)
+        grantedDirectories.insert(url.path)
+        return bookmarkData
+    }
+
+    public func resolveBookmark(_ data: Data) -> URL? {
+        var isStale = false
+        do {
+            let url = try URL(
+                resolvingBookmarkData: data,
+                options: .withSecurityScope,
+                relativeTo: nil,
+                bookmarkDataIsStale: &isStale
+            )
+            if isStale {
+                CoreLog.warning("Bookmark is stale for \(url.path)", category: logCategory)
+            }
+            return url
+        } catch {
+            CoreLog.error("Failed to resolve bookmark: \(error.localizedDescription)", category: logCategory)
+            return nil
+        }
+    }
+
     /// Request permission to access a directory
     public func requestDirectoryAccess(prompt: String = "Select a folder to monitor") -> URL? {
         let panel = NSOpenPanel()
@@ -32,14 +63,9 @@ public class PermissionManager: ObservableObject {
             return nil
         }
 
-        // Request security-scoped bookmark
-        guard let bookmarkData = try? url.bookmarkData(options: [.withSecurityScope, .securityScopeAllowOnlyReadAccess]) else {
-            CoreLog.error("Failed to create bookmark for \(url.path)", category: logCategory)
+        guard storeBookmark(for: url) != nil else {
             return nil
         }
-
-        // Save bookmark
-        saveBookmark(url: url, data: bookmarkData)
 
         // Add to granted directories
         grantedDirectories.insert(url.path)
