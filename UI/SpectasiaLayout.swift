@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 import SpectasiaCore
 
 /// Three-panel layout for Spectasia: Sidebar, Content, Detail
@@ -12,6 +13,7 @@ public struct SpectasiaLayout: View {
     }
     @State private var showSettings: Bool = false
     @State private var directoryToAdd: URL? = nil
+    @State private var treePickerPresented: Bool = false
     @State private var thumbnailSizeOption: ThumbnailSizeOption = .medium
     @State private var lastViewModeMessage: String? = "Ready"
     @Binding private var images: [SpectasiaImage]
@@ -125,12 +127,23 @@ public struct SpectasiaLayout: View {
 
                         GypsumCard {
                             VStack(alignment: .leading, spacing: 10) {
-                                HStack {
-                                    Text("Directory tree")
-                                        .font(GypsumFont.headline)
-                                        .foregroundColor(GypsumColor.text)
+                                HStack(alignment: .top) {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("Folders")
+                                            .font(GypsumFont.headline)
+                                            .foregroundColor(GypsumColor.text)
+                                        Text("\(directoryScanManager.watchedDirectories.count) watched folder\(directoryScanManager.watchedDirectories.count == 1 ? "" : "s")")
+                                            .font(GypsumFont.caption)
+                                            .foregroundColor(GypsumColor.textSecondary)
+                                    }
                                     Spacer()
                                     HStack(spacing: 8) {
+                                        Button {
+                                            treePickerPresented = true
+                                        } label: {
+                                            Label("Add folder", systemImage: "plus")
+                                        }
+                                        .buttonStyle(.bordered)
                                         Button("Collapse") {
                                             directoryScanManager.collapseAllDirectories()
                                         }
@@ -145,21 +158,24 @@ public struct SpectasiaLayout: View {
                                         .buttonStyle(.borderedProminent)
                                     }
                                 }
+                                Divider()
                                 DirectoryTreeView(
                                     selectedPath: selectedDirectory?.path,
                                     onSelectDirectory: onSelectDirectory
                                 )
                                 .frame(maxHeight: 360)
+                                Text("Tap a node to open the folder in the viewer.")
+                                    .font(GypsumFont.caption)
+                                    .foregroundColor(GypsumColor.textSecondary)
+                                    .padding(.vertical, 4)
                                 if let message = directoryScanManager.scanCompletionMessage {
                                     Text(message)
                                         .font(GypsumFont.caption)
                                         .foregroundColor(GypsumColor.textSecondary)
-                                        .padding(.top, 4)
                                 } else {
-                                    Text("Live indexing and metadata generation happen automatically below.")
+                                    Text("Live indexing and metadata generation happen automatically in the background.")
                                         .font(GypsumFont.caption)
                                         .foregroundColor(GypsumColor.textSecondary)
-                                        .padding(.top, 4)
                                 }
                             }
                         }
@@ -333,6 +349,20 @@ public struct SpectasiaLayout: View {
         .navigationTitle("Library")
         .sheet(isPresented: $showSettings) {
             SettingsView()
+        }
+        .fileImporter(
+            isPresented: $treePickerPresented,
+            allowedContentTypes: [.folder],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case .success(let urls):
+                if let url = urls.first {
+                    directoryToAdd = url
+                }
+            case .failure(let error):
+                CoreLog.error("Directory selection failed: \(error.localizedDescription)", category: "SpectasiaLayout")
+            }
         }
     }
 

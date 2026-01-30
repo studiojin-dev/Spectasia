@@ -99,7 +99,7 @@ private struct DirectoryTreeRow: View {
                     Text(statusDescription)
                         .font(GypsumFont.caption)
                         .foregroundColor(.secondary)
-                    Text("\(node.fileCount) files • \(node.children.count) subfolders")
+                    Text("\(node.fileCount) images • \(node.children.count) subfolders")
                         .font(GypsumFont.caption)
                         .foregroundColor(.secondary)
                         .opacity(0.8)
