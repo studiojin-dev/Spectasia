@@ -40,8 +40,24 @@ public struct SpectasiaLayout: View {
                 VStack {
                     Text("Folders")
                         .padding()
-                    Text("Images List")
-                        .padding()
+                    DirectoryPicker(prompt: "Select Folder", selectedURL: $selectedDirectory)
+                        .padding(.bottom, 8)
+                    if let directory = selectedDirectory {
+                        Text(directory.path)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal)
+                            .lineLimit(2)
+                    } else {
+                        Text("No folder selected")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal)
+                    }
+                    Text("Images: \(images.count)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.top, 8)
                     Spacer()
                 }
                 .frame(minWidth: 200)

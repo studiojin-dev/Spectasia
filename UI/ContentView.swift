@@ -32,7 +32,7 @@ struct ContentView: View {
         .onAppear {
             requestInitialDirectoryAccess()
         }
-        .onChange(of: selectedDirectory) { newValue in
+        .onChange(of: selectedDirectory) { _, newValue in
             guard let url = newValue else { return }
             Task {
                 await loadDirectory(url)
@@ -40,6 +40,20 @@ struct ContentView: View {
         }
         .task {
             await loadImages()
+        }
+        .alert("Error", isPresented: Binding(
+            get: { errorMessage != nil },
+            set: { isPresented in
+                if !isPresented {
+                    errorMessage = nil
+                }
+            }
+        )) {
+            Button("OK") {
+                errorMessage = nil
+            }
+        } message: {
+            Text(errorMessage ?? "Unknown error")
         }
     }
 
@@ -64,6 +78,7 @@ struct ContentView: View {
     }
 
     private func loadImages() async {
+        guard selectedDirectory == nil else { return }
         isLoading = true
         defer { isLoading = false }
 
