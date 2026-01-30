@@ -57,6 +57,9 @@ public actor MetadataStore {
         }
         let url = URL(fileURLWithPath: path)
         guard fileManager.fileExists(atPath: url.path) else {
+            updateRecord(for: originalURL) { record in
+                record.thumbnails.removeValue(forKey: size.rawValue)
+            }
             return nil
         }
         return url

@@ -45,10 +45,16 @@ public struct SettingsView: View {
 
             Section("Maintenance") {
                 Toggle("Auto Cleanup Missing Metadata", isOn: $appConfig.isAutoCleanupEnabledPublished)
+                Toggle("Remove Missing Originals", isOn: $appConfig.cleanupRemoveMissingOriginalsPublished)
                 Button("Run Cleanup Now") {
                     Task { [metadataStoreManager, toastCenter] in
-                        let result = await metadataStoreManager.store.cleanupMissingFiles(removeMissingOriginals: true)
-                        toastCenter.show("Cleaned metadata: \(result.removedRecords) records, \(result.removedFiles) files")
+                        let result = await metadataStoreManager.store.cleanupMissingFiles(removeMissingOriginals: appConfig.cleanupRemoveMissingOriginalsPublished)
+                        let message = String(
+                            format: NSLocalizedString("Cleaned metadata: %lld records, %lld files", comment: "Cleanup summary"),
+                            result.removedRecords,
+                            result.removedFiles
+                        )
+                        toastCenter.show(message)
                     }
                 }
             }

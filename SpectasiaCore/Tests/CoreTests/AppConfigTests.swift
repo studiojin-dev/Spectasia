@@ -11,6 +11,7 @@ final class AppConfigTests: XCTestCase {
         UserDefaults.standard.removeObject(forKey: "appLanguage")
         UserDefaults.standard.removeObject(forKey: "autoAIToggle")
         UserDefaults.standard.removeObject(forKey: "autoCleanupToggle")
+        UserDefaults.standard.removeObject(forKey: "cleanupRemoveMissingOriginals")
         UserDefaults.standard.removeObject(forKey: "recentDirectoryBookmarks")
         UserDefaults.standard.removeObject(forKey: "favoriteDirectoryBookmarks")
     }
@@ -22,6 +23,7 @@ final class AppConfigTests: XCTestCase {
         UserDefaults.standard.removeObject(forKey: "appLanguage")
         UserDefaults.standard.removeObject(forKey: "autoAIToggle")
         UserDefaults.standard.removeObject(forKey: "autoCleanupToggle")
+        UserDefaults.standard.removeObject(forKey: "cleanupRemoveMissingOriginals")
         UserDefaults.standard.removeObject(forKey: "recentDirectoryBookmarks")
         UserDefaults.standard.removeObject(forKey: "favoriteDirectoryBookmarks")
     }
@@ -114,6 +116,18 @@ final class AppConfigTests: XCTestCase {
         config.isAutoCleanupEnabled = true
         let newConfig = AppConfig()
         XCTAssertTrue(newConfig.isAutoCleanupEnabled, "Auto cleanup toggle should persist")
+    }
+
+    func testCleanupRemoveMissingOriginalsDefaultsTrue() throws {
+        let config = AppConfig()
+        XCTAssertTrue(config.cleanupRemoveMissingOriginals, "Cleanup should remove missing originals by default")
+    }
+
+    func testCleanupRemoveMissingOriginalsPersists() throws {
+        let config = AppConfig()
+        config.cleanupRemoveMissingOriginals = false
+        let newConfig = AppConfig()
+        XCTAssertFalse(newConfig.cleanupRemoveMissingOriginals, "Cleanup remove missing originals should persist")
     }
 
     func testRecentDirectoriesPersist() throws {

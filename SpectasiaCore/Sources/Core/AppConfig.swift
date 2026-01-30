@@ -31,6 +31,7 @@ public class AppConfig: ObservableObject {
         static let appLanguage = "appLanguage"
         static let autoAIToggle = "autoAIToggle"
         static let autoCleanupToggle = "autoCleanupToggle"
+        static let cleanupRemoveMissingOriginals = "cleanupRemoveMissingOriginals"
         static let recentDirectoryBookmarks = "recentDirectoryBookmarks"
         static let favoriteDirectoryBookmarks = "favoriteDirectoryBookmarks"
     }
@@ -51,6 +52,9 @@ public class AppConfig: ObservableObject {
     }
     @Published public var isAutoCleanupEnabledPublished: Bool {
         didSet { UserDefaults.standard.set(isAutoCleanupEnabledPublished, forKey: Keys.autoCleanupToggle) }
+    }
+    @Published public var cleanupRemoveMissingOriginalsPublished: Bool {
+        didSet { UserDefaults.standard.set(cleanupRemoveMissingOriginalsPublished, forKey: Keys.cleanupRemoveMissingOriginals) }
     }
     @Published public var recentDirectoryBookmarks: [DirectoryBookmark] {
         didSet { persistDirectoryBookmarks(recentDirectoryBookmarks, key: Keys.recentDirectoryBookmarks) }
@@ -120,6 +124,19 @@ public class AppConfig: ObservableObject {
         }
     }
 
+    /// Whether cleanup removes entries for missing original files
+    public var cleanupRemoveMissingOriginals: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: Keys.cleanupRemoveMissingOriginals) == nil {
+                return true
+            }
+            return UserDefaults.standard.bool(forKey: Keys.cleanupRemoveMissingOriginals)
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: Keys.cleanupRemoveMissingOriginals)
+        }
+    }
+
     // MARK: - Initialization
 
     public init() {
@@ -133,6 +150,11 @@ public class AppConfig: ObservableObject {
         }
         self.isAutoAIEnabledPublished = UserDefaults.standard.bool(forKey: Keys.autoAIToggle)
         self.isAutoCleanupEnabledPublished = UserDefaults.standard.bool(forKey: Keys.autoCleanupToggle)
+        if UserDefaults.standard.object(forKey: Keys.cleanupRemoveMissingOriginals) == nil {
+            self.cleanupRemoveMissingOriginalsPublished = true
+        } else {
+            self.cleanupRemoveMissingOriginalsPublished = UserDefaults.standard.bool(forKey: Keys.cleanupRemoveMissingOriginals)
+        }
         self.recentDirectoryBookmarks = Self.loadDirectoryBookmarks(key: Keys.recentDirectoryBookmarks)
         self.favoriteDirectoryBookmarks = Self.loadDirectoryBookmarks(key: Keys.favoriteDirectoryBookmarks)
     }

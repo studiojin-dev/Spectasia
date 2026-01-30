@@ -1,6 +1,264 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Auto Cleanup Missing Metadata" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auto Cleanup Missing Metadata"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "누락 메타데이터 자동 정리"
+          }
+        }
+      }
+    },
+    "Cleanup Missing Metadata" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cleanup Missing Metadata"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "누락 메타데이터 정리"
+          }
+        }
+      }
+    },
+    "Cleaned metadata: %lld records, %lld files" : {
+      "comment" : "Cleanup summary notification",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cleaned metadata: %lld records, %lld files"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "정리 완료: 레코드 %lld개, 파일 %lld개"
+          }
+        }
+      }
+    },
+    "Maintenance" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maintenance"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "유지보수"
+          }
+        }
+      }
+    },
+    "Notifications suppressed (+%lld)" : {
+      "comment" : "Toast shown when too many notifications are queued.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notifications suppressed (+%lld)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "알림 생략됨 (+%lld)"
+          }
+        }
+      }
+    },
+    "Regenerate Thumbnails (All Loaded)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regenerate Thumbnails (All Loaded)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "썸네일 재생성 (전체)"
+          }
+        }
+      }
+    },
+    "Regenerate Thumbnails" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regenerate Thumbnails"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "썸네일 재생성"
+          }
+        }
+      }
+    },
+    "Regenerate Thumbnails (Current Directory)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regenerate Thumbnails (Current Directory)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "썸네일 재생성 (현재 폴더)"
+          }
+        }
+      }
+    },
+    "Remove Missing Originals" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove Missing Originals"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "원본 누락 항목 제거"
+          }
+        }
+      }
+    },
+    "Rescan Current Directory" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rescan Current Directory"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "현재 폴더 재스캔"
+          }
+        }
+      }
+    },
+    "Rescan completed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rescan completed"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "재스캔 완료"
+          }
+        }
+      }
+    },
+    "Rescan failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rescan failed"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "재스캔 실패"
+          }
+        }
+      }
+    },
+    "Run Cleanup Now" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Run Cleanup Now"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지금 정리 실행"
+          }
+        }
+      }
+    },
+    "Thumbnails refreshed (all)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thumbnails refreshed (all)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "썸네일 새로고침 (전체)"
+          }
+        }
+      }
+    },
+    "Thumbnails refreshed (current)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thumbnails refreshed (current)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "썸네일 새로고침 (현재)"
+          }
+        }
+      }
+    },
+    "Thumbnails refreshed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thumbnails refreshed"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "썸네일 새로고침"
+          }
+        }
+      }
+    },
     "%@" : {
       "comment" : "The text that appears in the leading column of each row in the images list view. The argument is the ID of the image.",
       "isCommentAutoGenerated" : true

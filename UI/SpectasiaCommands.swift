@@ -5,6 +5,7 @@ struct SpectasiaCommands: Commands {
     @EnvironmentObject private var repository: ObservableImageRepository
     @EnvironmentObject private var toastCenter: ToastCenter
     @EnvironmentObject private var metadataStoreManager: MetadataStoreManager
+    @EnvironmentObject private var appConfig: AppConfig
 
     var body: some Commands {
         CommandMenu("Library") {
@@ -12,9 +13,9 @@ struct SpectasiaCommands: Commands {
                 Task {
                     do {
                         try await repository.rescanCurrentDirectory()
-                        toastCenter.show("Rescan completed")
+                        toastCenter.show(NSLocalizedString("Rescan completed", comment: "Rescan finished"))
                     } catch {
-                        toastCenter.show("Rescan failed")
+                        toastCenter.show(NSLocalizedString("Rescan failed", comment: "Rescan failed"))
                     }
                 }
             }
@@ -22,14 +23,14 @@ struct SpectasiaCommands: Commands {
             Button("Regenerate Thumbnails (Current Directory)") {
                 Task {
                     await repository.regenerateThumbnailsForCurrentDirectory()
-                    toastCenter.show("Thumbnails refreshed (current)")
+                    toastCenter.show(NSLocalizedString("Thumbnails refreshed (current)", comment: "Thumbnails refreshed for current directory"))
                 }
             }
 
             Button("Regenerate Thumbnails (All Loaded)") {
                 Task {
                     await repository.regenerateThumbnailsForAllImages()
-                    toastCenter.show("Thumbnails refreshed (all)")
+                    toastCenter.show(NSLocalizedString("Thumbnails refreshed (all)", comment: "Thumbnails refreshed for all images"))
                 }
             }
 
@@ -37,8 +38,13 @@ struct SpectasiaCommands: Commands {
 
             Button("Cleanup Missing Metadata") {
                 Task { [metadataStoreManager, toastCenter] in
-                    let result = await metadataStoreManager.store.cleanupMissingFiles(removeMissingOriginals: true)
-                    toastCenter.show("Cleaned metadata: \(result.removedRecords) records, \(result.removedFiles) files")
+                    let result = await metadataStoreManager.store.cleanupMissingFiles(removeMissingOriginals: appConfig.cleanupRemoveMissingOriginalsPublished)
+                    let message = String(
+                        format: NSLocalizedString("Cleaned metadata: %lld records, %lld files", comment: "Cleanup summary"),
+                        result.removedRecords,
+                        result.removedFiles
+                    )
+                    toastCenter.show(message)
                 }
             }
         }
