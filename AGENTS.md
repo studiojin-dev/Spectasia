@@ -79,6 +79,7 @@ If create new file(s), tell the user to add the files to the xcode project manua
 - [x] Sidebar 순서를 Settings → 디렉토리 추가 → Directory tree로 정리하고 트리 전역 확장/축소/전체 재스캔 버튼과 메타데이터 상태 메시지를 노출
 - [x] Metadata panel now allows editing tags, shows thumbnail/XMP status, and keeps metadata timestamps in sync with background indexing
 - [x] 데이터 바인딩 최적화 (선택/상태 분리 완료)
+- [x] Sidebar shows permission status and a “Grant Full Disk Access” shortcut to open System Settings when extra rights are required
 
 #### 설정 화면
 

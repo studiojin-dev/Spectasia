@@ -74,6 +74,14 @@ public class PermissionManager: ObservableObject {
         return url
     }
 
+    public func openSecurityPreferencesForFullDiskAccess() {
+        #if os(macOS)
+        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles") {
+            NSWorkspace.shared.open(url)
+        }
+        #endif
+    }
+
     /// Access directory with security scope
     public func accessDirectory(_ url: URL, block: (URL) -> Void) -> Bool {
         var isStale = false

@@ -6,6 +6,7 @@ public struct SpectasiaLayout: View {
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
     @EnvironmentObject private var repository: ObservableImageRepository
     @EnvironmentObject private var directoryScanManager: DirectoryScanManager
+    @EnvironmentObject private var permissionManager: PermissionManager
     @State private var showSettings: Bool = false
     @State private var directoryToAdd: URL? = nil
     @Binding private var images: [SpectasiaImage]
@@ -67,6 +68,14 @@ public struct SpectasiaLayout: View {
                                     }
                                     .buttonStyle(.borderedProminent)
                                 }
+                                Text(permissionManager.permissionStatus)
+                                    .font(GypsumFont.caption)
+                                    .foregroundColor(.secondary)
+                                Button("Grant Full Disk Access") {
+                                    permissionManager.openSecurityPreferencesForFullDiskAccess()
+                                }
+                                .buttonStyle(.bordered)
+                                .controlSize(.mini)
                             }
                         }
 
