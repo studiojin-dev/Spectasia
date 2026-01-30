@@ -26,6 +26,47 @@ public struct SpectasiaLayout: View {
         case singleImage
     }
 
+#if DEBUG
+struct SpectasiaLayout_Previews: PreviewProvider {
+    static var previews: some View {
+        let metadataManager = MetadataStoreManager(rootDirectory: URL(fileURLWithPath: NSTemporaryDirectory()))
+        let repository = ObservableImageRepository(metadataStore: metadataManager.store)
+        repository.updateImages([
+            SpectasiaImage(
+                url: URL(fileURLWithPath: "/tmp/sample1.jpg"),
+                metadata: ImageMetadata(rating: 3, tags: ["preview", "landscape"], fileSize: 1024, modificationDate: Date(), fileExtension: "jpg")
+            ),
+            SpectasiaImage(
+                url: URL(fileURLWithPath: "/tmp/sample2.png"),
+                metadata: ImageMetadata(rating: 5, tags: ["portrait"], fileSize: 2048, modificationDate: Date(), fileExtension: "png")
+            )
+        ])
+
+        let recentBookmark = AppConfig.DirectoryBookmark(path: "/tmp", data: Data())
+        let favoriteBookmark = AppConfig.DirectoryBookmark(path: "/Volumes/shared", data: Data())
+        let appConfig = AppConfig()
+        appConfig.recentDirectoryBookmarks = [recentBookmark]
+        appConfig.favoriteDirectoryBookmarks = [favoriteBookmark]
+
+        return SpectasiaLayout(
+            images: .constant(repository.images),
+            selectedImage: .constant(repository.images.first),
+            selectedDirectory: .constant(URL(fileURLWithPath: "/tmp")),
+            currentViewMode: .constant(.thumbnailGrid),
+            isLoading: .constant(false),
+            backgroundTasks: .constant(1),
+            isMonitoring: .constant(true),
+            recentDirectories: .constant(appConfig.recentDirectoryBookmarks),
+            favoriteDirectories: .constant(appConfig.favoriteDirectoryBookmarks),
+            onSelectDirectory: { _ in },
+            onToggleFavorite: { _ in }
+        )
+        .environmentObject(repository)
+        .environmentObject(appConfig)
+    }
+}
+#endif
+
     public init(
         images: Binding<[SpectasiaImage]>,
         selectedImage: Binding<SpectasiaImage?>,
