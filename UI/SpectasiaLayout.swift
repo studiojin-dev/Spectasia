@@ -46,76 +46,117 @@ public struct SpectasiaLayout: View {
         NavigationSplitView(columnVisibility: $columnVisibility,
                               sidebar: {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
-                        HStack {
-                            Text("Library")
-                                .font(.title3)
-                                .foregroundColor(GypsumColor.text)
-                            Spacer()
-                            Button(action: {
-                                showSettings = true
-                            }) {
-                                Label("Settings", systemImage: "gearshape")
-                                    .font(.caption)
+                    VStack(alignment: .leading, spacing: 20) {
+                        GypsumCard {
+                            VStack(alignment: .leading, spacing: 10) {
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Settings")
+                                            .font(GypsumFont.headline)
+                                            .foregroundColor(GypsumColor.text)
+                                        Text("Adjust metadata, AI, and cleanup behaviors.")
+                                            .font(GypsumFont.caption)
+                                            .foregroundColor(GypsumColor.textSecondary)
+                                    }
+                                    Spacer()
+                                    Button(action: {
+                                        showSettings = true
+                                    }) {
+                                        Label("Open", systemImage: "gearshape")
+                                            .font(.caption)
+                                    }
+                                    .buttonStyle(.borderedProminent)
+                                }
                             }
-                            .buttonStyle(.bordered)
                         }
 
-                        Divider()
-
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("Watch folders")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-
-                            HStack(spacing: 8) {
-                                DirectoryPicker(prompt: "Add Directory", selectedURL: $directoryToAdd)
-                                Text("Add a directory to index and monitor. Tap to scan the folder once it appears in the tree.")
+                        GypsumCard {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("Watch folders")
+                                    .font(GypsumFont.headline)
+                                    .foregroundColor(GypsumColor.text)
+                                Text("Add a directory once to keep its metadata, thumbnails, and AI tags in sync.")
                                     .font(GypsumFont.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                            .onChange(of: directoryToAdd) { oldValue, newValue in
-                                guard let url = newValue else { return }
-                                Task {
-                                    await directoryScanManager.addDirectory(url)
-                                    // Hop to the main actor to access UI-bound state safely
-                                    let bookmark = await MainActor.run { directoryScanManager.bookmark(for: url.path) }
-                                    if let bookmark {
-                                        await MainActor.run {
-                                            onSelectDirectory(bookmark)
-                                        }
+                                    .foregroundColor(GypsumColor.textSecondary)
+                                HStack(spacing: 16) {
+                                    DirectoryPicker(prompt: "Add Directory", selectedURL: $directoryToAdd)
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("Select a folder to index and monitor. Indexing runs automatically, and you can re-run it from the tree.")
+                                            .font(GypsumFont.caption)
+                                            .foregroundColor(GypsumColor.textSecondary)
+                                            .fixedSize(horizontal: false, vertical: true)
                                     }
                                 }
-                                directoryToAdd = nil
+                                .onChange(of: directoryToAdd) { _, newValue in
+                                    guard let url = newValue else { return }
+                                    Task {
+                                        await directoryScanManager.addDirectory(url)
+                                        let bookmark = await MainActor.run { directoryScanManager.bookmark(for: url.path) }
+                                        if let bookmark {
+                                            await MainActor.run {
+                                                onSelectDirectory(bookmark)
+                                            }
+                                        }
+                                    }
+                                    directoryToAdd = nil
+                                }
                             }
                         }
 
-                        Divider()
-
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Directory tree")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                            DirectoryTreeView(
-                                selectedPath: selectedDirectory?.path,
-                                onSelectDirectory: onSelectDirectory
-                            )
-                            .frame(maxHeight: 360)
-                            .background(GypsumColor.surface)
-                            .cornerRadius(8)
+                        GypsumCard {
+                            VStack(alignment: .leading, spacing: 10) {
+                                HStack {
+                                    Text("Directory tree")
+                                        .font(GypsumFont.headline)
+                                        .foregroundColor(GypsumColor.text)
+                                    Spacer()
+                                    HStack(spacing: 8) {
+                                        Button("Collapse") {
+                                            directoryScanManager.collapseAllDirectories()
+                                        }
+                                        .buttonStyle(.bordered)
+                                        Button("Expand") {
+                                            directoryScanManager.expandAllDirectories()
+                                        }
+                                        .buttonStyle(.bordered)
+                                        Button("Scan all") {
+                                            directoryScanManager.reindexWatchedDirectories()
+                                        }
+                                        .buttonStyle(.borderedProminent)
+                                    }
+                                }
+                                DirectoryTreeView(
+                                    selectedPath: selectedDirectory?.path,
+                                    onSelectDirectory: onSelectDirectory
+                                )
+                                .frame(maxHeight: 360)
+                                if let message = directoryScanManager.scanCompletionMessage {
+                                    Text(message)
+                                        .font(GypsumFont.caption)
+                                        .foregroundColor(GypsumColor.textSecondary)
+                                        .padding(.top, 4)
+                                } else {
+                                    Text("Long-running indexing and metadata generation happen automatically below.")
+                                        .font(GypsumFont.caption)
+                                        .foregroundColor(GypsumColor.textSecondary)
+                                        .padding(.top, 4)
+                                }
+                            }
                         }
 
-                        Spacer()
+                        Spacer(minLength: 0)
 
-                        Text("Live indexing always runs in the background.")
-                            .font(GypsumFont.caption)
-                            .foregroundColor(.secondary)
-                        Text("Images: \(images.count)")
-                            .font(GypsumFont.caption)
-                            .foregroundColor(.secondary)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Live indexing always runs in the background.")
+                                .font(GypsumFont.caption)
+                                .foregroundColor(.secondary)
+                            Text("Images: \(images.count)")
+                                .font(GypsumFont.caption)
+                                .foregroundColor(.secondary)
+                        }
                     }
                     .padding()
-                    .frame(minWidth: 240)
+                    .frame(minWidth: 280)
                 }
             },
                               content: {

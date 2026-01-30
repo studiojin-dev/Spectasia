@@ -36,6 +36,7 @@ public final class DirectoryScanManager: ObservableObject {
     @Published public private(set) var directoryTree: [DirectoryNode] = []
     @Published public private(set) var expandedPaths: Set<String> = []
     @Published public private(set) var activeIndexingPaths: Set<String> = []
+    @Published public var scanCompletionMessage: String? = nil
 
     private let metadataStore: MetadataStore
     private let metadataIndexStore: MetadataIndexStore
@@ -77,6 +78,7 @@ public final class DirectoryScanManager: ObservableObject {
         appConfig.addMonitoredDirectory(bookmark)
         watchedDirectories = appConfig.monitoredDirectoryBookmarks
         await metadataIndexStore.updateDirectory(path: url.path, parentPath: url.deletingLastPathComponent().path, status: .idle, fileCount: 0, lastScanDate: nil)
+        publishScanMessage(String(format: NSLocalizedString("Watching %@", comment: "Toast when a folder is added to the watch list."), displayName(for: url)))
         startIndexing(bookmark: bookmark)
     }
 
@@ -87,6 +89,7 @@ public final class DirectoryScanManager: ObservableObject {
         watchedDirectories = appConfig.monitoredDirectoryBookmarks
         securityTokens[path] = nil
         await refreshDirectoryTree()
+        publishScanMessage(String(format: NSLocalizedString("Stopped watching %@", comment: "Toast shown when a watch folder is removed."), displayName(forPath: path)))
     }
 
     public func toggleExpansion(for path: String) {
@@ -103,6 +106,21 @@ public final class DirectoryScanManager: ObservableObject {
 
     public func isIndexing(_ path: String) -> Bool {
         activeIndexingPaths.contains(path)
+    }
+
+    public func expandAllDirectories() {
+        let allPaths = gatherNodePaths(from: directoryTree)
+        expandedPaths = Set(allPaths)
+    }
+
+    public func collapseAllDirectories() {
+        expandedPaths.removeAll()
+    }
+
+    public func reindexWatchedDirectories() {
+        for bookmark in watchedDirectories {
+            startIndexingRoot(at: bookmark.path)
+        }
     }
 
     public func startIndexingRoot(at path: String) {
@@ -126,12 +144,15 @@ public final class DirectoryScanManager: ObservableObject {
     private func startIndexing(bookmark: AppConfig.DirectoryBookmark) {
         let path = bookmark.path
         guard scanningTasks[path] == nil else { return }
+        let displayName = displayName(forPath: path)
         guard let directoryURL = permissionManager.resolveBookmark(bookmark.data) else {
             CoreLog.error("Unable to resolve bookmark for indexing: \(path)", category: "DirectoryScanManager")
+            publishFailure(for: displayName)
             return
         }
         guard let token = permissionManager.beginAccess(to: directoryURL) else {
             CoreLog.error("Failed to start access for \(path)", category: "DirectoryScanManager")
+            publishFailure(for: displayName)
             return
         }
         securityTokens[path] = token
@@ -159,6 +180,7 @@ public final class DirectoryScanManager: ObservableObject {
             securityTokens[path] = nil
             markIndexing(path: path, active: false)
             await refreshDirectoryTree()
+            await publishCompletion(for: path, displayName: displayName)
         }
     }
 
@@ -224,6 +246,15 @@ public final class DirectoryScanManager: ObservableObject {
         }
 
         directoryTree = roots
+    }
+
+    private func gatherNodePaths(from nodes: [DirectoryNode]) -> [String] {
+        var paths: [String] = []
+        for node in nodes {
+            paths.append(node.id)
+            paths.append(contentsOf: gatherNodePaths(from: node.children))
+        }
+        return paths
     }
 
     // MARK: - Static Scan Helpers
@@ -394,5 +425,28 @@ public final class DirectoryScanManager: ObservableObject {
                 CoreLog.error("AI analysis failed for \(fileURL.path): \(error.localizedDescription)", category: "DirectoryScanManager")
             }
         }
+    }
+
+    private func publishScanMessage(_ message: String) {
+        scanCompletionMessage = message
+    }
+
+    private func publishFailure(for displayName: String) {
+        publishScanMessage(String(format: NSLocalizedString("Indexing failed for %@", comment: "Toast shown when indexing cannot start"), displayName))
+    }
+
+    private func displayName(for url: URL) -> String {
+        let name = url.lastPathComponent
+        return name.isEmpty ? url.path : name
+    }
+
+    private func displayName(forPath path: String) -> String {
+        displayName(for: URL(fileURLWithPath: path))
+    }
+
+    private func publishCompletion(for path: String, displayName: String) async {
+        let record = await metadataIndexStore.directoryRecord(for: path)
+        let count = record?.fileCount ?? 0
+        publishScanMessage(String(format: NSLocalizedString("Indexed %lld files in %@", comment: "Toast shown after indexing completes"), Int64(count), displayName))
     }
 }

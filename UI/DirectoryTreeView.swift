@@ -1,5 +1,8 @@
 import SwiftUI
 import SpectasiaCore
+#if os(macOS)
+import AppKit
+#endif
 
 /// Tree view that displays indexed directories, exposes scan controls, and allows loading a watched folder.
 struct DirectoryTreeView: View {
@@ -103,7 +106,7 @@ private struct DirectoryTreeRow: View {
                         .scaleEffect(0.6)
                 }
                 if node.isRoot {
-                    Button("Index") {
+                    Button("Scan now") {
                         directoryScanManager.startIndexingRoot(at: node.id)
                     }
                     .buttonStyle(.borderedProminent)
@@ -125,6 +128,27 @@ private struct DirectoryTreeRow: View {
                     .fill(selectedPath == node.id ? GypsumColor.surface.opacity(0.35) : Color.clear)
             )
             .contentShape(Rectangle())
+            .contextMenu {
+                Button {
+                    copyPathToClipboard()
+                } label: {
+                    Label("Copy Path", systemImage: "doc.on.doc")
+                }
+                if node.isRoot {
+                    Button {
+                        directoryScanManager.startIndexingRoot(at: node.id)
+                    } label: {
+                        Label("Scan folder", systemImage: "arrow.clockwise")
+                    }
+                    Button(role: .destructive) {
+                        Task {
+                            await directoryScanManager.removeDirectory(at: node.id)
+                        }
+                    } label: {
+                        Label("Remove watch folder", systemImage: "trash")
+                    }
+                }
+            }
             .onTapGesture {
                 if node.isRoot,
                    let bookmark = directoryScanManager.bookmark(for: node.id) {
@@ -142,5 +166,13 @@ private struct DirectoryTreeRow: View {
                 }
             }
         }
+    }
+
+    private func copyPathToClipboard() {
+        #if os(macOS)
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(node.url.path, forType: .string)
+        #endif
     }
 }

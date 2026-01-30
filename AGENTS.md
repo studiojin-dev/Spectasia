@@ -13,6 +13,10 @@ macOS image viewer & manager with AI-powered tagging, non-destructive XMP metada
 
 ---
 
+## RULE
+
+If create new file(s), tell the user to add the files to the xcode project manually. Agent are hard to add the new files into the xcode project
+
 ## STRUCTURE
 
 ```
@@ -72,6 +76,7 @@ macOS image viewer & manager with AI-powered tagging, non-destructive XMP metada
 - [x] DirectoryScanManager 기반 디렉토리 트리 + 자동 스캔 도구 추가
 - [x] 파일 모니터링 이벤트와 이미지 선택 상태 정합성 확보
 - [x] "모니터링" 토글 제거 및 기본 감시(항상 켬) 전환
+- [x] Sidebar 순서를 Settings → 디렉토리 추가 → Directory tree로 정리하고 트리 전역 확장/축소/전체 재스캔 버튼과 메타데이터 상태 메시지를 노출
 - [ ] 데이터 바인딩 최적화 (선택/상태 분리 미완)
 
 #### 설정 화면

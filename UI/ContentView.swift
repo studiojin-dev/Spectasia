@@ -57,8 +57,13 @@ struct ContentView: View {
                     await loadDirectory(url)
                 }
             }
-            .onChange(of: repository.images) { _, images in
-                alignSelectedImage(with: images)
+            .onChange(of: repository.images.map(\.url)) { _, _ in
+                alignSelectedImage(with: repository.images)
+            }
+            .onChange(of: directoryScanManager.scanCompletionMessage) { _, message in
+                if let message {
+                    toastCenter.show(message)
+                }
             }
             .alert("Error", isPresented: Binding(
                 get: { errorMessage != nil },
