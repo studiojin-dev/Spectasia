@@ -26,13 +26,15 @@ public class PermissionManager: ObservableObject {
             CoreLog.error("Failed to access directory before creating bookmark: \(url.path)", category: logCategory)
             return nil
         }
-        guard let bookmarkData = try? url.bookmarkData(options: [.withSecurityScope, .securityScopeAllowOnlyReadAccess]) else {
-            CoreLog.error("Failed to create bookmark for \(url.path)", category: logCategory)
+        do {
+            let bookmarkData = try url.bookmarkData(options: [.withSecurityScope, .securityScopeAllowOnlyReadAccess])
+            saveBookmark(url: url, data: bookmarkData)
+            grantedDirectories.insert(url.path)
+            return bookmarkData
+        } catch {
+            CoreLog.error("Failed to create bookmark for \(url.path): \(error.localizedDescription)", category: logCategory)
             return nil
         }
-        saveBookmark(url: url, data: bookmarkData)
-        grantedDirectories.insert(url.path)
-        return bookmarkData
     }
 
     public func resolveBookmark(_ data: Data) -> URL? {
