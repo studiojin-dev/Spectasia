@@ -130,6 +130,7 @@ public struct SettingsView: View {
                 HStack(spacing: 12) {
                     GypsumButton(title: "Cancel", style: .secondary) {
                         resetDrafts()
+                        dismiss()
                     }
                     GypsumButton(title: "Apply") {
                         commitChanges()

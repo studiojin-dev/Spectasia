@@ -105,9 +105,10 @@ If create new file(s), tell the user to add the files to the xcode project manua
    - [x] 사용자가 수동으로 선택하도록 변경 (자동 다이얼로그 X)
 
 2. **Settings 창 개선**
-   - [ ] 일반적인 3버튼 패턴 추가 (저장/취소/적용)
-   - [ ] Gypsum 디자인 시스템 적용
-   - [ ] App Language 섹션 Grid 레이아웃 수정
+   - [x] 일반적인 3버튼 패턴 추가 (저장/취소/적용)
+   - [x] Gypsum 디자인 시스템 적용
+   - [x] App Language 섹션 Grid 레이아웃 수정
+   - [x] 취소 버튼 기능 구현 : 변경사항 폐기 후 팝업 닫기
 
 3. **Sidecar(사이드바) 영역 기능 및 디자인**
    - [ ] 각 영역별 수평선으로 구분
