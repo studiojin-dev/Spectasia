@@ -95,12 +95,16 @@ public class FileMonitorService {
             { (_, info, numEvents, eventPaths, eventFlags, _) in
                 guard let info else { return }
                 let monitor = Unmanaged<FileMonitorService>.fromOpaque(info).takeUnretainedValue()
-                let paths = unsafeBitCast(eventPaths, to: NSArray.self) as? [String] ?? []
-                for index in 0..<numEvents {
-                    let path = paths[Int(index)]
-                    let flags = eventFlags[Int(index)]
-                    monitor.handleEvent(path: path, flags: flags)
-                }
+        let rawPaths = eventPaths.assumingMemoryBound(to: UnsafePointer<CChar>?.self)
+        for index in 0..<numEvents {
+            guard let cString = rawPaths[Int(index)] else { continue }
+            var path = URL(fileURLWithPath: String(cString: cString)).standardizedFileURL.path
+            if path.hasPrefix("/private/var/") {
+                path = path.replacingOccurrences(of: "/private/var/", with: "/var/")
+            }
+            let flags = eventFlags[Int(index)]
+            monitor.handleEvent(path: path, flags: flags)
+        }
             },
             &context,
             pathsToWatch,
@@ -156,15 +160,18 @@ public class FileMonitorService {
 
         let created = flags & FSEventStreamEventFlags(kFSEventStreamEventFlagItemCreated) != 0
         let removed = flags & FSEventStreamEventFlags(kFSEventStreamEventFlagItemRemoved) != 0
-        let modified = flags & FSEventStreamEventFlags(kFSEventStreamEventFlagItemModified) != 0
         let renamed = flags & FSEventStreamEventFlags(kFSEventStreamEventFlagItemRenamed) != 0
 
         if created {
             let filename = url.lastPathComponent
-            knownFiles.insert(filename)
-            updateAttributes(directory: url.deletingLastPathComponent().path, filename: filename)
-            callbackQueue.async { [weak self] in
-                self?.onFileCreated?(url)
+            if knownFiles.contains(filename) {
+                notifyModificationIfChanged(at: url)
+            } else {
+                knownFiles.insert(filename)
+                updateAttributes(directory: url.deletingLastPathComponent().path, filename: filename)
+                callbackQueue.async { [weak self] in
+                    self?.onFileCreated?(url)
+                }
             }
         }
 
@@ -197,15 +204,8 @@ public class FileMonitorService {
             }
         }
 
-        if modified || renamed {
-            let filename = url.lastPathComponent
-            let changed = didAttributesChange(directory: url.deletingLastPathComponent().path, filename: filename)
-            if changed {
-                updateAttributes(directory: url.deletingLastPathComponent().path, filename: filename)
-                callbackQueue.async { [weak self] in
-                    self?.onFileModified?(url)
-                }
-            }
+        if !created && !removed {
+            notifyModificationIfChanged(at: url)
         }
     }
 
@@ -282,6 +282,17 @@ public class FileMonitorService {
             }
         }
         return results
+    }
+
+    private func notifyModificationIfChanged(at url: URL) {
+        let directory = url.deletingLastPathComponent().path
+        let filename = url.lastPathComponent
+        if didAttributesChange(directory: directory, filename: filename) {
+            updateAttributes(directory: directory, filename: filename)
+            callbackQueue.async { [weak self] in
+                self?.onFileModified?(url)
+            }
+        }
     }
 
     private func loadSizes(directory: String, filenames: [String]) -> [String: Int64] {

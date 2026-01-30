@@ -12,6 +12,7 @@ final class AppConfigTests: XCTestCase {
         UserDefaults.standard.removeObject(forKey: "autoAIToggle")
         UserDefaults.standard.removeObject(forKey: "autoCleanupToggle")
         UserDefaults.standard.removeObject(forKey: "cleanupRemoveMissingOriginals")
+        UserDefaults.standard.removeObject(forKey: "cleanupExcludedPaths")
         UserDefaults.standard.removeObject(forKey: "recentDirectoryBookmarks")
         UserDefaults.standard.removeObject(forKey: "favoriteDirectoryBookmarks")
     }
@@ -24,6 +25,7 @@ final class AppConfigTests: XCTestCase {
         UserDefaults.standard.removeObject(forKey: "autoAIToggle")
         UserDefaults.standard.removeObject(forKey: "autoCleanupToggle")
         UserDefaults.standard.removeObject(forKey: "cleanupRemoveMissingOriginals")
+        UserDefaults.standard.removeObject(forKey: "cleanupExcludedPaths")
         UserDefaults.standard.removeObject(forKey: "recentDirectoryBookmarks")
         UserDefaults.standard.removeObject(forKey: "favoriteDirectoryBookmarks")
     }
@@ -128,6 +130,18 @@ final class AppConfigTests: XCTestCase {
         config.cleanupRemoveMissingOriginals = false
         let newConfig = AppConfig()
         XCTAssertFalse(newConfig.cleanupRemoveMissingOriginals, "Cleanup remove missing originals should persist")
+    }
+
+    func testDefaultCleanupExcludedPathsContainsVolumes() throws {
+        let config = AppConfig()
+        XCTAssertEqual(config.cleanupExcludedPathsPublished, ["/Volumes"], "Default cleanup excluded paths should include /Volumes")
+    }
+
+    func testCleanupExcludedPathsPersists() throws {
+        let config = AppConfig()
+        config.cleanupExcludedPathsPublished = ["/tmp/protected"]
+        let newConfig = AppConfig()
+        XCTAssertEqual(newConfig.cleanupExcludedPathsPublished, ["/tmp/protected"], "Cleanup excluded paths should persist")
     }
 
     func testRecentDirectoriesPersist() throws {

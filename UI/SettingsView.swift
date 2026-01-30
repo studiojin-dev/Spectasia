@@ -9,6 +9,8 @@ public struct SettingsView: View {
     @EnvironmentObject private var toastCenter: ToastCenter
     @EnvironmentObject private var repository: ObservableImageRepository
     @State private var isStorePickerPresented = false
+    @State private var isProtectedDirectoryPickerPresented = false
+    @State private var lastCleanupSummary: String? = nil
     
     public init() {}
     
@@ -48,13 +50,15 @@ public struct SettingsView: View {
                 Toggle("Auto Cleanup Missing Metadata", isOn: $appConfig.isAutoCleanupEnabledPublished)
                 Toggle("Remove Missing Originals", isOn: $appConfig.cleanupRemoveMissingOriginalsPublished)
                 Button("Run Cleanup Now") {
-                    Task { [metadataStoreManager, toastCenter, repository] in
+                    let excludedPaths = appConfig.cleanupExcludedPathsPublished
+                    let removeMissing = appConfig.cleanupRemoveMissingOriginalsPublished
+                    Task { [metadataStoreManager, toastCenter, repository, excludedPaths, removeMissing] in
                         await repository.startActivity(message: NSLocalizedString("Cleaning metadata…", comment: "Cleanup in progress"))
                         toastCenter.setStatus(NSLocalizedString("Cleaning metadata…", comment: "Cleanup in progress"))
                         let result = await metadataStoreManager.store.cleanupMissingFiles(
-                            removeMissingOriginals: appConfig.cleanupRemoveMissingOriginalsPublished,
+                            removeMissingOriginals: removeMissing,
                             isOriginalSafeToRemove: { url in
-                                !url.path.hasPrefix("/Volumes/")
+                                !excludedPaths.contains(where: { url.path.hasPrefix($0) })
                             }
                         )
                         await repository.finishActivity()
@@ -65,8 +69,50 @@ public struct SettingsView: View {
                             result.removedFiles
                         )
                         toastCenter.show(message)
+                        await MainActor.run {
+                            lastCleanupSummary = message
+                        }
                     }
                 }
+                if let summary = lastCleanupSummary {
+                    Text(summary)
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                        .textSelection(.enabled)
+                }
+            }
+
+            Section("Cleanup Safety") {
+                if appConfig.cleanupExcludedPathsPublished.isEmpty {
+                    Text("No protected directories configured.")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                } else {
+                    ForEach(appConfig.cleanupExcludedPathsPublished, id: \.self) { path in
+                        HStack {
+                            Text(path)
+                                .font(.footnote)
+                                .lineLimit(1)
+                                .textSelection(.enabled)
+                            Spacer()
+                            Button(role: .destructive) {
+                                if let index = appConfig.cleanupExcludedPathsPublished.firstIndex(of: path) {
+                                    appConfig.removeCleanupExcludedPaths(at: IndexSet(integer: index))
+                                }
+                            } label: {
+                                Image(systemName: "trash")
+                            }
+                            .buttonStyle(.borderless)
+                        }
+                    }
+                }
+                Button("Protect Directory…") {
+                    isProtectedDirectoryPickerPresented = true
+                }
+                .buttonStyle(.bordered)
+                Text("Cleanup will never delete metadata for files inside protected directories.")
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
             }
         }
         .padding()
@@ -81,6 +127,20 @@ public struct SettingsView: View {
                 if let url = urls.first {
                     appConfig.metadataStoreDirectoryPublished = url.path
                     metadataStoreManager.rootDirectory = url
+                }
+            case .failure:
+                break
+            }
+        }
+        .fileImporter(
+            isPresented: $isProtectedDirectoryPickerPresented,
+            allowedContentTypes: [.folder],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case .success(let urls):
+                if let url = urls.first {
+                    appConfig.addCleanupExcludedPath(url.path)
                 }
             case .failure:
                 break

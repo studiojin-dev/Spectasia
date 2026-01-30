@@ -32,6 +32,7 @@ public class AppConfig: ObservableObject {
         static let autoAIToggle = "autoAIToggle"
         static let autoCleanupToggle = "autoCleanupToggle"
         static let cleanupRemoveMissingOriginals = "cleanupRemoveMissingOriginals"
+        static let cleanupExcludedPaths = "cleanupExcludedPaths"
         static let recentDirectoryBookmarks = "recentDirectoryBookmarks"
         static let favoriteDirectoryBookmarks = "favoriteDirectoryBookmarks"
     }
@@ -55,6 +56,9 @@ public class AppConfig: ObservableObject {
     }
     @Published public var cleanupRemoveMissingOriginalsPublished: Bool {
         didSet { UserDefaults.standard.set(cleanupRemoveMissingOriginalsPublished, forKey: Keys.cleanupRemoveMissingOriginals) }
+    }
+    @Published public var cleanupExcludedPathsPublished: [String] {
+        didSet { UserDefaults.standard.set(cleanupExcludedPathsPublished, forKey: Keys.cleanupExcludedPaths) }
     }
     @Published public var recentDirectoryBookmarks: [DirectoryBookmark] {
         didSet { persistDirectoryBookmarks(recentDirectoryBookmarks, key: Keys.recentDirectoryBookmarks) }
@@ -137,6 +141,19 @@ public class AppConfig: ObservableObject {
         }
     }
 
+    public var cleanupExcludedPaths: [String] {
+        get {
+            if let paths = UserDefaults.standard.stringArray(forKey: Keys.cleanupExcludedPaths), !paths.isEmpty {
+                return paths.map(Self.normalizedPath)
+            }
+            return Self.defaultCleanupExcludedPaths()
+        }
+        set {
+            let normalized = newValue.map(Self.normalizedPath)
+            UserDefaults.standard.set(normalized, forKey: Keys.cleanupExcludedPaths)
+        }
+    }
+
     // MARK: - Initialization
 
     public init() {
@@ -154,6 +171,12 @@ public class AppConfig: ObservableObject {
             self.cleanupRemoveMissingOriginalsPublished = false
         } else {
             self.cleanupRemoveMissingOriginalsPublished = UserDefaults.standard.bool(forKey: Keys.cleanupRemoveMissingOriginals)
+        }
+        if let storedPaths = UserDefaults.standard.stringArray(forKey: Keys.cleanupExcludedPaths),
+           !storedPaths.isEmpty {
+            self.cleanupExcludedPathsPublished = storedPaths.map(Self.normalizedPath)
+        } else {
+            self.cleanupExcludedPathsPublished = Self.defaultCleanupExcludedPaths()
         }
         self.recentDirectoryBookmarks = Self.loadDirectoryBookmarks(key: Keys.recentDirectoryBookmarks)
         self.favoriteDirectoryBookmarks = Self.loadDirectoryBookmarks(key: Keys.favoriteDirectoryBookmarks)
@@ -201,6 +224,23 @@ public class AppConfig: ObservableObject {
         return nil
     }
 
+    public func addCleanupExcludedPath(_ path: String) {
+        let normalized = Self.normalizedPath(path)
+        guard !cleanupExcludedPathsPublished.contains(normalized) else { return }
+        cleanupExcludedPathsPublished.append(normalized)
+    }
+
+    public func removeCleanupExcludedPaths(at offsets: IndexSet) {
+        var updated = cleanupExcludedPathsPublished
+        updated.remove(atOffsets: offsets)
+        cleanupExcludedPathsPublished = updated
+    }
+
+    public func isCleanupPathProtected(_ url: URL) -> Bool {
+        let normalized = Self.normalizedPath(url.path)
+        return cleanupExcludedPathsPublished.contains(where: { normalized.hasPrefix($0) })
+    }
+
     // MARK: - Persistence
 
     private func persistDirectoryBookmarks(_ bookmarks: [DirectoryBookmark], key: String) {
@@ -234,5 +274,13 @@ public class AppConfig: ObservableObject {
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
         let appSupportDir = paths.first ?? "/tmp"
         return (appSupportDir as NSString).appendingPathComponent("Spectasia/Metadata")
+    }
+
+    private static func normalizedPath(_ path: String) -> String {
+        URL(fileURLWithPath: path).standardizedFileURL.path
+    }
+
+    private static func defaultCleanupExcludedPaths() -> [String] {
+        [normalizedPath("/Volumes/")]
     }
 }
