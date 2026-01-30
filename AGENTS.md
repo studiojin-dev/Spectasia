@@ -81,6 +81,7 @@ If create new file(s), tell the user to add the files to the xcode project manua
 - [x] 데이터 바인딩 최적화 (선택/상태 분리 완료)
 - [x] Sidebar shows permission status and a “Grant Full Disk Access” shortcut to open System Settings when extra rights are required
 - [x] Sidebar also lists the currently authorized directories so you can see which bookmarks are in scope while developing
+- [x] View-mode picker, enriched list view, and single-image filmstrip/zoom placeholder now live so Phase 2 view-mode work is underway
 - [x] Settings view reworked with Gypsum cards, Save/Cancel/Apply buttons, and a language grid
 - [x] Initial directory UX now manual—Starts with a “no folder” placeholder and relies on sidebar picker
 - [x] Directory tree rows show file stats and the sidebar has dividers, multi-add cues, and accessible-directory list

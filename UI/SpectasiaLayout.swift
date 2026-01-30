@@ -281,23 +281,11 @@ public struct SpectasiaLayout: View {
                                     )
                                 case .singleImage:
                                     if let image = selectedImage {
-                                        VStack(spacing: 10) {
-                                            SingleImageView(imageURL: image.url)
-                                            ScrollView(.horizontal, showsIndicators: false) {
-                                                LazyHStack(spacing: 8) {
-                                                    ForEach(images.prefix(8)) { candidate in
-                                                        FilmstripThumb(
-                                                            image: candidate,
-                                                            isSelected: candidate.id == image.id
-                                                        ) {
-                                                            selectedImage = candidate
-                                                        }
-                                                    }
-                                                }
-                                                .padding(.horizontal)
-                                            }
-                                            .frame(height: 80)
-                                        }
+                                        SingleImageView(
+                                            image: image,
+                                            gallery: images,
+                                            onSelectImage: { selectedImage = $0 }
+                                        )
                                     } else {
                                         VStack(spacing: 12) {
                                             Image(systemName: "photo")
@@ -372,35 +360,5 @@ public struct SpectasiaLayout: View {
         )
         .environmentObject(repository)
         .environmentObject(scanManager)
-    }
-}
-
-private struct FilmstripThumb: View {
-    let image: SpectasiaImage
-    let isSelected: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 4) {
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(isSelected ? GypsumColor.accent : GypsumColor.border, lineWidth: isSelected ? 2 : 1)
-                    .frame(width: 92, height: 52)
-                    .overlay(
-                        Text(image.url.lastPathComponent)
-                            .font(GypsumFont.caption)
-                            .foregroundColor(.secondary)
-                            .lineLimit(2)
-                            .multilineTextAlignment(.center)
-                            .padding(4)
-                    )
-                Text(image.url.lastPathComponent)
-                    .font(GypsumFont.caption)
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-                    .frame(width: 92)
-            }
-        }
-        .buttonStyle(.plain)
     }
 }
