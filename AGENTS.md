@@ -80,6 +80,7 @@ If create new file(s), tell the user to add the files to the xcode project manua
 - [x] Metadata panel now allows editing tags, shows thumbnail/XMP status, and keeps metadata timestamps in sync with background indexing
 - [x] 데이터 바인딩 최적화 (선택/상태 분리 완료)
 - [x] Sidebar shows permission status and a “Grant Full Disk Access” shortcut to open System Settings when extra rights are required
+- [x] Sidebar also lists the currently authorized directories so you can see which bookmarks are in scope while developing
 
 #### 설정 화면
 

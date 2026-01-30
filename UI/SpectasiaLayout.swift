@@ -79,6 +79,30 @@ public struct SpectasiaLayout: View {
                             }
                         }
 
+                        if !permissionManager.grantedDirectories.isEmpty {
+                            GypsumCard {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text("Accessible directories")
+                                        .font(GypsumFont.headline)
+                                        .foregroundColor(GypsumColor.text)
+                                    ForEach(Array(permissionManager.grantedDirectories).sorted(), id: \.self) { path in
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text((path as NSString).lastPathComponent.isEmpty ? path : (path as NSString).lastPathComponent)
+                                                .font(GypsumFont.caption)
+                                                .foregroundColor(GypsumColor.textSecondary)
+                                                .lineLimit(1)
+                                                .truncationMode(.middle)
+                                            Text(path)
+                                                .font(GypsumFont.caption2)
+                                                .foregroundColor(.secondary)
+                                                .lineLimit(1)
+                                                .truncationMode(.middle)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                         GypsumCard {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("Watch folders")
