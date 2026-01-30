@@ -32,7 +32,7 @@ final class AppConfigTests: XCTestCase {
         let customPath = "/Volumes/External/MyCache"
 
         // When: Setting cache directory
-        var config = AppConfig()
+        let config = AppConfig()
         config.cacheDirectory = customPath
 
         // Then: Should persist across instances
@@ -50,7 +50,7 @@ final class AppConfigTests: XCTestCase {
 
     func testLanguagePersists() throws {
         // Given: Set language to Korean
-        var config = AppConfig()
+        let config = AppConfig()
         config.language = .korean
 
         // When: Creating new instance
@@ -70,7 +70,7 @@ final class AppConfigTests: XCTestCase {
 
     func testAutoAIPersists() throws {
         // Given: Enable auto AI
-        var config = AppConfig()
+        let config = AppConfig()
         config.isAutoAIEnabled = true
 
         // When: Creating new instance

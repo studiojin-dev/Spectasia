@@ -1,10 +1,9 @@
 import Foundation
-import os
 import Combine
 
 // MARK: - Logging
 
-private let logger = Logger(subsystem: "com.spectasia.core", category: "ImageRepository")
+private let logCategory = "ImageRepository"
 
 // MARK: - Models
 
@@ -35,6 +34,7 @@ public struct SpectasiaImage: Sendable, Identifiable {
 // MARK: - Protocols
 
 /// Protocol for background task coordination
+@available(macOS 10.15, *)
 public protocol BackgroundCoordinating: Actor {
     func queueThumbnailGeneration(for url: URL, size: ThumbnailSize, priority: TaskPriority)
     func queueAIAnalysis(for url: URL, priority: TaskPriority)
@@ -57,6 +57,7 @@ public enum TaskPriority: Int, Comparable, Sendable {
 // MARK: - Background Coordinator
 
 /// Actor-based coordinator for background image processing
+@available(macOS 10.15, *)
 public actor BackgroundCoordinator: BackgroundCoordinating {
     private var thumbnailQueue: [(url: URL, size: ThumbnailSize, priority: TaskPriority)] = []
     private var aiQueue: [(url: URL, priority: TaskPriority)] = []
@@ -130,7 +131,7 @@ public actor BackgroundCoordinator: BackgroundCoordinating {
             _ = try thumbnailService.generateThumbnail(for: task.url, size: task.size)
         } catch {
             // Log error but continue processing
-            logger.error("Thumbnail generation failed for \(task.url.path): \(error.localizedDescription)")
+            CoreLog.error("Thumbnail generation failed for \(task.url.path): \(error.localizedDescription)", category: logCategory)
         }
     }
 
@@ -141,7 +142,7 @@ public actor BackgroundCoordinator: BackgroundCoordinating {
             try xmpService.writeTags(url: task.url, tags: tags)
         } catch {
             // Log error but continue processing
-            logger.error("AI analysis failed for \(task.url.path): \(error.localizedDescription)")
+            CoreLog.error("AI analysis failed for \(task.url.path): \(error.localizedDescription)", category: logCategory)
         }
     }
 }
@@ -149,9 +150,13 @@ public actor BackgroundCoordinator: BackgroundCoordinating {
 // MARK: - Image Repository
 
 /// Repository for managing image collection
+@available(macOS 10.15, *)
 public actor ImageRepository {
+    private let imageExtensions: Set<String> = [
+        "jpg", "jpeg", "png", "gif", "heic", "heif", "tiff", "bmp", "webp"
+    ]
     private let config: AppConfig
-    private let backgroundCoordinator: BackgroundCoordinator
+    private let backgroundCoordinator: any BackgroundCoordinating
     private nonisolated(unsafe) let fileMonitor: FileMonitorService
     private let xmpService: XMPService
 
@@ -159,7 +164,7 @@ public actor ImageRepository {
 
     public init(
         config: AppConfig = AppConfig(),
-        backgroundCoordinator: BackgroundCoordinator? = nil,
+        backgroundCoordinator: (any BackgroundCoordinating)? = nil,
         fileMonitor: FileMonitorService = FileMonitorService(),
         xmpService: XMPService = XMPService()
     ) {
@@ -210,6 +215,35 @@ public actor ImageRepository {
         return images
     }
 
+    /// Load images from a directory and add them to the repository
+    public func loadImages(in directory: URL) async throws {
+        var isDirectory: ObjCBool = false
+        guard FileManager.default.fileExists(atPath: directory.path, isDirectory: &isDirectory),
+              isDirectory.boolValue else {
+            throw RepositoryError.directoryNotFound
+        }
+
+        let contents = try FileManager.default.contentsOfDirectory(
+            at: directory,
+            includingPropertiesForKeys: nil,
+            options: [.skipsHiddenFiles]
+        )
+
+        let imageURLs = contents.filter { url in
+            imageExtensions.contains(url.pathExtension.lowercased())
+        }
+
+        for url in imageURLs {
+            try await addImage(at: url)
+        }
+    }
+
+    /// Load images and start monitoring a directory for changes
+    public func loadAndMonitor(directory: URL) async throws {
+        try startMonitoring(directory: directory.path)
+        try await loadImages(in: directory)
+    }
+
     /// Start monitoring a directory for changes
     public nonisolated func startMonitoring(directory: String) throws {
         try fileMonitor.startMonitoring(directory: directory)
@@ -247,6 +281,7 @@ public actor ImageRepository {
 // MARK: - ObservableObject Wrapper
 
 /// ObservableObject wrapper for actor-based ImageRepository
+@available(macOS 10.15, *)
 public class ObservableImageRepository: ObservableObject {
     public let repository: ImageRepository
     
@@ -268,4 +303,15 @@ public class ObservableImageRepository: ObservableObject {
     public func getImages() async -> [SpectasiaImage] {
         return await repository.getImages()
     }
+
+    public func loadDirectory(_ url: URL) async throws {
+        try await repository.loadAndMonitor(directory: url)
+        await refreshImages()
+    }
+}
+
+// MARK: - Errors
+
+public enum RepositoryError: Error {
+    case directoryNotFound
 }

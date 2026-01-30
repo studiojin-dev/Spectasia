@@ -1,4 +1,5 @@
 import SwiftUI
+import SpectasiaCore
 
 /// Right panel showing metadata, tags, and ratings
 public struct MetadataPanel: View {
@@ -78,7 +79,7 @@ public struct MetadataPanel: View {
             do {
                 try xmpService.writeRating(url: image.url, rating: rating)
             } catch {
-                print("Failed to save rating: \(error.localizedDescription)")
+                CoreLog.error("Failed to save rating: \(error.localizedDescription)", category: "MetadataPanel")
             }
         }
     }

@@ -1,4 +1,5 @@
 import SwiftUI
+import SpectasiaCore
 
 /// Three-panel layout for Spectasia: Sidebar, Content, Detail
 public struct SpectasiaLayout: View {
@@ -108,4 +109,3 @@ public struct SpectasiaLayout: View {
         )
     }
 }
-

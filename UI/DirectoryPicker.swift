@@ -1,6 +1,7 @@
 import SwiftUI
 import AppKit
 import UniformTypeIdentifiers
+import SpectasiaCore
 
 /// Directory picker for selecting folders to monitor
 public struct DirectoryPicker: View {
@@ -30,10 +31,15 @@ public struct DirectoryPicker: View {
             case .success(let urls):
                 if let url = urls.first {
                     selectedURL = url
-                    url.startAccessingSecurityScopedResource()
+                    if !url.startAccessingSecurityScopedResource() {
+                        CoreLog.error(
+                            "Failed to start accessing security-scoped resource: \(url.path)",
+                            category: "DirectoryPicker"
+                        )
+                    }
                 }
             case .failure(let error):
-                print("Directory selection failed: \(error)")
+                CoreLog.error("Directory selection failed: \(error)", category: "DirectoryPicker")
             }
         }
     }

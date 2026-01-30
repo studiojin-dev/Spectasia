@@ -21,7 +21,7 @@ final class ImageRepositoryTests: XCTestCase {
             try FileManager.default.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
 
             // Configure services
-            var config = AppConfig()
+            let config = AppConfig()
             config.cacheDirectory = cacheDirectory.path
 
             // Create mock background coordinator

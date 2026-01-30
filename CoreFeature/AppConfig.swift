@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 import SwiftUI
 
 /// Supported languages for the app
@@ -10,6 +11,8 @@ public enum AppLanguage: String, Codable {
 /// Application configuration manager
 /// Persists settings using UserDefaults
 public class AppConfig: ObservableObject {
+    public var objectWillChange = ObservableObjectPublisher()
+    
     // MARK: - Keys
     private enum Keys {
         static let cacheDirectory = "cacheDirectory"
@@ -36,7 +39,7 @@ public class AppConfig: ObservableObject {
                 return custom
             }
             // Default: ~/Library/Caches/Spectasia
-            return defaultCacheDirectory()
+            return Self.defaultCacheDirectory()
         }
         set {
             UserDefaults.standard.set(newValue, forKey: Keys.cacheDirectory)
@@ -71,25 +74,20 @@ public class AppConfig: ObservableObject {
 
     public init() {
         // Initialize published values from persisted storage
-        self.cacheDirectoryPublished = UserDefaults.standard.string(forKey: Keys.cacheDirectory) ?? defaultCacheDirectory()
+        self.cacheDirectoryPublished = UserDefaults.standard.string(forKey: Keys.cacheDirectory) ?? Self.defaultCacheDirectory()
         if let rawValue = UserDefaults.standard.string(forKey: Keys.appLanguage), let lang = AppLanguage(rawValue: rawValue) {
             self.languagePublished = lang
         } else {
             self.languagePublished = .english
         }
         self.isAutoAIEnabledPublished = UserDefaults.standard.bool(forKey: Keys.autoAIToggle)
-
-        // Observe published changes and persist to UserDefaults
-        // Note: Using didSet on published-backed properties to mirror to computed properties
-        // will be implemented via property observers below.
     }
 
     // MARK: - Private Helpers
 
-    private func defaultCacheDirectory() -> String {
+    private static func defaultCacheDirectory() -> String {
         let paths = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true)
         let cachesDir = paths.first ?? "/tmp"
         return (cachesDir as NSString).appendingPathComponent("Spectasia")
     }
 }
-

@@ -17,7 +17,7 @@ final class ThumbnailServiceTests: XCTestCase {
         try FileManager.default.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
 
         // Configure thumbnail service with cache directory
-        var config = AppConfig()
+        let config = AppConfig()
         config.cacheDirectory = cacheDirectory.path
         thumbnailService = ThumbnailService(config: config)
 

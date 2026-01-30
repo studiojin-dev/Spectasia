@@ -6,6 +6,7 @@
 //  Connects Core services with UI components
 
 import SwiftUI
+import SpectasiaCore
 
 /// Main view for Spectasia image viewer
 struct ContentView: View {
@@ -17,6 +18,7 @@ struct ContentView: View {
     @State private var errorMessage: String? = nil
 
     @EnvironmentObject var repository: ObservableImageRepository
+    @EnvironmentObject var permissionManager: PermissionManager
 
     var body: some View {
         SpectasiaLayout(
@@ -30,6 +32,12 @@ struct ContentView: View {
         .onAppear {
             requestInitialDirectoryAccess()
         }
+        .onChange(of: selectedDirectory) { newValue in
+            guard let url = newValue else { return }
+            Task {
+                await loadDirectory(url)
+            }
+        }
         .task {
             await loadImages()
         }
@@ -37,8 +45,21 @@ struct ContentView: View {
 
     private func requestInitialDirectoryAccess() {
         if repository.images.isEmpty {
-            let permissionManager = PermissionManager()
-            permissionManager.requestDirectoryAccess()
+            if let url = permissionManager.requestDirectoryAccess() {
+                selectedDirectory = url
+            }
+        }
+    }
+
+    private func loadDirectory(_ url: URL) async {
+        isLoading = true
+        defer { isLoading = false }
+
+        do {
+            try await repository.loadDirectory(url)
+        } catch {
+            errorMessage = "Failed to load directory: \(url.path)"
+            CoreLog.error("Failed to load directory \(url.path): \(error.localizedDescription)", category: "ContentView")
         }
     }
 
