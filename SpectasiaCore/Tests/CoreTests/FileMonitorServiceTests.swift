@@ -139,10 +139,34 @@ final class FileMonitorServiceTests: XCTestCase {
         XCTAssertEqual(filesDetected.first?.path, testFile1.path, "Should detect correct file")
     }
 
+    func testDetectsModifiedFile() throws {
+        let expectation = self.expectation(description: "File modified event")
+        var modifiedFile: URL?
+
+        let testFile = tempDirectory.appendingPathComponent("modified.jpg")
+        try Data([0x01, 0x02]).write(to: testFile)
+
+        monitorService.onFileModified = { fileURL in
+            modifiedFile = fileURL
+            expectation.fulfill()
+        }
+
+        try monitorService.startMonitoring(directory: tempDirectory.path)
+
+        // Ensure file system timestamp resolution advances
+        Thread.sleep(forTimeInterval: 1.1)
+        try Data([0x03, 0x04, 0x05, 0x06]).write(to: testFile)
+
+        wait(for: [expectation], timeout: 2.0)
+        XCTAssertNotNil(modifiedFile, "Should detect modified file")
+        XCTAssertEqual(modifiedFile?.path, testFile.path, "Should detect correct modified file")
+    }
+
     static let allTests = [
         ("testDetectsNewFile", testDetectsNewFile),
         ("testDetectsDeletedFile", testDetectsDeletedFile),
         ("testIgnoresNonImageFiles", testIgnoresNonImageFiles),
         ("testStopsMonitoring", testStopsMonitoring),
+        ("testDetectsModifiedFile", testDetectsModifiedFile),
     ]
 }

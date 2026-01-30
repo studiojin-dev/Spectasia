@@ -62,21 +62,26 @@ public class ThumbnailService {
     ///   - size: Desired thumbnail size
     /// - Returns: URL of the thumbnail file
     /// - Throws: ThumbnailError if generation fails
-    public func generateThumbnail(for url: URL, size: ThumbnailSize) async throws -> URL {
+    public func generateThumbnail(for url: URL, size: ThumbnailSize, regenerate: Bool = false) async throws -> URL {
         // Check if source exists
         guard fileManager.fileExists(atPath: url.path) else {
             throw ThumbnailError.sourceFileNotFound
         }
 
         // Check cache
-        let cacheURL = await metadataStore.thumbnailURL(for: url, size: size)
-        if fileManager.fileExists(atPath: cacheURL.path) {
-            return cacheURL
+        if !regenerate, let existing = await metadataStore.currentThumbnailURL(for: url, size: size) {
+            return existing
         }
 
         // Generate thumbnail
+        let cacheURL = await metadataStore.allocateThumbnailURL(for: url, size: size)
         let thumbnailData = try generateThumbnailData(from: url, size: size)
         try thumbnailData.write(to: cacheURL)
+
+        let previousURL = await metadataStore.updateThumbnailURL(for: url, size: size, to: cacheURL)
+        if let previousURL, previousURL != cacheURL {
+            try? fileManager.removeItem(at: previousURL)
+        }
 
         return cacheURL
     }

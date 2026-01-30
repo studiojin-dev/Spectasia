@@ -50,16 +50,34 @@ public actor MetadataStore {
         return xmpURL
     }
 
-    public func thumbnailURL(for originalURL: URL, size: ThumbnailSize) -> URL {
+    public func currentThumbnailURL(for originalURL: URL, size: ThumbnailSize) -> URL? {
+        guard let record = records[originalURL.path],
+              let path = record.thumbnails[size.rawValue] else {
+            return nil
+        }
+        let url = URL(fileURLWithPath: path)
+        guard fileManager.fileExists(atPath: url.path) else {
+            return nil
+        }
+        return url
+    }
+
+    public func allocateThumbnailURL(for originalURL: URL, size: ThumbnailSize) -> URL {
         let relativeBase = relativeBasePath(for: originalURL)
         let thumbRoot = rootDirectory.appendingPathComponent("thumbnails")
         let baseDir = thumbRoot.appendingPathComponent(relativeBase)
-        let thumbURL = baseDir.appendingPathComponent("\(size.suffix).jpg")
+        let uniqueName = "\(size.suffix)-\(UUID().uuidString).jpg"
+        let thumbURL = baseDir.appendingPathComponent(uniqueName)
         createDirectoryIfNeeded(baseDir)
-        updateRecord(for: originalURL) { record in
-            record.thumbnails[size.rawValue] = thumbURL.path
-        }
         return thumbURL
+    }
+
+    public func updateThumbnailURL(for originalURL: URL, size: ThumbnailSize, to url: URL) -> URL? {
+        let previous = currentThumbnailURL(for: originalURL, size: size)
+        updateRecord(for: originalURL) { record in
+            record.thumbnails[size.rawValue] = url.path
+        }
+        return previous
     }
 
     public func record(for originalURL: URL) -> Record? {

@@ -36,7 +36,7 @@ public struct SpectasiaImage: Sendable, Identifiable {
 /// Protocol for background task coordination
 @available(macOS 10.15, *)
 public protocol BackgroundCoordinating: Actor {
-    func queueThumbnailGeneration(for url: URL, size: ThumbnailSize, priority: TaskPriority)
+    func queueThumbnailGeneration(for url: URL, size: ThumbnailSize, priority: TaskPriority, regenerate: Bool)
     func queueAIAnalysis(for url: URL, priority: TaskPriority)
     func startProcessing()
     func pauseProcessing()
@@ -59,7 +59,7 @@ public enum TaskPriority: Int, Comparable, Sendable {
 /// Actor-based coordinator for background image processing
 @available(macOS 10.15, *)
 public actor BackgroundCoordinator: BackgroundCoordinating {
-    private var thumbnailQueue: [(url: URL, size: ThumbnailSize, priority: TaskPriority)] = []
+    private var thumbnailQueue: [(url: URL, size: ThumbnailSize, priority: TaskPriority, regenerate: Bool)] = []
     private var aiQueue: [(url: URL, priority: TaskPriority)] = []
     private var isProcessing = false
 
@@ -77,8 +77,8 @@ public actor BackgroundCoordinator: BackgroundCoordinating {
         self.xmpService = xmpService
     }
 
-    public func queueThumbnailGeneration(for url: URL, size: ThumbnailSize, priority: TaskPriority = .normal) {
-        thumbnailQueue.append((url, size, priority))
+    public func queueThumbnailGeneration(for url: URL, size: ThumbnailSize, priority: TaskPriority = .normal, regenerate: Bool = false) {
+        thumbnailQueue.append((url, size, priority, regenerate))
         // Sort by priority (high first)
         thumbnailQueue.sort { $0.priority > $1.priority }
     }
@@ -126,9 +126,9 @@ public actor BackgroundCoordinator: BackgroundCoordinating {
         isProcessing = false
     }
 
-    private func processThumbnailTask(_ task: (url: URL, size: ThumbnailSize, priority: TaskPriority)) async {
+    private func processThumbnailTask(_ task: (url: URL, size: ThumbnailSize, priority: TaskPriority, regenerate: Bool)) async {
         do {
-            _ = try await thumbnailService.generateThumbnail(for: task.url, size: task.size)
+            _ = try await thumbnailService.generateThumbnail(for: task.url, size: task.size, regenerate: task.regenerate)
         } catch {
             // Log error but continue processing
             CoreLog.error("Thumbnail generation failed for \(task.url.path): \(error.localizedDescription)", category: logCategory)
@@ -161,6 +161,7 @@ public actor ImageRepository {
     private let thumbnailService: ThumbnailService
 
     public private(set) var images: [SpectasiaImage] = []
+    private var currentDirectory: URL?
     private var changeContinuations: [UUID: AsyncStream<Void>.Continuation] = [:]
 
     public init(
@@ -205,9 +206,9 @@ public actor ImageRepository {
         notifyChange()
 
         // Queue background tasks
-        await backgroundCoordinator.queueThumbnailGeneration(for: url, size: .small, priority: .high)
-        await backgroundCoordinator.queueThumbnailGeneration(for: url, size: .medium, priority: .normal)
-        await backgroundCoordinator.queueThumbnailGeneration(for: url, size: .large, priority: .low)
+        await backgroundCoordinator.queueThumbnailGeneration(for: url, size: .small, priority: .high, regenerate: false)
+        await backgroundCoordinator.queueThumbnailGeneration(for: url, size: .medium, priority: .normal, regenerate: false)
+        await backgroundCoordinator.queueThumbnailGeneration(for: url, size: .large, priority: .low, regenerate: false)
         await backgroundCoordinator.queueAIAnalysis(for: url, priority: .normal)
 
         // Start processing
@@ -227,6 +228,7 @@ public actor ImageRepository {
 
     /// Load images from a directory and add them to the repository
     public func loadImages(in directory: URL) async throws {
+        currentDirectory = directory
         var isDirectory: ObjCBool = false
         guard FileManager.default.fileExists(atPath: directory.path, isDirectory: &isDirectory),
               isDirectory.boolValue else {
@@ -251,6 +253,7 @@ public actor ImageRepository {
 
     /// Load images and start monitoring a directory for changes
     public func loadAndMonitor(directory: URL) async throws {
+        currentDirectory = directory
         try startMonitoring(directory: directory.path)
         try await loadImages(in: directory)
     }
@@ -275,7 +278,66 @@ public actor ImageRepository {
     }
 
     public func thumbnailURL(for url: URL, size: ThumbnailSize) async throws -> URL {
-        return try await thumbnailService.generateThumbnail(for: url, size: size)
+        return try await thumbnailService.generateThumbnail(for: url, size: size, regenerate: false)
+    }
+
+    public func rescanCurrentDirectory() async throws {
+        guard let directory = currentDirectory else { return }
+        try await rescanDirectory(directory)
+    }
+
+    public func rescanDirectory(_ directory: URL) async throws {
+        let contents = try FileManager.default.contentsOfDirectory(
+            at: directory,
+            includingPropertiesForKeys: nil,
+            options: [.skipsHiddenFiles]
+        )
+        let imageURLs = contents.filter { url in
+            imageExtensions.contains(url.pathExtension.lowercased())
+        }
+
+        let existingPaths = Set(images.map { $0.url.path })
+        let newPaths = Set(imageURLs.map { $0.path })
+
+        // Remove missing
+        let removed = existingPaths.subtracting(newPaths)
+        if !removed.isEmpty {
+            images.removeAll { removed.contains($0.url.path) }
+        }
+
+        // Add new
+        for url in imageURLs where !existingPaths.contains(url.path) {
+            try await addImage(at: url)
+        }
+
+        // Refresh metadata for existing
+        let common = existingPaths.intersection(newPaths)
+        for url in imageURLs where common.contains(url.path) {
+            await refreshImageMetadata(at: url)
+        }
+
+        notifyChange()
+    }
+
+    public func regenerateThumbnails(for url: URL) async {
+        await backgroundCoordinator.queueThumbnailGeneration(for: url, size: .small, priority: .high, regenerate: true)
+        await backgroundCoordinator.queueThumbnailGeneration(for: url, size: .medium, priority: .normal, regenerate: true)
+        await backgroundCoordinator.queueThumbnailGeneration(for: url, size: .large, priority: .low, regenerate: true)
+        await backgroundCoordinator.startProcessing()
+    }
+
+    public func regenerateThumbnailsForCurrentDirectory() async {
+        guard let directory = currentDirectory else { return }
+        let urls = images.filter { $0.url.deletingLastPathComponent() == directory }
+        for image in urls {
+            await regenerateThumbnails(for: image.url)
+        }
+    }
+
+    public func regenerateThumbnailsForAllImages() async {
+        for image in images {
+            await regenerateThumbnails(for: image.url)
+        }
     }
 
     // MARK: - Private Methods
@@ -299,6 +361,7 @@ public actor ImageRepository {
             guard let self = self else { return }
             Task {
                 await self.refreshImageMetadata(at: url)
+                await self.regenerateThumbnails(for: url)
             }
         }
     }
@@ -398,6 +461,28 @@ public class ObservableImageRepository: ObservableObject {
 
     public func thumbnailURL(for url: URL, size: ThumbnailSize) async throws -> URL {
         return try await repository.thumbnailURL(for: url, size: size)
+    }
+
+    public func rescanCurrentDirectory() async throws {
+        try await repository.rescanCurrentDirectory()
+        await refreshImages()
+    }
+
+    public func rescanDirectory(_ url: URL) async throws {
+        try await repository.rescanDirectory(url)
+        await refreshImages()
+    }
+
+    public func regenerateThumbnails(for url: URL) async {
+        await repository.regenerateThumbnails(for: url)
+    }
+
+    public func regenerateThumbnailsForCurrentDirectory() async {
+        await repository.regenerateThumbnailsForCurrentDirectory()
+    }
+
+    public func regenerateThumbnailsForAllImages() async {
+        await repository.regenerateThumbnailsForAllImages()
     }
 
     private func observeChanges() async {

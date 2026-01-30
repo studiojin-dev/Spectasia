@@ -175,7 +175,7 @@ actor MockBackgroundCoordinator: BackgroundCoordinating {
     var tasksQueued = false
     var taskCount = 0
 
-    func queueThumbnailGeneration(for url: URL, size: ThumbnailSize, priority: TaskPriority) {
+    func queueThumbnailGeneration(for url: URL, size: ThumbnailSize, priority: TaskPriority, regenerate: Bool) {
         tasksQueued = true
         taskCount += 1
     }
