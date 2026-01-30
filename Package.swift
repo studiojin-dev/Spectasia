@@ -29,6 +29,6 @@ let package = Package(
         .testTarget(
             name: "SpectasiaCoreTests",
             dependencies: ["SpectasiaCore"],
-            path: "Tests/SpectasiaCoreTests"),
+            path: "SpectasiaCore/Tests/CoreTests"),
     ]
 )

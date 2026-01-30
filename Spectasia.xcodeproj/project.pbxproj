@@ -347,15 +347,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				ACEDCA812F29AB7700B1E22C /* DirectoryPicker.swift in Sources */,
-				ACEDCA852F29AB7700B1E22C /* ContentView.swift in Sources */,
-				ACEDCA862F29AB7700B1E22C /* SpectasiaApp.swift in Sources */,
-				ACEDCA892F29AB7700B1E22C /* SettingsView.swift in Sources */,
-				ACEDCA8B2F29AB7700B1E22C /* GypsumDesignSystem.swift in Sources */,
-				ACEDCA8C2F29AB7700B1E22C /* ImageGridView.swift in Sources */,
-				ACEDCA8D2F29AB7700B1E22C /* MetadataPanel.swift in Sources */,
-				ACFCE2CA2F2C26CD001B9220 /* SingleImageView.swift in Sources */,
-				ACEDCA932F29AB7700B1E22C /* SpectasiaLayout.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -363,15 +354,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				ACEDCA972F29AB7700B1E22C /* DirectoryPicker.swift in Sources */,
-				ACEDCA9B2F29AB7700B1E22C /* ContentView.swift in Sources */,
-				ACEDCA9C2F29AB7700B1E22C /* SpectasiaApp.swift in Sources */,
-				ACEDCA9F2F29AB7700B1E22C /* SettingsView.swift in Sources */,
-				ACEDCAA12F29AB7700B1E22C /* GypsumDesignSystem.swift in Sources */,
-				ACEDCAA22F29AB7700B1E22C /* ImageGridView.swift in Sources */,
-				ACEDCAA32F29AB7700B1E22C /* MetadataPanel.swift in Sources */,
-				ACFCE2CC2F2C26CD001B9220 /* SingleImageView.swift in Sources */,
-				ACEDCAA92F29AB7700B1E22C /* SpectasiaLayout.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
