@@ -77,7 +77,7 @@ If create new file(s), tell the user to add the files to the xcode project manua
 - [x] 파일 모니터링 이벤트와 이미지 선택 상태 정합성 확보
 - [x] "모니터링" 토글 제거 및 기본 감시(항상 켬) 전환
 - [x] Sidebar 순서를 Settings → 디렉토리 추가 → Directory tree로 정리하고 트리 전역 확장/축소/전체 재스캔 버튼과 메타데이터 상태 메시지를 노출
-- [x] Metadata panel now allows editing tags, shows thumbnail/XMP status, and keeps metadata timestamps in sync with background indexing
+- [x] Metadata panel now allows editing tags and reports thumbnail/AI status with relative timestamps while keeping metadata timestamps in sync with background indexing
 - [x] 데이터 바인딩 최적화 (선택/상태 분리 완료)
 - [x] Sidebar shows permission status and a “Grant Full Disk Access” shortcut to open System Settings when extra rights are required
 - [x] Sidebar also lists the currently authorized directories so you can see which bookmarks are in scope while developing
@@ -112,12 +112,12 @@ If create new file(s), tell the user to add the files to the xcode project manua
 
 3. **Sidecar(사이드바) 영역 기능 및 디자인**
    - [x] 각 영역별 수평선으로 구분
-  - [ ] Setting 버튼 최상단, "폴더" 타이틀 하단 배치
-  - [ ] 감시 디렉토리 다중 지원
-  - [ ] 디렉토리 트리 구조 구현
-  - [ ] 환경설정에 감시 디렉토리 목록 저장
-  - [x] 트리 최상단에 '+' 메뉴 (디렉토리 추가용)
-  - [x] 트리 노드에 이미지 합계 표시 (작은 글씨)
+   - [x] Setting 버튼 최상단, "폴더" 타이틀 하단 배치
+   - [x] 감시 디렉토리 다중 지원
+   - [x] 디렉토리 트리 구조 구현
+   - [x] 환경설정에 감시 디렉토리 목록 저장
+   - [x] 트리 최상단에 '+' 메뉴 (디렉토리 추가용)
+   - [x] 트리 노드에 이미지 합계 표시 (작은 글씨)
 
 4. **중앙 Viewer 화면 개선**
    - [ ] 썸네일 보기 / 리스트 보기 / 큰 이미지 보기 전환 메뉴

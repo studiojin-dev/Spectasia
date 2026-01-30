@@ -8,9 +8,11 @@ public struct MetadataPanel: View {
     @State private var metadataRecord: MetadataStore.Record?
     @State private var editableTags: [String] = []
     @State private var newTagText: String = ""
+    @State private var fileRecord: FileRecord?
     @EnvironmentObject private var metadataStoreManager: MetadataStoreManager
     @EnvironmentObject private var repository: ObservableImageRepository
     @EnvironmentObject private var toastCenter: ToastCenter
+    @EnvironmentObject private var directoryScanManager: DirectoryScanManager
 
     public init(image: SpectasiaImage? = nil) {
         self.image = image
@@ -100,6 +102,24 @@ public struct MetadataPanel: View {
                             .font(GypsumFont.caption)
                             .foregroundColor(.secondary)
                     }
+                    if let thumbnailDate = fileRecord?.thumbnailGeneratedAt {
+                        Text("Thumbnail generated \(thumbnailDate, style: .relative)")
+                            .font(GypsumFont.caption2)
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("Thumbnail generation pending")
+                            .font(GypsumFont.caption2)
+                            .foregroundColor(.secondary)
+                    }
+                    if let aiDate = fileRecord?.aiAnalyzedAt {
+                        Text("AI analysis \(aiDate, style: .relative)")
+                            .font(GypsumFont.caption2)
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("AI analysis pending")
+                            .font(GypsumFont.caption2)
+                            .foregroundColor(.secondary)
+                    }
                 } else {
                     Text("Waiting for metadata indexing")
                         .font(GypsumFont.caption)
@@ -134,6 +154,7 @@ public struct MetadataPanel: View {
         .background(GypsumColor.background)
         .task(id: image?.url) {
             await refreshMetadataRecord()
+            await refreshFileRecord()
             updateEditableTags()
         }
         .onChange(of: image?.rating ?? 0) { _, newValue in
@@ -142,6 +163,14 @@ public struct MetadataPanel: View {
         .onChange(of: image?.tags) { _, _ in
             updateEditableTags()
         }
+    }
+
+    private func refreshFileRecord() async {
+        guard let image = image else {
+            fileRecord = nil
+            return
+        }
+        fileRecord = await directoryScanManager.fileRecord(for: image.url)
     }
 
     // MARK: - Private Methods

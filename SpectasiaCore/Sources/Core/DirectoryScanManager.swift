@@ -134,6 +134,10 @@ public final class DirectoryScanManager: ObservableObject {
         watchedDirectories.first { $0.path == path }
     }
 
+    public func fileRecord(for url: URL) async -> FileRecord? {
+        await metadataIndexStore.fileRecord(for: url)
+    }
+
     // MARK: - Private Helpers
 
     private func startIndexingAll() async {
