@@ -50,8 +50,15 @@ public struct SettingsView: View {
                 Button("Run Cleanup Now") {
                     Task { [metadataStoreManager, toastCenter, repository] in
                         await repository.startActivity(message: NSLocalizedString("Cleaning metadata…", comment: "Cleanup in progress"))
-                        let result = await metadataStoreManager.store.cleanupMissingFiles(removeMissingOriginals: appConfig.cleanupRemoveMissingOriginalsPublished)
+                        toastCenter.setStatus(NSLocalizedString("Cleaning metadata…", comment: "Cleanup in progress"))
+                        let result = await metadataStoreManager.store.cleanupMissingFiles(
+                            removeMissingOriginals: appConfig.cleanupRemoveMissingOriginalsPublished,
+                            isOriginalSafeToRemove: { url in
+                                !url.path.hasPrefix("/Volumes/")
+                            }
+                        )
                         await repository.finishActivity()
+                        toastCenter.setStatus(nil)
                         let message = String(
                             format: NSLocalizedString("Cleaned metadata: %lld records, %lld files", comment: "Cleanup summary"),
                             result.removedRecords,

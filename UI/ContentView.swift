@@ -101,6 +101,21 @@ struct ContentView: View {
                     .padding(.bottom, 16)
                     .transition(.opacity)
             }
+
+            if let status = toastCenter.statusMessage {
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .scaleEffect(0.7)
+                    Text(status)
+                        .font(.caption)
+                        .foregroundColor(.white)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(Color.black.opacity(0.6))
+                .cornerRadius(8)
+                .padding(.bottom, 52)
+            }
         }
     }
 
@@ -155,8 +170,15 @@ struct ContentView: View {
         didRunStartupCleanup = true
         Task { [metadataStoreManager, toastCenter, repository] in
             await repository.startActivity(message: NSLocalizedString("Cleaning metadata…", comment: "Cleanup in progress"))
-            let result = await metadataStoreManager.store.cleanupMissingFiles(removeMissingOriginals: appConfig.cleanupRemoveMissingOriginalsPublished)
+            toastCenter.setStatus(NSLocalizedString("Cleaning metadata…", comment: "Cleanup in progress"))
+            let result = await metadataStoreManager.store.cleanupMissingFiles(
+                removeMissingOriginals: appConfig.cleanupRemoveMissingOriginalsPublished,
+                isOriginalSafeToRemove: { url in
+                    !url.path.hasPrefix("/Volumes/")
+                }
+            )
             await repository.finishActivity()
+            toastCenter.setStatus(nil)
             if result.removedRecords > 0 || result.removedFiles > 0 {
                 let message = String(
                     format: NSLocalizedString("Cleaned metadata: %lld records, %lld files", comment: "Cleanup summary"),

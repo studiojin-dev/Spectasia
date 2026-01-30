@@ -128,7 +128,7 @@ public class AppConfig: ObservableObject {
     public var cleanupRemoveMissingOriginals: Bool {
         get {
             if UserDefaults.standard.object(forKey: Keys.cleanupRemoveMissingOriginals) == nil {
-                return true
+                return false
             }
             return UserDefaults.standard.bool(forKey: Keys.cleanupRemoveMissingOriginals)
         }
@@ -151,7 +151,7 @@ public class AppConfig: ObservableObject {
         self.isAutoAIEnabledPublished = UserDefaults.standard.bool(forKey: Keys.autoAIToggle)
         self.isAutoCleanupEnabledPublished = UserDefaults.standard.bool(forKey: Keys.autoCleanupToggle)
         if UserDefaults.standard.object(forKey: Keys.cleanupRemoveMissingOriginals) == nil {
-            self.cleanupRemoveMissingOriginalsPublished = true
+            self.cleanupRemoveMissingOriginalsPublished = false
         } else {
             self.cleanupRemoveMissingOriginalsPublished = UserDefaults.standard.bool(forKey: Keys.cleanupRemoveMissingOriginals)
         }

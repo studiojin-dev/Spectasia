@@ -83,7 +83,10 @@ public actor MetadataStore {
         return previous
     }
 
-    public func cleanupMissingFiles(removeMissingOriginals: Bool = true) -> (removedRecords: Int, removedFiles: Int) {
+    public func cleanupMissingFiles(
+        removeMissingOriginals: Bool = true,
+        isOriginalSafeToRemove: ((URL) -> Bool)? = nil
+    ) -> (removedRecords: Int, removedFiles: Int) {
         var removedRecords = 0
         var removedFiles = 0
 
@@ -92,6 +95,9 @@ public actor MetadataStore {
             let originalExists = fileManager.fileExists(atPath: originalURL.path)
 
             if removeMissingOriginals && !originalExists {
+                if let isOriginalSafeToRemove, !isOriginalSafeToRemove(originalURL) {
+                    continue
+                }
                 if let xmp = record.xmpPath {
                     let url = URL(fileURLWithPath: xmp)
                     if fileManager.fileExists(atPath: url.path) {

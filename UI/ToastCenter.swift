@@ -3,6 +3,7 @@ import SwiftUI
 @MainActor
 final class ToastCenter: ObservableObject {
     @Published var message: String?
+    @Published var statusMessage: String?
     private var queue: [String] = []
     private var isShowing = false
     private var lastShownAt: Date?
@@ -23,6 +24,10 @@ final class ToastCenter: ObservableObject {
         }
 
         display(message, duration: duration)
+    }
+
+    func setStatus(_ message: String?) {
+        statusMessage = message
     }
 
     private func enqueue(_ message: String) {

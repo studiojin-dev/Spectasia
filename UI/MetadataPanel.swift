@@ -75,7 +75,7 @@ public struct MetadataPanel: View {
                     Button("Regenerate Thumbnails") {
                         Task {
                             await repository.regenerateThumbnails(for: image.url)
-                            toastCenter.show("Thumbnails refreshed")
+                            toastCenter.show(NSLocalizedString("Thumbnails refreshed", comment: "Thumbnails refreshed"))
                         }
                     }
                 }

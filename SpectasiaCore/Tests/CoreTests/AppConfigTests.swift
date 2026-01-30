@@ -120,7 +120,7 @@ final class AppConfigTests: XCTestCase {
 
     func testCleanupRemoveMissingOriginalsDefaultsTrue() throws {
         let config = AppConfig()
-        XCTAssertTrue(config.cleanupRemoveMissingOriginals, "Cleanup should remove missing originals by default")
+        XCTAssertFalse(config.cleanupRemoveMissingOriginals, "Cleanup should not remove missing originals by default")
     }
 
     func testCleanupRemoveMissingOriginalsPersists() throws {
