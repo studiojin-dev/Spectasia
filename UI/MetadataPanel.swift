@@ -5,7 +5,7 @@ import SpectasiaCore
 public struct MetadataPanel: View {
     let image: SpectasiaImage?
     @State private var selectedRating: Int = 0
-    private let xmpService = XMPService()
+    @EnvironmentObject private var metadataStoreManager: MetadataStoreManager
 
     public init(image: SpectasiaImage? = nil) {
         self.image = image
@@ -68,6 +68,9 @@ public struct MetadataPanel: View {
         }
         .padding()
         .background(GypsumColor.background)
+        .onChange(of: image?.rating ?? 0) { _, newValue in
+            selectedRating = newValue
+        }
     }
 
     // MARK: - Private Methods
@@ -77,7 +80,8 @@ public struct MetadataPanel: View {
 
         Task {
             do {
-                try xmpService.writeRating(url: image.url, rating: rating)
+                let xmpService = XMPService(metadataStore: metadataStoreManager.store)
+                try await xmpService.writeRating(url: image.url, rating: rating)
             } catch {
                 CoreLog.error("Failed to save rating: \(error.localizedDescription)", category: "MetadataPanel")
             }

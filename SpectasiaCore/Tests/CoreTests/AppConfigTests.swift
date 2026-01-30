@@ -7,6 +7,7 @@ final class AppConfigTests: XCTestCase {
     override func setUpWithError() throws {
         // Clear UserDefaults before each test
         UserDefaults.standard.removeObject(forKey: "cacheDirectory")
+        UserDefaults.standard.removeObject(forKey: "metadataStoreDirectory")
         UserDefaults.standard.removeObject(forKey: "appLanguage")
         UserDefaults.standard.removeObject(forKey: "autoAIToggle")
         UserDefaults.standard.removeObject(forKey: "recentDirectoryBookmarks")
@@ -16,6 +17,7 @@ final class AppConfigTests: XCTestCase {
     override func tearDownWithError() throws {
         // Clean up after each test
         UserDefaults.standard.removeObject(forKey: "cacheDirectory")
+        UserDefaults.standard.removeObject(forKey: "metadataStoreDirectory")
         UserDefaults.standard.removeObject(forKey: "appLanguage")
         UserDefaults.standard.removeObject(forKey: "autoAIToggle")
         UserDefaults.standard.removeObject(forKey: "recentDirectoryBookmarks")
@@ -43,6 +45,21 @@ final class AppConfigTests: XCTestCase {
         // Then: Should persist across instances
         let newConfig = AppConfig()
         XCTAssertEqual(newConfig.cacheDirectory, customPath, "Cache directory should persist")
+    }
+
+    func testDefaultMetadataStoreDirectory() throws {
+        let config = AppConfig()
+        let defaultPath = config.metadataStoreDirectory
+        XCTAssertTrue(defaultPath.contains("Application Support"), "Default metadata store should use Application Support")
+        XCTAssertTrue(defaultPath.contains("Spectasia"), "Default metadata store should contain 'Spectasia'")
+    }
+
+    func testMetadataStoreDirectoryPersists() throws {
+        let customPath = "/Volumes/External/MetadataStore"
+        let config = AppConfig()
+        config.metadataStoreDirectory = customPath
+        let newConfig = AppConfig()
+        XCTAssertEqual(newConfig.metadataStoreDirectory, customPath, "Metadata store directory should persist")
     }
 
     func testDefaultLanguage() throws {

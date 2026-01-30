@@ -7,7 +7,7 @@ public struct ImageGridView: View {
     let selectedImage: Binding<SpectasiaImage?>
     let backgroundTasks: Binding<Int>
     let gridSize: CGFloat = 120
-    @EnvironmentObject private var appConfig: AppConfig
+    @EnvironmentObject private var metadataStoreManager: MetadataStoreManager
 
     public init(
         images: [SpectasiaImage],
@@ -38,6 +38,7 @@ public struct ImageGridView: View {
                     ForEach(images, id: \.url) { spectasiaImage in
                         ImageThumbnail(
                             spectasiaImage: spectasiaImage,
+                            selectedImage: selectedImage,
                             size: CGSize(width: gridSize, height: gridSize)
                         )
                     }
@@ -52,14 +53,19 @@ public struct ImageGridView: View {
 /// Thumbnail view for a single image
 struct ImageThumbnail: View {
     let spectasiaImage: SpectasiaImage
+    @Binding var selectedImage: SpectasiaImage?
     let size: CGSize
     @State private var thumbnail: Image?
-    @State private var isSelected = false
     @State private var isLoading = true
-    @EnvironmentObject private var appConfig: AppConfig
+    @State private var loadTask: Task<Void, Never>?
+    @EnvironmentObject private var metadataStoreManager: MetadataStoreManager
 
     private var thumbnailService: ThumbnailService {
-        ThumbnailService(cacheDirectory: appConfig.cacheDirectory)
+        ThumbnailService(metadataStore: metadataStoreManager.store)
+    }
+
+    private var isSelected: Bool {
+        selectedImage?.url == spectasiaImage.url
     }
 
     var body: some View {
@@ -91,10 +97,18 @@ struct ImageThumbnail: View {
         }
         .cornerRadius(4)
         .onTapGesture {
-            isSelected.toggle()
+            if isSelected {
+                selectedImage = nil
+            } else {
+                selectedImage = spectasiaImage
+            }
         }
         .onAppear {
             loadThumbnail()
+        }
+        .onDisappear {
+            loadTask?.cancel()
+            loadTask = nil
         }
     }
 
@@ -111,15 +125,19 @@ struct ImageThumbnail: View {
 
         // Generate thumbnail using ThumbnailService
         isLoading = true
-        Task {
+        loadTask?.cancel()
+        loadTask = Task {
             do {
-                let thumbnailURL = try thumbnailService.generateThumbnail(
+                let thumbnailURL = try await thumbnailService.generateThumbnail(
                     for: spectasiaImage.url,
                     size: .small
                 )
 
                 // Load the generated thumbnail
                 if let nsImage = NSImage(contentsOf: thumbnailURL) {
+                    if Task.isCancelled {
+                        return
+                    }
                     await MainActor.run {
                         self.thumbnail = Image(nsImage: nsImage)
                         self.isLoading = false

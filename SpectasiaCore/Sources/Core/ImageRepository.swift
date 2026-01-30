@@ -70,7 +70,7 @@ public actor BackgroundCoordinator: BackgroundCoordinating {
     public init(
         thumbnailService: ThumbnailService,
         aiService: AIService = AIService(),
-        xmpService: XMPService = XMPService()
+        xmpService: XMPService
     ) {
         self.thumbnailService = thumbnailService
         self.aiService = aiService
@@ -128,7 +128,7 @@ public actor BackgroundCoordinator: BackgroundCoordinating {
 
     private func processThumbnailTask(_ task: (url: URL, size: ThumbnailSize, priority: TaskPriority)) async {
         do {
-            _ = try thumbnailService.generateThumbnail(for: task.url, size: task.size)
+            _ = try await thumbnailService.generateThumbnail(for: task.url, size: task.size)
         } catch {
             // Log error but continue processing
             CoreLog.error("Thumbnail generation failed for \(task.url.path): \(error.localizedDescription)", category: logCategory)
@@ -139,7 +139,7 @@ public actor BackgroundCoordinator: BackgroundCoordinating {
         do {
             let tags = try aiService.analyze(imageAt: task.url, language: .english)
             // Save tags to XMP
-            try xmpService.writeTags(url: task.url, tags: tags)
+            try await xmpService.writeTags(url: task.url, tags: tags)
         } catch {
             // Log error but continue processing
             CoreLog.error("AI analysis failed for \(task.url.path): \(error.localizedDescription)", category: logCategory)
@@ -158,21 +158,27 @@ public actor ImageRepository {
     private let backgroundCoordinator: any BackgroundCoordinating
     private nonisolated(unsafe) let fileMonitor: FileMonitorService
     private let xmpService: XMPService
+    private let thumbnailService: ThumbnailService
 
     public private(set) var images: [SpectasiaImage] = []
 
     public init(
-        cacheDirectory: String,
+        metadataStore: MetadataStore,
         backgroundCoordinator: (any BackgroundCoordinating)? = nil,
         fileMonitor: FileMonitorService = FileMonitorService(),
-        xmpService: XMPService = XMPService()
+        xmpService: XMPService? = nil,
+        thumbnailService: ThumbnailService? = nil
     ) {
+        let thumbService = thumbnailService ?? ThumbnailService(metadataStore: metadataStore)
+        let xmp = xmpService ?? XMPService(metadataStore: metadataStore)
         let coordinator = backgroundCoordinator ?? BackgroundCoordinator(
-            thumbnailService: ThumbnailService(cacheDirectory: cacheDirectory)
+            thumbnailService: thumbService,
+            xmpService: xmp
         )
         self.backgroundCoordinator = coordinator
         self.fileMonitor = fileMonitor
-        self.xmpService = xmpService
+        self.xmpService = xmp
+        self.thumbnailService = thumbService
 
         // Setup file monitoring asynchronously
         Task {
@@ -190,7 +196,7 @@ public actor ImageRepository {
         }
 
         // Load metadata
-        let metadata = try xmpService.readMetadata(url: url)
+        let metadata = try await xmpService.readMetadata(url: url)
 
         // Create image
         let image = SpectasiaImage(url: url, metadata: metadata)
@@ -264,6 +270,10 @@ public actor ImageRepository {
         return await backgroundCoordinator.getProcessingStatus()
     }
 
+    public func thumbnailURL(for url: URL, size: ThumbnailSize) async throws -> URL {
+        return try await thumbnailService.generateThumbnail(for: url, size: size)
+    }
+
     // MARK: - Private Methods
 
     private func setupFileMonitoring() {
@@ -293,8 +303,8 @@ public class ObservableImageRepository: ObservableObject {
     
     @Published public var images: [SpectasiaImage] = []
     
-    public init(cacheDirectory: String, repository: ImageRepository? = nil) {
-        let repo = repository ?? ImageRepository(cacheDirectory: cacheDirectory)
+    public init(metadataStore: MetadataStore, repository: ImageRepository? = nil) {
+        let repo = repository ?? ImageRepository(metadataStore: metadataStore)
         self.repository = repo
         objectWillChange.send()
     }
@@ -328,6 +338,10 @@ public class ObservableImageRepository: ObservableObject {
 
     public func stopMonitoring() async {
         await repository.stopMonitoringDirectory()
+    }
+
+    public func thumbnailURL(for url: URL, size: ThumbnailSize) async throws -> URL {
+        return try await repository.thumbnailURL(for: url, size: size)
     }
 }
 

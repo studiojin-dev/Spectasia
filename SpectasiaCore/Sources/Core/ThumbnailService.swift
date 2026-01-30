@@ -12,7 +12,7 @@ private enum ThumbnailSizeConstants {
 }
 
 /// Thumbnail size options
-public enum ThumbnailSize: Sendable {
+public enum ThumbnailSize: String, Sendable, Codable {
     case small   // 120px
     case medium  // 480px
     case large   // 1024px
@@ -37,16 +37,21 @@ public enum ThumbnailSize: Sendable {
 /// Service for generating and caching image thumbnails
 @available(macOS 10.15, *)
 public class ThumbnailService {
-    private let cacheDirectory: String
+    private let metadataStore: MetadataStore
     private let fileManager = FileManager.default
 
-    public init(cacheDirectory: String) {
-        self.cacheDirectory = cacheDirectory
+    public init(metadataStore: MetadataStore) {
+        self.metadataStore = metadataStore
+    }
+
+    public convenience init(cacheDirectory: String) {
+        let store = MetadataStore(rootDirectory: URL(fileURLWithPath: cacheDirectory))
+        self.init(metadataStore: store)
     }
 
     @MainActor
     public convenience init(config: AppConfig) {
-        self.init(cacheDirectory: config.cacheDirectory)
+        self.init(cacheDirectory: config.metadataStoreDirectory)
     }
 
     // MARK: - Public Methods
@@ -57,14 +62,14 @@ public class ThumbnailService {
     ///   - size: Desired thumbnail size
     /// - Returns: URL of the thumbnail file
     /// - Throws: ThumbnailError if generation fails
-    public func generateThumbnail(for url: URL, size: ThumbnailSize) throws -> URL {
+    public func generateThumbnail(for url: URL, size: ThumbnailSize) async throws -> URL {
         // Check if source exists
         guard fileManager.fileExists(atPath: url.path) else {
             throw ThumbnailError.sourceFileNotFound
         }
 
         // Check cache
-        let cacheURL = cacheURL(for: url, size: size)
+        let cacheURL = await metadataStore.thumbnailURL(for: url, size: size)
         if fileManager.fileExists(atPath: cacheURL.path) {
             return cacheURL
         }
@@ -77,20 +82,6 @@ public class ThumbnailService {
     }
 
     // MARK: - Private Methods
-
-    private func cacheURL(for url: URL, size: ThumbnailSize) -> URL {
-        let cacheDir = URL(fileURLWithPath: cacheDirectory)
-
-        // Create subdirectory structure: cache/<filename>/<size>.jpg
-        let filename = url.deletingPathExtension().lastPathComponent
-        let thumbnailDir = cacheDir.appendingPathComponent(filename)
-        let thumbnailFile = thumbnailDir.appendingPathComponent("\(size.suffix).jpg")
-
-        // Ensure directory exists
-        try? fileManager.createDirectory(at: thumbnailDir, withIntermediateDirectories: true)
-
-        return thumbnailFile
-    }
 
     private func generateThumbnailData(from url: URL, size: ThumbnailSize) throws -> Data {
         guard let imageSource = CGImageSourceCreateWithURL(url as CFURL, nil) else {

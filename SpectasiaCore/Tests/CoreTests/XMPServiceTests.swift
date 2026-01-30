@@ -4,6 +4,7 @@ import XCTest
 final class XMPServiceTests: XCTestCase {
 
     var tempDirectory: URL!
+    var metadataDirectory: URL!
     var xmpService: XMPService!
     var testImageFile: URL!
     var originalFileHash: String!
@@ -12,9 +13,12 @@ final class XMPServiceTests: XCTestCase {
         // Create temporary directory
         let tempDir = FileManager.default.temporaryDirectory
         tempDirectory = tempDir.appendingPathComponent(UUID().uuidString)
+        metadataDirectory = tempDir.appendingPathComponent(UUID().uuidString + "-metadata")
         try FileManager.default.createDirectory(at: tempDirectory, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: metadataDirectory, withIntermediateDirectories: true)
 
-        xmpService = XMPService()
+        let store = MetadataStore(rootDirectory: metadataDirectory)
+        xmpService = XMPService(metadataStore: store)
 
         // Create a dummy image file (1x1 pixel JPEG)
         testImageFile = tempDirectory.appendingPathComponent("test.jpg")
@@ -30,51 +34,54 @@ final class XMPServiceTests: XCTestCase {
         if FileManager.default.fileExists(atPath: tempDirectory.path) {
             try FileManager.default.removeItem(at: tempDirectory)
         }
+        if FileManager.default.fileExists(atPath: metadataDirectory.path) {
+            try FileManager.default.removeItem(at: metadataDirectory)
+        }
     }
 
-    func testSidecarCreatedWhenMissing() throws {
+    func testSidecarCreatedWhenMissing() async throws {
         // Given: An image file without XMP sidecar
-        let sidecarURL = testImageFile.deletingPathExtension().appendingPathExtension("xmp")
+        let sidecarURL = await MetadataStore(rootDirectory: metadataDirectory).xmpURL(for: testImageFile)
         XCTAssertFalse(FileManager.default.fileExists(atPath: sidecarURL.path), "Sidecar should not exist initially")
 
         // When: Writing metadata
-        try xmpService.writeRating(url: testImageFile, rating: 4)
+        try await xmpService.writeRating(url: testImageFile, rating: 4)
 
         // Then: Sidecar should be created
         XCTAssertTrue(FileManager.default.fileExists(atPath: sidecarURL.path), "Sidecar should be created")
     }
 
-    func testWriteAndReadRating() throws {
+    func testWriteAndReadRating() async throws {
         // Given: An image file
         let rating = 5
 
         // When: Writing rating
-        try xmpService.writeRating(url: testImageFile, rating: rating)
+        try await xmpService.writeRating(url: testImageFile, rating: rating)
 
         // Then: Should read back the same rating
-        let metadata = try xmpService.readMetadata(url: testImageFile)
+        let metadata = try await xmpService.readMetadata(url: testImageFile)
         XCTAssertEqual(metadata.rating, rating, "Rating should match")
     }
 
-    func testWriteAndReadTags() throws {
+    func testWriteAndReadTags() async throws {
         // Given: An image file
         let tags = ["nature", "landscape", "sunset"]
 
         // When: Writing tags
-        try xmpService.writeTags(url: testImageFile, tags: tags)
+        try await xmpService.writeTags(url: testImageFile, tags: tags)
 
         // Then: Should read back the same tags
-        let metadata = try xmpService.readMetadata(url: testImageFile)
+        let metadata = try await xmpService.readMetadata(url: testImageFile)
         XCTAssertEqual(Set(metadata.tags), Set(tags), "Tags should match")
     }
 
-    func testOriginalFileNotModified() throws {
+    func testOriginalFileNotModified() async throws {
         // Given: Original file hash
         let originalModDate = try FileManager.default.attributesOfItem(atPath: testImageFile.path)[.modificationDate] as! Date
 
         // When: Writing metadata
-        try xmpService.writeRating(url: testImageFile, rating: 3)
-        try xmpService.writeTags(url: testImageFile, tags: ["test"])
+        try await xmpService.writeRating(url: testImageFile, rating: 3)
+        try await xmpService.writeTags(url: testImageFile, tags: ["test"])
 
         // Then: Original file hash should be unchanged
         let newHash = calculateFileHash(testImageFile)
@@ -85,26 +92,32 @@ final class XMPServiceTests: XCTestCase {
         XCTAssertEqual(newModDate, originalModDate, "Original file modification date should not change")
     }
 
-    func testMetadataPersistsAcrossInstances() throws {
+    func testMetadataPersistsAcrossInstances() async throws {
         // Given: Write metadata with one service instance
-        try xmpService.writeRating(url: testImageFile, rating: 5)
-        try xmpService.writeTags(url: testImageFile, tags: ["persistent"])
+        try await xmpService.writeRating(url: testImageFile, rating: 5)
+        try await xmpService.writeTags(url: testImageFile, tags: ["persistent"])
 
         // When: Creating new service instance
-        let newService = XMPService()
-        let metadata = try newService.readMetadata(url: testImageFile)
+        let store = MetadataStore(rootDirectory: metadataDirectory)
+        let newService = XMPService(metadataStore: store)
+        let metadata = try await newService.readMetadata(url: testImageFile)
 
         // Then: Should read the written metadata
         XCTAssertEqual(metadata.rating, 5, "Rating should persist")
         XCTAssertEqual(metadata.tags, ["persistent"], "Tags should persist")
     }
 
-    func testReadMetadataFromNonExistentFile() throws {
+    func testReadMetadataFromNonExistentFile() async throws {
         // Given: Non-existent file
         let nonExistentFile = tempDirectory.appendingPathComponent("doesnotexist.jpg")
 
         // When/Then: Should throw error
-        XCTAssertThrowsError(try xmpService.readMetadata(url: nonExistentFile), "Should throw error for non-existent file")
+        do {
+            _ = try await xmpService.readMetadata(url: nonExistentFile)
+            XCTFail("Should throw error for non-existent file")
+        } catch {
+            // Expected
+        }
     }
 
     // MARK: - Helper

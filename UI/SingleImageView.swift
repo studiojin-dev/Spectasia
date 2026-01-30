@@ -43,15 +43,20 @@ public struct SingleImageView: View {
             } else {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .task(load)
+                    .task {
+                        await load()
+                    }
             }
         }
         .navigationTitle(imageURL.lastPathComponent)
     }
 
-    private func load() {
+    @MainActor
+    private func load() async {
         do {
-            let data = try Data(contentsOf: imageURL)
+            let data = try await Task.detached {
+                try Data(contentsOf: imageURL)
+            }.value
             if let image = PlatformImage(data: data) {
                 loadedImage = image
             } else {

@@ -66,9 +66,6 @@ struct ContentView: View {
                 await loadDirectory(url, monitor: newValue)
             }
         }
-        .task {
-            await loadImages()
-        }
         .alert("Error", isPresented: Binding(
             get: { errorMessage != nil },
             set: { isPresented in
@@ -85,6 +82,7 @@ struct ContentView: View {
         }
     }
 
+    @MainActor
     private func requestInitialDirectoryAccess() {
         if repository.images.isEmpty {
             if let url = permissionManager.requestDirectoryAccess() {
@@ -93,61 +91,29 @@ struct ContentView: View {
         }
     }
 
+    @MainActor
     private func loadDirectory(_ url: URL) async {
         await loadDirectory(url, monitor: isMonitoring)
     }
 
+    @MainActor
     private func loadDirectory(_ url: URL, monitor: Bool) async {
         isLoading = true
         defer { isLoading = false }
 
         do {
-            try await repository.loadDirectory(url, monitor: monitor)
-            if let data = permissionManager.storeBookmark(for: url) {
-                let bookmark = AppConfig.DirectoryBookmark(path: url.path, data: data)
-                await MainActor.run {
-                    appConfig.addRecentDirectory(bookmark)
-                }
+            guard let data = permissionManager.storeBookmark(for: url) else {
+                errorMessage = "Failed to save folder permission."
+                return
             }
+            _ = try await permissionManager.withAccess(to: url) { securedURL in
+                try await repository.loadDirectory(securedURL, monitor: monitor)
+            }
+            let bookmark = AppConfig.DirectoryBookmark(path: url.path, data: data)
+            appConfig.addRecentDirectory(bookmark)
         } catch {
             errorMessage = "Failed to load directory: \(url.path)"
             CoreLog.error("Failed to load directory \(url.path): \(error.localizedDescription)", category: "ContentView")
-        }
-    }
-
-    private func loadImages() async {
-        guard selectedDirectory == nil else { return }
-        isLoading = true
-        defer { isLoading = false }
-
-        let loadedImages = [
-            SpectasiaImage(
-                url: URL(fileURLWithPath: "/tmp/test1.jpg"),
-                metadata: ImageMetadata(
-                    rating: 4,
-                    tags: ["nature", "landscape"],
-                    fileSize: 1024000,
-                    modificationDate: Date(),
-                    fileExtension: "jpg"
-                )
-            ),
-            SpectasiaImage(
-                url: URL(fileURLWithPath: "/tmp/test2.jpg"),
-                metadata: ImageMetadata(
-                    rating: 3,
-                    tags: ["portrait", "people"],
-                    fileSize: 2048000,
-                    modificationDate: Date().addingTimeInterval(-86400),
-                    fileExtension: "jpg"
-                )
-            )
-        ]
-
-        let fetchedImages = repository.images
-        let allImages = fetchedImages.isEmpty ? loadedImages : fetchedImages
-
-        await MainActor.run {
-            repository.updateImages(allImages)
         }
     }
 }

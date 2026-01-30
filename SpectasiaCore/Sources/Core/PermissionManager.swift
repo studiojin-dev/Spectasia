@@ -103,6 +103,7 @@ public class PermissionManager: ObservableObject {
 
             // Access directory with security scope
             if securedURL.startAccessingSecurityScopedResource() {
+                defer { securedURL.stopAccessingSecurityScopedResource() }
                 block(securedURL)
                 return true
             }
@@ -117,6 +118,32 @@ public class PermissionManager: ObservableObject {
     /// Check if we have permission to access a directory
     public func hasAccess(to url: URL) -> Bool {
         return grantedDirectories.contains(url.path)
+    }
+
+    public func withAccess<T>(
+        to url: URL,
+        perform: @escaping (URL) async throws -> T
+    ) async throws -> T {
+        var isStale = false
+        guard let bookmarkData = loadBookmark(for: url) else {
+            throw PermissionError.bookmarkNotFound
+        }
+        let securedURL = try URL(
+            resolvingBookmarkData: bookmarkData,
+            options: .withSecurityScope,
+            relativeTo: nil,
+            bookmarkDataIsStale: &isStale
+        )
+        if isStale {
+            removeBookmark(for: url)
+            grantedDirectories.remove(url.path)
+            throw PermissionError.staleBookmark
+        }
+        guard securedURL.startAccessingSecurityScopedResource() else {
+            throw PermissionError.accessDenied
+        }
+        defer { securedURL.stopAccessingSecurityScopedResource() }
+        return try await perform(securedURL)
     }
 
     // MARK: - Private Helpers
@@ -170,4 +197,10 @@ public class PermissionManager: ObservableObject {
         grantedDirectories = Set(bookmarks.keys)
         permissionStatus = bookmarks.isEmpty ? "No permissions granted" : "\(bookmarks.count) folders accessible"
     }
+}
+
+public enum PermissionError: Error {
+    case bookmarkNotFound
+    case staleBookmark
+    case accessDenied
 }

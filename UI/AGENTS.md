@@ -7,11 +7,11 @@ SwiftUI views + Gypsum design system for Spectasia GUI.
 ```
 UI/
 ├── GypsumDesignSystem.swift    # Design tokens + reusable components
-├── ContentView.swift            # Main view (placeholder)
+├── ContentView.swift            # Main view (wired to Core)
 ├── ImageGridView.swift         # Thumbnail grid gallery
-├── SingleImageView.swift        # Single image viewer with zoom/pan
-├── MetadataPanel.swift        # Rating, tags, properties panel
-├── SettingsView.swift         # App settings (cache, language, AI toggle)
+├── SingleImageView.swift        # Single image viewer (basic load/display)
+├── MetadataPanel.swift        # Rating, tags panel (partial)
+├── SettingsView.swift         # App settings (AppConfig bindings)
 ├── DirectoryPicker.swift      # Folder selection UI
 └── SpectasiaLayout.swift      # Three-panel layout (sidebar, grid, detail)
 ```
@@ -21,13 +21,13 @@ UI/
 | Task | Location | Notes |
 |------|----------|-------|
 | Design tokens | `GypsumDesignSystem.swift` | Colors, fonts, GypsumCard, GypsumButton |
-| Main view | `ContentView.swift` | Currently placeholder - NOT connected to Core |
+| Main view | `ContentView.swift` | Wired to `ObservableImageRepository`, `AppConfig`, `PermissionManager` |
 | Image gallery | `ImageGridView.swift` | LazyVGrid with async thumbnails |
-| Image viewer | `SingleImageView.swift` | Zoom/pan gestures, fullscreen |
-| Metadata editor | `MetadataPanel.swift` | Rating, tags, image properties |
-| Settings | `SettingsView.swift` | Cache dir, language, AI toggle |
+| Image viewer | `SingleImageView.swift` | Basic image load/display (no zoom/pan yet) |
+| Metadata editor | `MetadataPanel.swift` | Rating writeback + tag display only |
+| Settings | `SettingsView.swift` | AppConfig bindings (metadata storage/language/AI) |
 | Folder selection | `DirectoryPicker.swift` | UI wrapper for PermissionManager |
-| Layout | `SpectasiaLayout.swift` | Three-panel: sidebar | grid | detail |
+| Layout | `SpectasiaLayout.swift` | Three-panel shell with sidebar + content + detail metadata |
 
 ## CONVENTIONS
 - **Gypsum aesthetic**: `GypsumColor.*` colors, `GypsumFont.*` fonts
@@ -42,3 +42,16 @@ UI/
 - **Design system first**: Centralized tokens (`GypsumColor`, `GypsumFont`)
 - **Component library**: Reusable `GypsumCard`, `GypsumButton` with shadows
 - **Three-panel layout**: Sidebar (folders) + Grid (thumbnails) + Detail (metadata)
+
+## CURRENT IMPLEMENTATION STATUS (2026-01-30)
+- **Wired**: `ContentView` drives `SpectasiaLayout`, handles directory selection, monitoring toggle, and uses `ObservableImageRepository`.
+- **Grid**: `ImageGridView` renders thumbnails via `ThumbnailService`; selection now binds to `selectedImage`.
+- **Single Image**: Displays a file via `Data(contentsOf:)` with basic error handling; no zoom/pan/filmstrip.
+- **Metadata**: Shows tags and writes rating to XMP; no tag editing, EXIF, or album support.
+- **Settings**: `SettingsView` implemented with AppConfig bindings and opened from sidebar.
+- **Detail Panel**: `MetadataPanel` renders in detail pane when selection exists.
+
+## NEAR-TERM PLAN
+- Remove any remaining selection edge cases (e.g., list/grid sync) and refresh on file monitor events.
+- Implement real list view (table columns, sorting) and single-image zoom/pan/filmstrip.
+- Add tag editing + EXIF display in `MetadataPanel`.

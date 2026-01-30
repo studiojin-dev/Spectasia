@@ -17,7 +17,8 @@ final class ThumbnailServiceTests: XCTestCase {
         try FileManager.default.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
 
         // Configure thumbnail service with cache directory
-        thumbnailService = ThumbnailService(cacheDirectory: cacheDirectory.path)
+        let store = MetadataStore(rootDirectory: cacheDirectory)
+        thumbnailService = ThumbnailService(metadataStore: store)
 
         // Create a test image file using CoreGraphics
         testImageFile = tempDirectory.appendingPathComponent("test.jpg")
@@ -31,9 +32,9 @@ final class ThumbnailServiceTests: XCTestCase {
         }
     }
 
-    func testGenerateSmallThumbnail() throws {
+    func testGenerateSmallThumbnail() async throws {
         // When: Generating 120px thumbnail
-        let thumbnailURL = try thumbnailService.generateThumbnail(
+        let thumbnailURL = try await thumbnailService.generateThumbnail(
             for: testImageFile,
             size: .small
         )
@@ -43,9 +44,9 @@ final class ThumbnailServiceTests: XCTestCase {
         XCTAssertTrue(thumbnailURL.path.contains("120"), "Thumbnail should contain size in filename")
     }
 
-    func testGenerateMediumThumbnail() throws {
+    func testGenerateMediumThumbnail() async throws {
         // When: Generating 480px thumbnail
-        let thumbnailURL = try thumbnailService.generateThumbnail(
+        let thumbnailURL = try await thumbnailService.generateThumbnail(
             for: testImageFile,
             size: .medium
         )
@@ -55,9 +56,9 @@ final class ThumbnailServiceTests: XCTestCase {
         XCTAssertTrue(thumbnailURL.path.contains("480"), "Thumbnail should contain size in filename")
     }
 
-    func testGenerateLargeThumbnail() throws {
+    func testGenerateLargeThumbnail() async throws {
         // When: Generating 1024px thumbnail
-        let thumbnailURL = try thumbnailService.generateThumbnail(
+        let thumbnailURL = try await thumbnailService.generateThumbnail(
             for: testImageFile,
             size: .large
         )
@@ -67,15 +68,15 @@ final class ThumbnailServiceTests: XCTestCase {
         XCTAssertTrue(thumbnailURL.path.contains("1024"), "Thumbnail should contain size in filename")
     }
 
-    func testCacheHitReturnsExistingThumbnail() throws {
+    func testCacheHitReturnsExistingThumbnail() async throws {
         // Given: Generate a thumbnail
-        let firstURL = try thumbnailService.generateThumbnail(
+        let firstURL = try await thumbnailService.generateThumbnail(
             for: testImageFile,
             size: .small
         )
 
         // When: Requesting the same thumbnail again
-        let secondURL = try thumbnailService.generateThumbnail(
+        let secondURL = try await thumbnailService.generateThumbnail(
             for: testImageFile,
             size: .small
         )
@@ -84,9 +85,9 @@ final class ThumbnailServiceTests: XCTestCase {
         XCTAssertEqual(firstURL.path, secondURL.path, "Should return cached thumbnail")
     }
 
-    func testThumbnailStoredInCacheDirectory() throws {
+    func testThumbnailStoredInCacheDirectory() async throws {
         // When: Generating thumbnail
-        let thumbnailURL = try thumbnailService.generateThumbnail(
+        let thumbnailURL = try await thumbnailService.generateThumbnail(
             for: testImageFile,
             size: .small
         )
@@ -95,15 +96,17 @@ final class ThumbnailServiceTests: XCTestCase {
         XCTAssertTrue(thumbnailURL.path.hasPrefix(cacheDirectory.path), "Thumbnail should be in cache directory")
     }
 
-    func testGenerateThumbnailForNonExistentFile() throws {
+    func testGenerateThumbnailForNonExistentFile() async throws {
         // Given: Non-existent file
         let nonExistentFile = tempDirectory.appendingPathComponent("doesnotexist.jpg")
 
         // When/Then: Should throw error
-        XCTAssertThrowsError(
-            try thumbnailService.generateThumbnail(for: nonExistentFile, size: .small),
-            "Should throw error for non-existent file"
-        )
+        do {
+            _ = try await thumbnailService.generateThumbnail(for: nonExistentFile, size: .small)
+            XCTFail("Should throw error for non-existent file")
+        } catch {
+            // Expected
+        }
     }
 
     // MARK: - Helper

@@ -20,8 +20,11 @@ public struct ImageMetadata: Sendable {
 /// Service for reading/writing XMP metadata via sidecar files
 public class XMPService {
     private let fileManager = FileManager.default
+    private let metadataStore: MetadataStore
 
-    public init() {}
+    public init(metadataStore: MetadataStore) {
+        self.metadataStore = metadataStore
+    }
 
     // MARK: - Public Methods
 
@@ -29,14 +32,14 @@ public class XMPService {
     /// - Parameter url: URL of the image file
     /// - Returns: ImageMetadata containing rating and tags
     /// - Throws: XMPError if file doesn't exist or cannot be read
-    public func readMetadata(url: URL) throws -> ImageMetadata {
+    public func readMetadata(url: URL) async throws -> ImageMetadata {
         // Check if image exists
         guard fileManager.fileExists(atPath: url.path) else {
             throw XMPError.fileNotFound
         }
 
         // Try to read from sidecar
-        let sidecarURL = url.deletingPathExtension().appendingPathExtension("xmp")
+        let sidecarURL = await metadataStore.xmpURL(for: url)
 
         guard fileManager.fileExists(atPath: sidecarURL.path) else {
             // No sidecar exists, return empty metadata
@@ -53,10 +56,10 @@ public class XMPService {
     ///   - url: URL of the image file
     ///   - rating: Rating value (0-5)
     /// - Throws: XMPError if operation fails
-    public func writeRating(url: URL, rating: Int) throws {
-        var metadata = try readMetadata(url: url)
+    public func writeRating(url: URL, rating: Int) async throws {
+        var metadata = try await readMetadata(url: url)
         metadata.rating = rating
-        try writeMetadata(url: url, metadata: metadata)
+        try await writeMetadata(url: url, metadata: metadata)
     }
 
     /// Write tags to XMP sidecar
@@ -64,16 +67,16 @@ public class XMPService {
     ///   - url: URL of the image file
     ///   - tags: Array of tag strings
     /// - Throws: XMPError if operation fails
-    public func writeTags(url: URL, tags: [String]) throws {
-        var metadata = try readMetadata(url: url)
+    public func writeTags(url: URL, tags: [String]) async throws {
+        var metadata = try await readMetadata(url: url)
         metadata.tags = tags
-        try writeMetadata(url: url, metadata: metadata)
+        try await writeMetadata(url: url, metadata: metadata)
     }
 
     // MARK: - Private Methods
 
-    private func writeMetadata(url: URL, metadata: ImageMetadata) throws {
-        let sidecarURL = url.deletingPathExtension().appendingPathExtension("xmp")
+    private func writeMetadata(url: URL, metadata: ImageMetadata) async throws {
+        let sidecarURL = await metadataStore.xmpURL(for: url)
         let xmpContent = generateXMP(metadata: metadata, imageURL: url)
         try xmpContent.write(to: sidecarURL, atomically: true, encoding: .utf8)
     }

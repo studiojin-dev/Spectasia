@@ -25,8 +25,9 @@ final class ImageRepositoryTests: XCTestCase {
             mockCoordinator = MockBackgroundCoordinator()
 
             // Create repository
+            let metadataStore = MetadataStore(rootDirectory: cacheDirectory)
             repository = ImageRepository(
-                cacheDirectory: cacheDirectory.path,
+                metadataStore: metadataStore,
                 backgroundCoordinator: mockCoordinator
             )
         } catch {

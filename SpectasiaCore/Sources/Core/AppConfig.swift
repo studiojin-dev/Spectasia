@@ -27,6 +27,7 @@ public class AppConfig: ObservableObject {
     // MARK: - Keys
     private enum Keys {
         static let cacheDirectory = "cacheDirectory"
+        static let metadataStoreDirectory = "metadataStoreDirectory"
         static let appLanguage = "appLanguage"
         static let autoAIToggle = "autoAIToggle"
         static let recentDirectoryBookmarks = "recentDirectoryBookmarks"
@@ -37,6 +38,9 @@ public class AppConfig: ObservableObject {
 
     @Published public var cacheDirectoryPublished: String {
         didSet { UserDefaults.standard.set(cacheDirectoryPublished, forKey: Keys.cacheDirectory) }
+    }
+    @Published public var metadataStoreDirectoryPublished: String {
+        didSet { UserDefaults.standard.set(metadataStoreDirectoryPublished, forKey: Keys.metadataStoreDirectory) }
     }
     @Published public var languagePublished: AppLanguage {
         didSet { UserDefaults.standard.set(languagePublished.rawValue, forKey: Keys.appLanguage) }
@@ -62,6 +66,19 @@ public class AppConfig: ObservableObject {
         }
         set {
             UserDefaults.standard.set(newValue, forKey: Keys.cacheDirectory)
+        }
+    }
+
+    /// Directory for XMP + thumbnail storage
+    public var metadataStoreDirectory: String {
+        get {
+            if let custom = UserDefaults.standard.string(forKey: Keys.metadataStoreDirectory) {
+                return custom
+            }
+            return Self.defaultMetadataStoreDirectory()
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: Keys.metadataStoreDirectory)
         }
     }
 
@@ -94,6 +111,7 @@ public class AppConfig: ObservableObject {
     public init() {
         // Initialize published values from persisted storage
         self.cacheDirectoryPublished = UserDefaults.standard.string(forKey: Keys.cacheDirectory) ?? Self.defaultCacheDirectory()
+        self.metadataStoreDirectoryPublished = UserDefaults.standard.string(forKey: Keys.metadataStoreDirectory) ?? Self.defaultMetadataStoreDirectory()
         if let rawValue = UserDefaults.standard.string(forKey: Keys.appLanguage), let lang = AppLanguage(rawValue: rawValue) {
             self.languagePublished = lang
         } else {
@@ -173,5 +191,11 @@ public class AppConfig: ObservableObject {
         let paths = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true)
         let cachesDir = paths.first ?? "/tmp"
         return (cachesDir as NSString).appendingPathComponent("Spectasia")
+    }
+
+    private static func defaultMetadataStoreDirectory() -> String {
+        let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
+        let appSupportDir = paths.first ?? "/tmp"
+        return (appSupportDir as NSString).appendingPathComponent("Spectasia/Metadata")
     }
 }

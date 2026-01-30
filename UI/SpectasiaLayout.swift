@@ -4,6 +4,7 @@ import SpectasiaCore
 /// Three-panel layout for Spectasia: Sidebar, Content, Detail
 public struct SpectasiaLayout: View {
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
+    @State private var showSettings: Bool = false
     @Binding private var images: [SpectasiaImage]
     @Binding private var selectedImage: SpectasiaImage?
     @Binding private var selectedDirectory: URL?
@@ -57,6 +58,17 @@ public struct SpectasiaLayout: View {
                     VStack {
                     Text("Folders")
                         .padding()
+                    Button(action: {
+                        showSettings = true
+                    }) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "gearshape")
+                            Text("Settings")
+                        }
+                        .font(.caption)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.bottom, 8)
                     DirectoryPicker(prompt: "Select Folder", selectedURL: $selectedDirectory)
                         .padding(.bottom, 8)
                     Toggle("Monitoring", isOn: $isMonitoring)
@@ -193,6 +205,16 @@ public struct SpectasiaLayout: View {
                         case .singleImage:
                             if let image = selectedImage {
                                 SingleImageView(imageURL: image.url)
+                            } else {
+                                VStack(spacing: 12) {
+                                    Image(systemName: "photo")
+                                        .font(.system(size: 32))
+                                        .foregroundColor(.secondary)
+                                    Text("No image selected")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
                             }
                         }
                     }
@@ -200,11 +222,25 @@ public struct SpectasiaLayout: View {
                 .frame(minWidth: 800, minHeight: 600)
             },
                               detail: {
-                Text("Detail Panel")
-                    .frame(minWidth: 200)
+                if let image = selectedImage {
+                    MetadataPanel(image: image)
+                        .frame(minWidth: 240)
+                } else {
+                    VStack(spacing: 8) {
+                        Image(systemName: "sidebar.right")
+                            .foregroundColor(.secondary)
+                        Text("No image selected")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(minWidth: 240)
+                }
             }
         )
         .navigationTitle("Library")
+        .sheet(isPresented: $showSettings) {
+            SettingsView()
+        }
     }
 
     #Preview("Spectasia Layout") {
