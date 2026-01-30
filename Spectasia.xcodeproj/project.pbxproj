@@ -46,6 +46,7 @@
 		ACFCE2CA2F2C26CD001B9220 /* SingleImageView 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACFCE2C92F2C26CD001B9220 /* SingleImageView 2.swift */; };
 		ACFCE2CB2F2C26CD001B9220 /* SingleImageView 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACFCE2C92F2C26CD001B9220 /* SingleImageView 2.swift */; };
 		ACFCE2CC2F2C26CD001B9220 /* SingleImageView 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACFCE2C92F2C26CD001B9220 /* SingleImageView 2.swift */; };
+		ACFCE2FE2F2C2AFC001B9220 /* SpectasiaCore in Frameworks */ = {isa = PBXBuildFile; productRef = ACFCE2FD2F2C2AFC001B9220 /* SpectasiaCore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -103,6 +104,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ACFCE2FE2F2C2AFC001B9220 /* SpectasiaCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -134,6 +136,7 @@
 				ACEDCA5E2F29AB7700B1E22C /* SpectasiaApp.swift */,
 				ACB87DC42F29B26700DC38B0 /* Spectasia.entitlements */,
 				ACEDCA672F29AB7700B1E22C /* UI */,
+				ACFCE2FC2F2C2AFC001B9220 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -172,6 +175,13 @@
 			path = UI;
 			sourceTree = "<group>";
 		};
+		ACFCE2FC2F2C2AFC001B9220 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -189,6 +199,7 @@
 			);
 			name = Spectasia;
 			packageProductDependencies = (
+				ACFCE2FD2F2C2AFC001B9220 /* SpectasiaCore */,
 			);
 			productName = Spectasia;
 			productReference = AC7CE7622F28DFFF00E2D895 /* Spectasia.app */;
@@ -272,6 +283,9 @@
 			);
 			mainGroup = AC7CE7592F28DFFF00E2D895;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				ACFCE2F92F2C2989001B9220 /* XCLocalSwiftPackageReference "SpectasiaCore" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AC7CE7632F28DFFF00E2D895 /* Products */;
 			projectDirPath = "";
@@ -776,6 +790,21 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		ACFCE2F92F2C2989001B9220 /* XCLocalSwiftPackageReference "SpectasiaCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = SpectasiaCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		ACFCE2FD2F2C2AFC001B9220 /* SpectasiaCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = ACFCE2F92F2C2989001B9220 /* XCLocalSwiftPackageReference "SpectasiaCore" */;
+			productName = SpectasiaCore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = AC7CE75A2F28DFFF00E2D895 /* Project object */;
 }
