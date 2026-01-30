@@ -22,10 +22,13 @@ public struct SpectasiaLayout: View {
     private let onSelectDirectory: (AppConfig.DirectoryBookmark) -> Void
 
     /// View mode for displaying images
-    public enum ViewMode {
-        case thumbnailGrid
-        case list
-        case singleImage
+    public enum ViewMode: String, CaseIterable, Identifiable {
+        case thumbnailGrid = "Thumbnail grid"
+        case list = "List"
+        case singleImage = "Single image"
+
+        public var id: String { rawValue }
+        public var title: String { rawValue }
     }
 
     public init(
@@ -50,7 +53,7 @@ public struct SpectasiaLayout: View {
         NavigationSplitView(columnVisibility: $columnVisibility,
                               sidebar: {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
+                    VStack(alignment: .leading, spacing: 16) {
                         GypsumCard {
                             VStack(alignment: .leading, spacing: 10) {
                                 HStack {
@@ -81,48 +84,25 @@ public struct SpectasiaLayout: View {
                                 .controlSize(.mini)
                             }
                         }
-
-                        if !accessibleDirectories.isEmpty {
-                            GypsumCard {
-                                VStack(alignment: .leading, spacing: 6) {
-                                    Text("Accessible directories")
-                                        .font(GypsumFont.headline)
-                                        .foregroundColor(GypsumColor.text)
-                                    ForEach(accessibleDirectories, id: \.self) { path in
-                                        let directoryName = (path as NSString).lastPathComponent
-                                        VStack(alignment: .leading, spacing: 2) {
-                                            Text(directoryName.isEmpty ? path : directoryName)
-                                                .font(GypsumFont.caption)
-                                                .foregroundColor(GypsumColor.textSecondary)
-                                                .lineLimit(1)
-                                                .truncationMode(.middle)
-                                            Text(path)
-                                                .font(GypsumFont.caption)
-                                                .foregroundColor(.secondary)
-                                                .lineLimit(1)
-                                                .truncationMode(.middle)
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        Divider()
 
                         GypsumCard {
-                            VStack(alignment: .leading, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 8) {
                                 Text("Watch folders")
                                     .font(GypsumFont.headline)
                                     .foregroundColor(GypsumColor.text)
                                 Text("Add a directory once to keep its metadata, thumbnails, and AI tags in sync.")
                                     .font(GypsumFont.caption)
                                     .foregroundColor(GypsumColor.textSecondary)
-                                HStack(spacing: 16) {
+                                HStack(spacing: 12) {
                                     DirectoryPicker(prompt: "Add Directory", selectedURL: $directoryToAdd)
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text("Select a folder to index and monitor. Indexing runs automatically, and you can re-run it from the tree.")
-                                            .font(GypsumFont.caption)
-                                            .foregroundColor(GypsumColor.textSecondary)
-                                            .fixedSize(horizontal: false, vertical: true)
+                                    Button {
+                                        directoryToAdd = nil
+                                    } label: {
+                                        Label("Add another folder", systemImage: "plus")
                                     }
+                                    .buttonStyle(.bordered)
+                                    Spacer()
                                 }
                                 .onChange(of: directoryToAdd) { _, newValue in
                                     guard let url = newValue else { return }
@@ -139,6 +119,7 @@ public struct SpectasiaLayout: View {
                                 }
                             }
                         }
+                        Divider()
 
                         GypsumCard {
                             VStack(alignment: .leading, spacing: 10) {
@@ -173,10 +154,35 @@ public struct SpectasiaLayout: View {
                                         .foregroundColor(GypsumColor.textSecondary)
                                         .padding(.top, 4)
                                 } else {
-                                    Text("Long-running indexing and metadata generation happen automatically below.")
+                                    Text("Live indexing and metadata generation happen automatically below.")
                                         .font(GypsumFont.caption)
                                         .foregroundColor(GypsumColor.textSecondary)
                                         .padding(.top, 4)
+                                }
+                            }
+                        }
+                        if !accessibleDirectories.isEmpty {
+                            Divider()
+                            GypsumCard {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text("Accessible directories")
+                                        .font(GypsumFont.headline)
+                                        .foregroundColor(GypsumColor.text)
+                                    ForEach(accessibleDirectories, id: \.self) { path in
+                                        let directoryName = (path as NSString).lastPathComponent
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(directoryName.isEmpty ? path : directoryName)
+                                                .font(GypsumFont.caption)
+                                                .foregroundColor(GypsumColor.textSecondary)
+                                                .lineLimit(1)
+                                                .truncationMode(.middle)
+                                            Text(path)
+                                                .font(GypsumFont.caption)
+                                                .foregroundColor(.secondary)
+                                                .lineLimit(1)
+                                                .truncationMode(.middle)
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -184,6 +190,7 @@ public struct SpectasiaLayout: View {
                         Spacer(minLength: 0)
 
                         VStack(alignment: .leading, spacing: 4) {
+                            Divider()
                             Text("Live indexing always runs in the background.")
                                 .font(GypsumFont.caption)
                                 .foregroundColor(.secondary)
@@ -225,7 +232,7 @@ public struct SpectasiaLayout: View {
                             return repository.activityMessage ?? "Ready"
                         }()
 
-                        VStack {
+                        VStack(spacing: 12) {
                             HStack {
                                 if isLoading || repository.isBusy {
                                     ProgressView()
@@ -247,6 +254,14 @@ public struct SpectasiaLayout: View {
                             .padding(.horizontal)
                             .padding(.top, 8)
 
+                            Picker("View mode", selection: $currentViewMode) {
+                                ForEach(ViewMode.allCases) { mode in
+                                    Text(mode.title)
+                                }
+                            }
+                            .pickerStyle(.segmented)
+                            .padding(.horizontal)
+
                             if isLoading {
                                 ProgressView()
                                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -266,7 +281,23 @@ public struct SpectasiaLayout: View {
                                     )
                                 case .singleImage:
                                     if let image = selectedImage {
-                                        SingleImageView(imageURL: image.url)
+                                        VStack(spacing: 10) {
+                                            SingleImageView(imageURL: image.url)
+                                            ScrollView(.horizontal, showsIndicators: false) {
+                                                LazyHStack(spacing: 8) {
+                                                    ForEach(images.prefix(8)) { candidate in
+                                                        FilmstripThumb(
+                                                            image: candidate,
+                                                            isSelected: candidate.id == image.id
+                                                        ) {
+                                                            selectedImage = candidate
+                                                        }
+                                                    }
+                                                }
+                                                .padding(.horizontal)
+                                            }
+                                            .frame(height: 80)
+                                        }
                                     } else {
                                         VStack(spacing: 12) {
                                             Image(systemName: "photo")
@@ -341,5 +372,35 @@ public struct SpectasiaLayout: View {
         )
         .environmentObject(repository)
         .environmentObject(scanManager)
+    }
+}
+
+private struct FilmstripThumb: View {
+    let image: SpectasiaImage
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 4) {
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(isSelected ? GypsumColor.accent : GypsumColor.border, lineWidth: isSelected ? 2 : 1)
+                    .frame(width: 92, height: 52)
+                    .overlay(
+                        Text(image.url.lastPathComponent)
+                            .font(GypsumFont.caption)
+                            .foregroundColor(.secondary)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.center)
+                            .padding(4)
+                    )
+                Text(image.url.lastPathComponent)
+                    .font(GypsumFont.caption)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+                    .frame(width: 92)
+            }
+        }
+        .buttonStyle(.plain)
     }
 }

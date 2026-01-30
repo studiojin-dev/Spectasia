@@ -92,13 +92,17 @@ private struct DirectoryTreeRow: View {
                 .buttonStyle(.plain)
                 .disabled(node.children.isEmpty)
 
-                VStack(alignment: .leading, spacing: 1) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text(node.url.lastPathComponent)
                         .font(.body)
                         .foregroundColor(selectedPath == node.id ? GypsumColor.accent : GypsumColor.text)
                     Text(statusDescription)
                         .font(GypsumFont.caption)
                         .foregroundColor(.secondary)
+                    Text("\(node.fileCount) files • \(node.children.count) subfolders")
+                        .font(GypsumFont.caption)
+                        .foregroundColor(.secondary)
+                        .opacity(0.8)
                 }
                 Spacer()
                 if directoryScanManager.isIndexing(node.id) {

@@ -59,7 +59,6 @@ struct ContentView: View {
                 }
             )
             .onAppear {
-                requestInitialDirectoryAccess()
                 runStartupCleanupIfNeeded()
             }
             .onChange(of: appConfig.isAutoCleanupEnabledPublished) { _, _ in
@@ -119,15 +118,6 @@ struct ContentView: View {
                 .background(Color.black.opacity(0.6))
                 .cornerRadius(8)
                 .padding(.bottom, 52)
-            }
-        }
-    }
-
-    @MainActor
-    private func requestInitialDirectoryAccess() {
-        if repository.images.isEmpty {
-            if let url = permissionManager.requestDirectoryAccess() {
-                selectedDirectory = url
             }
         }
     }
@@ -211,4 +201,3 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
-
