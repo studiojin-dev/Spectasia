@@ -10,7 +10,7 @@ import SpectasiaCore
 
 /// Main view for Spectasia image viewer
 struct ContentView: View {
-    @State private var selectedImage: SpectasiaImage? = nil
+    @State private var selectedImageID: String? = nil
     @State private var selectedDirectory: URL? = nil
     @State private var backgroundTasks: Int = 0
     @State private var currentViewMode: SpectasiaLayout.ViewMode = .thumbnailGrid
@@ -24,12 +24,26 @@ struct ContentView: View {
     @EnvironmentObject var appConfig: AppConfig
     @EnvironmentObject var metadataStoreManager: MetadataStoreManager
     @EnvironmentObject var toastCenter: ToastCenter
+    @EnvironmentObject var directoryScanManager: DirectoryScanManager
+
+    private var selectedImage: SpectasiaImage? {
+        repository.images.first { $0.id == selectedImageID }
+    }
+
+    private var selectedImageBinding: Binding<SpectasiaImage?> {
+        Binding(
+            get: { repository.images.first(where: { $0.id == selectedImageID }) },
+            set: { newValue in
+                selectedImageID = newValue?.id
+            }
+        )
+    }
 
     var body: some View {
         ZStack(alignment: .bottom) {
             SpectasiaLayout(
                 images: $repository.images,
-                selectedImage: $selectedImage,
+                selectedImage: selectedImageBinding,
                 selectedDirectory: $selectedDirectory,
                 currentViewMode: $currentViewMode,
                 isLoading: $isLoading,
@@ -57,10 +71,10 @@ struct ContentView: View {
                     await loadDirectory(url)
                 }
             }
-            .onChange(of: repository.images.map(\.url)) { _, _ in
+            .onChange(of: repository.images.map(\.id)) { _ in
                 alignSelectedImage(with: repository.images)
             }
-            .onChange(of: directoryScanManager.scanCompletionMessage) { _, message in
+            .onChange(of: directoryScanManager.scanCompletionMessage) { message in
                 if let message {
                     toastCenter.show(message)
                 }
@@ -173,12 +187,11 @@ struct ContentView: View {
 
     @MainActor
     private func alignSelectedImage(with images: [SpectasiaImage]) {
-        guard let current = selectedImage else { return }
-        if let updated = images.first(where: { $0.url == current.url }) {
-            selectedImage = updated
-        } else {
-            selectedImage = nil
+        guard let currentID = selectedImageID else { return }
+        if images.contains(where: { $0.id == currentID }) {
+            return
         }
+        selectedImageID = nil
     }
 }
 
