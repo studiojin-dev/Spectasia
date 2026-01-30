@@ -14,6 +14,7 @@ struct SpectasiaApp: App {
     @StateObject private var repository: ObservableImageRepository
     @StateObject private var permissionManager: PermissionManager
     @StateObject private var metadataStoreManager: MetadataStoreManager
+    @StateObject private var toastCenter = ToastCenter()
 
     init() {
         let config = AppConfig()
@@ -31,6 +32,10 @@ struct SpectasiaApp: App {
                 .environmentObject(appConfig)
                 .environmentObject(permissionManager)
                 .environmentObject(metadataStoreManager)
+                .environmentObject(toastCenter)
+        }
+        .commands {
+            SpectasiaCommands()
         }
     }
 }

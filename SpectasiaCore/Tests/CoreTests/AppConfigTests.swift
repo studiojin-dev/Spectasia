@@ -10,6 +10,7 @@ final class AppConfigTests: XCTestCase {
         UserDefaults.standard.removeObject(forKey: "metadataStoreDirectory")
         UserDefaults.standard.removeObject(forKey: "appLanguage")
         UserDefaults.standard.removeObject(forKey: "autoAIToggle")
+        UserDefaults.standard.removeObject(forKey: "autoCleanupToggle")
         UserDefaults.standard.removeObject(forKey: "recentDirectoryBookmarks")
         UserDefaults.standard.removeObject(forKey: "favoriteDirectoryBookmarks")
     }
@@ -20,6 +21,7 @@ final class AppConfigTests: XCTestCase {
         UserDefaults.standard.removeObject(forKey: "metadataStoreDirectory")
         UserDefaults.standard.removeObject(forKey: "appLanguage")
         UserDefaults.standard.removeObject(forKey: "autoAIToggle")
+        UserDefaults.standard.removeObject(forKey: "autoCleanupToggle")
         UserDefaults.standard.removeObject(forKey: "recentDirectoryBookmarks")
         UserDefaults.standard.removeObject(forKey: "favoriteDirectoryBookmarks")
     }
@@ -100,6 +102,18 @@ final class AppConfigTests: XCTestCase {
 
         // Then: Should be enabled
         XCTAssertTrue(newConfig.isAutoAIEnabled, "Auto AI toggle should persist")
+    }
+
+    func testDefaultAutoCleanup() throws {
+        let config = AppConfig()
+        XCTAssertFalse(config.isAutoCleanupEnabled, "Auto cleanup should default to false")
+    }
+
+    func testAutoCleanupPersists() throws {
+        let config = AppConfig()
+        config.isAutoCleanupEnabled = true
+        let newConfig = AppConfig()
+        XCTAssertTrue(newConfig.isAutoCleanupEnabled, "Auto cleanup toggle should persist")
     }
 
     func testRecentDirectoriesPersist() throws {

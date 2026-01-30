@@ -80,6 +80,54 @@ public actor MetadataStore {
         return previous
     }
 
+    public func cleanupMissingFiles(removeMissingOriginals: Bool = true) -> (removedRecords: Int, removedFiles: Int) {
+        var removedRecords = 0
+        var removedFiles = 0
+
+        for (originalPath, record) in records {
+            let originalURL = URL(fileURLWithPath: originalPath)
+            let originalExists = fileManager.fileExists(atPath: originalURL.path)
+
+            if removeMissingOriginals && !originalExists {
+                if let xmp = record.xmpPath {
+                    let url = URL(fileURLWithPath: xmp)
+                    if fileManager.fileExists(atPath: url.path) {
+                        try? fileManager.removeItem(at: url)
+                        removedFiles += 1
+                    }
+                }
+                for (_, thumbPath) in record.thumbnails {
+                    let url = URL(fileURLWithPath: thumbPath)
+                    if fileManager.fileExists(atPath: url.path) {
+                        try? fileManager.removeItem(at: url)
+                        removedFiles += 1
+                    }
+                }
+                records[originalPath] = nil
+                removedRecords += 1
+                continue
+            }
+
+            var updated = record
+            if let xmpPath = record.xmpPath {
+                let url = URL(fileURLWithPath: xmpPath)
+                if !fileManager.fileExists(atPath: url.path) {
+                    updated.xmpPath = nil
+                }
+            }
+            for (sizeKey, thumbPath) in record.thumbnails {
+                let url = URL(fileURLWithPath: thumbPath)
+                if !fileManager.fileExists(atPath: url.path) {
+                    updated.thumbnails.removeValue(forKey: sizeKey)
+                }
+            }
+            records[originalPath] = updated
+        }
+
+        schedulePersist()
+        return (removedRecords, removedFiles)
+    }
+
     public func record(for originalURL: URL) -> Record? {
         records[originalURL.path]
     }

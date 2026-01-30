@@ -163,6 +163,25 @@ public class FileMonitorService {
             }
         }
 
+        if renamed && !created && !removed {
+            let filename = url.lastPathComponent
+            let exists = fileManager.fileExists(atPath: url.path)
+            if exists && !knownFiles.contains(filename) {
+                knownFiles.insert(filename)
+                updateAttributes(directory: url.deletingLastPathComponent().path, filename: filename)
+                callbackQueue.async { [weak self] in
+                    self?.onFileCreated?(url)
+                }
+            } else if !exists && knownFiles.contains(filename) {
+                knownFiles.remove(filename)
+                knownModificationDates.removeValue(forKey: filename)
+                knownSizes.removeValue(forKey: filename)
+                callbackQueue.async { [weak self] in
+                    self?.onFileDeleted?(url)
+                }
+            }
+        }
+
         if modified || renamed {
             let filename = url.lastPathComponent
             let changed = didAttributesChange(directory: url.deletingLastPathComponent().path, filename: filename)

@@ -6,6 +6,7 @@ import SpectasiaCore
 public struct SettingsView: View {
     @EnvironmentObject private var appConfig: AppConfig
     @EnvironmentObject private var metadataStoreManager: MetadataStoreManager
+    @EnvironmentObject private var toastCenter: ToastCenter
     @State private var isStorePickerPresented = false
     
     public init() {}
@@ -40,6 +41,16 @@ public struct SettingsView: View {
 
             Section("AI") {
                 Toggle("Enable AI Analysis", isOn: $appConfig.isAutoAIEnabledPublished)
+            }
+
+            Section("Maintenance") {
+                Toggle("Auto Cleanup Missing Metadata", isOn: $appConfig.isAutoCleanupEnabledPublished)
+                Button("Run Cleanup Now") {
+                    Task { [metadataStoreManager, toastCenter] in
+                        let result = await metadataStoreManager.store.cleanupMissingFiles(removeMissingOriginals: true)
+                        toastCenter.show("Cleaned metadata: \(result.removedRecords) records, \(result.removedFiles) files")
+                    }
+                }
             }
         }
         .padding()

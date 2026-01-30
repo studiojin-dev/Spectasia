@@ -6,6 +6,8 @@ public struct MetadataPanel: View {
     let image: SpectasiaImage?
     @State private var selectedRating: Int = 0
     @EnvironmentObject private var metadataStoreManager: MetadataStoreManager
+    @EnvironmentObject private var repository: ObservableImageRepository
+    @EnvironmentObject private var toastCenter: ToastCenter
 
     public init(image: SpectasiaImage? = nil) {
         self.image = image
@@ -63,6 +65,24 @@ public struct MetadataPanel: View {
             .padding()
             .background(GypsumColor.surface)
             .cornerRadius(8)
+
+            // Maintenance section
+            if let image = image {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Maintenance")
+                        .font(GypsumFont.headline)
+                        .foregroundColor(GypsumColor.text)
+                    Button("Regenerate Thumbnails") {
+                        Task {
+                            await repository.regenerateThumbnails(for: image.url)
+                            toastCenter.show("Thumbnails refreshed")
+                        }
+                    }
+                }
+                .padding()
+                .background(GypsumColor.surface)
+                .cornerRadius(8)
+            }
 
             Spacer()
         }
@@ -140,4 +160,7 @@ struct FlowLayout: Layout {
 #Preview("Metadata Panel") {
     MetadataPanel()
         .frame(width: 250)
+        .environmentObject(MetadataStoreManager(rootDirectory: URL(fileURLWithPath: "/tmp")))
+        .environmentObject(ObservableImageRepository(metadataStore: MetadataStore(rootDirectory: URL(fileURLWithPath: "/tmp"))))
+        .environmentObject(ToastCenter())
 }

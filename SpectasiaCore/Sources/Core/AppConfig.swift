@@ -30,6 +30,7 @@ public class AppConfig: ObservableObject {
         static let metadataStoreDirectory = "metadataStoreDirectory"
         static let appLanguage = "appLanguage"
         static let autoAIToggle = "autoAIToggle"
+        static let autoCleanupToggle = "autoCleanupToggle"
         static let recentDirectoryBookmarks = "recentDirectoryBookmarks"
         static let favoriteDirectoryBookmarks = "favoriteDirectoryBookmarks"
     }
@@ -47,6 +48,9 @@ public class AppConfig: ObservableObject {
     }
     @Published public var isAutoAIEnabledPublished: Bool {
         didSet { UserDefaults.standard.set(isAutoAIEnabledPublished, forKey: Keys.autoAIToggle) }
+    }
+    @Published public var isAutoCleanupEnabledPublished: Bool {
+        didSet { UserDefaults.standard.set(isAutoCleanupEnabledPublished, forKey: Keys.autoCleanupToggle) }
     }
     @Published public var recentDirectoryBookmarks: [DirectoryBookmark] {
         didSet { persistDirectoryBookmarks(recentDirectoryBookmarks, key: Keys.recentDirectoryBookmarks) }
@@ -106,6 +110,16 @@ public class AppConfig: ObservableObject {
         }
     }
 
+    /// Whether metadata cleanup runs automatically on launch
+    public var isAutoCleanupEnabled: Bool {
+        get {
+            UserDefaults.standard.bool(forKey: Keys.autoCleanupToggle)
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: Keys.autoCleanupToggle)
+        }
+    }
+
     // MARK: - Initialization
 
     public init() {
@@ -118,6 +132,7 @@ public class AppConfig: ObservableObject {
             self.languagePublished = .english
         }
         self.isAutoAIEnabledPublished = UserDefaults.standard.bool(forKey: Keys.autoAIToggle)
+        self.isAutoCleanupEnabledPublished = UserDefaults.standard.bool(forKey: Keys.autoCleanupToggle)
         self.recentDirectoryBookmarks = Self.loadDirectoryBookmarks(key: Keys.recentDirectoryBookmarks)
         self.favoriteDirectoryBookmarks = Self.loadDirectoryBookmarks(key: Keys.favoriteDirectoryBookmarks)
     }

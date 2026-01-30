@@ -18,68 +18,89 @@ struct ContentView: View {
     @State private var errorMessage: String? = nil
     @State private var isMonitoring: Bool = true
     @State private var accessToken: SecurityScopeToken? = nil
+    @State private var didRunStartupCleanup = false
 
     @EnvironmentObject var repository: ObservableImageRepository
     @EnvironmentObject var permissionManager: PermissionManager
     @EnvironmentObject var appConfig: AppConfig
+    @EnvironmentObject var metadataStoreManager: MetadataStoreManager
+    @EnvironmentObject var toastCenter: ToastCenter
 
     var body: some View {
-        SpectasiaLayout(
-            images: $repository.images,
-            selectedImage: $selectedImage,
-            selectedDirectory: $selectedDirectory,
-            currentViewMode: $currentViewMode,
-            isLoading: $isLoading,
-            backgroundTasks: $backgroundTasks,
-            isMonitoring: $isMonitoring,
-            recentDirectories: $appConfig.recentDirectoryBookmarks,
-            favoriteDirectories: $appConfig.favoriteDirectoryBookmarks,
-            onSelectDirectory: { bookmark in
-                if let url = permissionManager.resolveBookmark(bookmark.data) {
-                    selectedDirectory = url
-                } else {
-                    errorMessage = "Unable to access saved folder."
-                    appConfig.removeRecentDirectory(path: bookmark.path)
-                    appConfig.removeFavoriteDirectory(path: bookmark.path)
+        ZStack(alignment: .bottom) {
+            SpectasiaLayout(
+                images: $repository.images,
+                selectedImage: $selectedImage,
+                selectedDirectory: $selectedDirectory,
+                currentViewMode: $currentViewMode,
+                isLoading: $isLoading,
+                backgroundTasks: $backgroundTasks,
+                isMonitoring: $isMonitoring,
+                recentDirectories: $appConfig.recentDirectoryBookmarks,
+                favoriteDirectories: $appConfig.favoriteDirectoryBookmarks,
+                onSelectDirectory: { bookmark in
+                    if let url = permissionManager.resolveBookmark(bookmark.data) {
+                        selectedDirectory = url
+                    } else {
+                        errorMessage = "Unable to access saved folder."
+                        appConfig.removeRecentDirectory(path: bookmark.path)
+                        appConfig.removeFavoriteDirectory(path: bookmark.path)
+                    }
+                },
+                onToggleFavorite: { url in
+                    guard let data = permissionManager.storeBookmark(for: url) else {
+                        errorMessage = "Failed to save folder permission."
+                        return
+                    }
+                    let bookmark = AppConfig.DirectoryBookmark(path: url.path, data: data)
+                    appConfig.toggleFavoriteDirectory(bookmark)
                 }
-            },
-            onToggleFavorite: { url in
-                guard let data = permissionManager.storeBookmark(for: url) else {
-                    errorMessage = "Failed to save folder permission."
-                    return
+            )
+            .onAppear {
+                requestInitialDirectoryAccess()
+                runStartupCleanupIfNeeded()
+            }
+            .onChange(of: appConfig.isAutoCleanupEnabledPublished) { _, _ in
+                runStartupCleanupIfNeeded()
+            }
+            .onChange(of: selectedDirectory) { _, newValue in
+                guard let url = newValue else { return }
+                Task {
+                    await loadDirectory(url)
                 }
-                let bookmark = AppConfig.DirectoryBookmark(path: url.path, data: data)
-                appConfig.toggleFavoriteDirectory(bookmark)
             }
-        )
-        .onAppear {
-            requestInitialDirectoryAccess()
-        }
-        .onChange(of: selectedDirectory) { _, newValue in
-            guard let url = newValue else { return }
-            Task {
-                await loadDirectory(url)
+            .onChange(of: isMonitoring) { _, newValue in
+                guard let url = selectedDirectory else { return }
+                Task {
+                    await loadDirectory(url, monitor: newValue)
+                }
             }
-        }
-        .onChange(of: isMonitoring) { _, newValue in
-            guard let url = selectedDirectory else { return }
-            Task {
-                await loadDirectory(url, monitor: newValue)
-            }
-        }
-        .alert("Error", isPresented: Binding(
-            get: { errorMessage != nil },
-            set: { isPresented in
-                if !isPresented {
+            .alert("Error", isPresented: Binding(
+                get: { errorMessage != nil },
+                set: { isPresented in
+                    if !isPresented {
+                        errorMessage = nil
+                    }
+                }
+            )) {
+                Button("OK") {
                     errorMessage = nil
                 }
+            } message: {
+                Text(errorMessage ?? "Unknown error")
             }
-        )) {
-            Button("OK") {
-                errorMessage = nil
+
+            if let message = toastCenter.message {
+                Text(message)
+                    .font(.caption)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(Color.black.opacity(0.75))
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                    .padding(.bottom, 16)
+                    .transition(.opacity)
             }
-        } message: {
-            Text(errorMessage ?? "Unknown error")
         }
     }
 
@@ -126,6 +147,17 @@ struct ContentView: View {
         } catch {
             errorMessage = "Failed to load directory: \(url.path)"
             CoreLog.error("Failed to load directory \(url.path): \(error.localizedDescription)", category: "ContentView")
+        }
+    }
+
+    private func runStartupCleanupIfNeeded() {
+        guard appConfig.isAutoCleanupEnabledPublished, !didRunStartupCleanup else { return }
+        didRunStartupCleanup = true
+        Task { [metadataStoreManager, toastCenter] in
+            let result = await metadataStoreManager.store.cleanupMissingFiles(removeMissingOriginals: true)
+            if result.removedRecords > 0 || result.removedFiles > 0 {
+                toastCenter.show("Cleaned metadata: \(result.removedRecords) records, \(result.removedFiles) files")
+            }
         }
     }
 }
