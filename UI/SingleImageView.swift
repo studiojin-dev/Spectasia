@@ -123,11 +123,17 @@ public struct SingleImageView: View {
                 .offset(x: translation.width + dragOffset.width, y: translation.height + dragOffset.height)
                 .frame(width: geometry.size.width, height: geometry.size.height)
                 .background(Color.black.opacity(0.02))
-                .gesture(
-                    simultaneousGestures
-                )
-        }
+        .gesture(
+            simultaneousGestures
+        )
+        .highPriorityGesture(
+            TapGesture(count: 2)
+                .onEnded {
+                    resetZoom()
+                }
+        )
     }
+}
 
     private func imageViewContent(for platformImage: PlatformImage) -> Image {
         #if canImport(AppKit)
@@ -167,6 +173,8 @@ public struct SingleImageView: View {
             Text("Modified: \(image.metadata.modificationDate.formatted(date: .abbreviated, time: .shortened))")
                 .font(GypsumFont.caption2)
             Text("Format: \(image.metadata.fileExtension.uppercased())")
+                .font(GypsumFont.caption2)
+            Text("Zoom: \(Int(zoomScale * 100))%")
                 .font(GypsumFont.caption2)
         }
         .padding(8)
@@ -231,6 +239,11 @@ public struct SingleImageView: View {
         } catch {
             loadError = error.localizedDescription
         }
+    }
+
+    private func resetZoom() {
+        zoomScale = 1.0
+        translation = .zero
     }
 }
 

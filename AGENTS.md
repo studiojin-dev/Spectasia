@@ -135,14 +135,14 @@ If create new file(s), tell the user to add the files to the xcode project manua
 
 #### Phase 2: 뷰 모드 완성
 
-- [ ] 리스트 뷰 TableView 구현 (파일명/크기/날짜/별점/포맷/태그 컬럼)
-- [ ] 컬럼 정렬 기능
-- [ ] 다중 선택 (Shift+클릭, Cmd+클릭)
-- [ ] 단일 이미지 뷰 필름스트립
-- [ ] 단일 이미지 뷰 좌우 화살표 네비게이션
-- [ ] EXIF 오버레이 (위치 선택: 상/하/좌/우)
-- [ ] 뷰 모드 전환 State Machine
-- [ ] 썸네일 크기 조절 UI (작음/중간/큼)
+- [x] 리스트 뷰 TableView 구현 (파일명/크기/날짜/별점/포맷/태그 컬럼)
+- [x] 컬럼 정렬 기능
+- [x] 다중 선택 (Shift+클릭, Cmd+클릭)
+- [x] 단일 이미지 뷰 필름스트립
+- [x] 단일 이미지 뷰 좌우 화살표 네비게이션
+- [x] EXIF 오버레이 (위치 선택: 상/하/좌/우)
+- [x] 뷰 모드 전환 State Machine
+- [x] 썸네일 크기 조절 UI (작음/중간/큼)
 
 #### Phase 3: AI 기능 확장
 

@@ -15,7 +15,9 @@ public struct SpectasiaLayout: View {
     @State private var directoryToAdd: URL? = nil
     @State private var treePickerPresented: Bool = false
     @State private var thumbnailSizeOption: ThumbnailSizeOption = .medium
-    @State private var lastViewModeMessage: String? = "Ready"
+    @State private var viewModeState: ViewModeState = .ready(.thumbnailGrid)
+    @State private var viewModeTransitionTask: Task<Void, Never>? = nil
+    @State private var viewModeMessageResetTask: Task<Void, Never>? = nil
     @Binding private var images: [SpectasiaImage]
     @Binding private var selectedImage: SpectasiaImage?
     @Binding private var selectedDirectory: URL?
@@ -267,14 +269,14 @@ public struct SpectasiaLayout: View {
                             .padding(.horizontal)
                             .padding(.top, 8)
 
-                            Picker("View mode", selection: $currentViewMode) {
+                            Picker("View mode", selection: viewModeBinding) {
                                 ForEach(ViewMode.allCases) { mode in
                                     Text(mode.title)
                                 }
                             }
                             .pickerStyle(.segmented)
                             .padding(.horizontal)
-                            Text(lastViewModeMessage ?? "")
+                            Text(viewModeState.message)
                                 .font(GypsumFont.caption)
                                 .foregroundColor(.secondary)
                                 .padding(.horizontal)
@@ -364,7 +366,87 @@ public struct SpectasiaLayout: View {
                 CoreLog.error("Directory selection failed: \(error.localizedDescription)", category: "SpectasiaLayout")
             }
         }
+        .onAppear {
+            viewModeState = .ready(currentViewMode)
+        }
+        .onChange(of: currentViewMode) { _, newMode in
+            if viewModeState != .switching(newMode) {
+                viewModeState = .ready(newMode)
+            }
+        }
     }
+
+    private var viewModeBinding: Binding<ViewMode> {
+        Binding(
+            get: { currentViewMode },
+            set: { handleViewModeChange(to: $0) }
+        )
+    }
+
+    private func handleViewModeChange(to requested: ViewMode) {
+        if requested == currentViewMode {
+            viewModeState = .ready(requested)
+            return
+        }
+
+        if requested == .singleImage && !ensureSingleImageAvailable() {
+            viewModeState = .blocked(currentViewMode, reason: "Select an image before using single-image mode.")
+            viewModeMessageResetTask?.cancel()
+            viewModeMessageResetTask = Task {
+                try? await Task.sleep(nanoseconds: 1_500_000_000)
+                await MainActor.run {
+                    viewModeState = .ready(currentViewMode)
+                }
+            }
+            return
+        }
+
+        transition(to: requested)
+    }
+
+    private func ensureSingleImageAvailable() -> Bool {
+        if selectedImage != nil {
+            return true
+        }
+        if let first = images.first {
+            selectedImage = first
+            return true
+        }
+        return false
+    }
+
+    private func transition(to newMode: ViewMode) {
+        viewModeTransitionTask?.cancel()
+        viewModeMessageResetTask?.cancel()
+        viewModeMessageResetTask = nil
+        viewModeState = .switching(newMode)
+        viewModeTransitionTask = Task {
+            try? await Task.sleep(nanoseconds: 50_000_000)
+            await MainActor.run {
+                currentViewMode = newMode
+                viewModeState = .ready(newMode)
+                viewModeTransitionTask = nil
+            }
+        }
+    }
+
+    private enum ViewModeState: Equatable {
+        case ready(ViewMode)
+        case switching(ViewMode)
+        case blocked(ViewMode, reason: String)
+
+        var message: String {
+            switch self {
+            case .ready(let mode):
+                return "Viewing \(mode.title)"
+            case .switching(let mode):
+                return "Switching to \(mode.title)…"
+            case .blocked(_, let reason):
+                return reason
+            }
+        }
+    }
+
 
     private struct InitialDirectorySelectionView: View {
         @Binding var directoryToAdd: URL?

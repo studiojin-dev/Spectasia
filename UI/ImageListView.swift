@@ -5,6 +5,7 @@ import SpectasiaCore
 struct ImageListView: View {
     let images: [SpectasiaImage]
     @Binding var selectedImage: SpectasiaImage?
+    @State private var selectedIDs: Set<String> = []
 
     @State private var sortDescriptor: SortDescriptor = .init(column: .name, ascending: true)
 
@@ -30,15 +31,11 @@ struct ImageListView: View {
         }
     }
 
-    private var selection: Binding<Set<String>> {
+    private var tableSelection: Binding<Set<String>> {
         Binding(
-            get: {
-                if let selectedImage {
-                    return [selectedImage.id]
-                }
-                return []
-            },
+            get: { selectedIDs },
             set: { newValue in
+                selectedIDs = newValue
                 if let id = newValue.first, let match = images.first(where: { $0.id == id }) {
                     selectedImage = match
                 } else {
@@ -48,10 +45,14 @@ struct ImageListView: View {
         )
     }
 
+    private func isSelected(_ image: SpectasiaImage) -> Bool {
+        selectedIDs.contains(image.id)
+    }
+
     var body: some View {
         VStack(spacing: 8) {
             SortHeader(descriptor: $sortDescriptor)
-            Table(sortedImages, selection: selection) {
+            Table(sortedImages, selection: tableSelection) {
                 TableColumn("Name") { image in
                     Text(image.url.lastPathComponent)
                         .lineLimit(1)
@@ -79,6 +80,21 @@ struct ImageListView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .onChange(of: selectedImage?.id) { _, newValue in
+                if let id = newValue {
+                    selectedIDs = [id]
+                } else {
+                    selectedIDs = []
+                }
+            }
+            .onChange(of: images.map(\.id)) { _, _ in
+                selectedIDs = selectedIDs.filter { id in images.contains(where: { $0.id == id }) }
+                if let id = selectedIDs.first, let match = images.first(where: { $0.id == id }) {
+                    selectedImage = match
+                } else if selectedIDs.isEmpty {
+                    selectedImage = nil
+                }
+            }
         }
     }
 }
