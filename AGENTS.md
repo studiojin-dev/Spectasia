@@ -77,6 +77,7 @@ If create new file(s), tell the user to add the files to the xcode project manua
 - [x] 파일 모니터링 이벤트와 이미지 선택 상태 정합성 확보
 - [x] "모니터링" 토글 제거 및 기본 감시(항상 켬) 전환
 - [x] Sidebar 순서를 Settings → 디렉토리 추가 → Directory tree로 정리하고 트리 전역 확장/축소/전체 재스캔 버튼과 메타데이터 상태 메시지를 노출
+- [x] Metadata panel now allows editing tags, shows thumbnail/XMP status, and keeps metadata timestamps in sync with background indexing
 - [ ] 데이터 바인딩 최적화 (선택/상태 분리 미완)
 
 #### 설정 화면

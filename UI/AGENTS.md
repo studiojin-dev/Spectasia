@@ -48,6 +48,7 @@ UI/
 - **Wired**: `ContentView` drives `SpectasiaLayout`, now wired to `DirectoryScanManager` so selections stay in sync while directories auto-scan.
 - **Sidebar**: Gypsum-style “add directory” picker + `DirectoryTreeView` show watch folder state; monitoring toggle removed in favor of always-on background indexing.
 - **Directory tree**: Sidebar now lists Settings, directory add flow, and `DirectoryTreeView` with expand/collapse, rescan, and scan completion messaging; manual scans trigger metadata regeneration tracked by the background manager.
+- **Metadata panel**: Tags can now be edited inline, the panel shows metadata timing/status, and rating/tag changes refresh repository/metadata indexes so the right pane stays up to date.
 - **Grid**: `ImageGridView` renders thumbnails via `ThumbnailService`; selection now binds to `selectedImage`.
 - **Single Image**: Displays a file via `Data(contentsOf:)` with basic error handling; no zoom/pan/filmstrip yet.
 - **Metadata**: Shows tags and writes rating to XMP; no tag editing, EXIF, or album support.

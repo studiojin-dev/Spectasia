@@ -5,6 +5,9 @@ import SpectasiaCore
 public struct MetadataPanel: View {
     let image: SpectasiaImage?
     @State private var selectedRating: Int = 0
+    @State private var metadataRecord: MetadataStore.Record?
+    @State private var editableTags: [String] = []
+    @State private var newTagText: String = ""
     @EnvironmentObject private var metadataStoreManager: MetadataStoreManager
     @EnvironmentObject private var repository: ObservableImageRepository
     @EnvironmentObject private var toastCenter: ToastCenter
@@ -43,23 +46,64 @@ public struct MetadataPanel: View {
                     .font(GypsumFont.headline)
                     .foregroundColor(GypsumColor.text)
 
-                // Tag chips
-                if let tags = image?.tags, !tags.isEmpty {
-                    FlowLayout(spacing: 8) {
-                        ForEach(tags, id: \.self) { tag in
-                            Text(tag)
-                                .font(GypsumFont.caption)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(GypsumColor.accent.opacity(0.1))
-                                .foregroundColor(GypsumColor.accent)
-                                .cornerRadius(12)
-                        }
-                    }
-                } else {
+                if editableTags.isEmpty {
                     Text("No tags")
                         .font(GypsumFont.caption)
                         .foregroundColor(GypsumColor.textSecondary)
+                } else {
+                    FlowLayout(spacing: 8) {
+                        ForEach(editableTags, id: \.self) { tag in
+                            TagChip(tag: tag) {
+                                removeTag(tag)
+                            }
+                        }
+                    }
+                }
+
+                HStack {
+                    TextField("Add tag", text: $newTagText)
+                        .textFieldStyle(.roundedBorder)
+                    Button("Add") {
+                        addTag()
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+            }
+            .padding()
+            .background(GypsumColor.surface)
+            .cornerRadius(8)
+
+            // Metadata status
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Metadata status")
+                    .font(GypsumFont.headline)
+                    .foregroundColor(GypsumColor.text)
+                if let record = metadataRecord {
+                    Text("Last updated \(record.updatedAt, style: .relative)")
+                        .font(GypsumFont.caption)
+                        .foregroundColor(.secondary)
+                    if let xmpPath = record.xmpPath {
+                        Text("XMP sidecar: \(URL(fileURLWithPath: xmpPath).lastPathComponent)")
+                            .font(GypsumFont.caption)
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("XMP sidecar not yet created")
+                            .font(GypsumFont.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    if record.thumbnails.isEmpty {
+                        Text("Thumbnail pending")
+                            .font(GypsumFont.caption)
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("Thumbnails available for \(record.thumbnails.keys.sorted().joined(separator: ", "))")
+                            .font(GypsumFont.caption)
+                            .foregroundColor(.secondary)
+                    }
+                } else {
+                    Text("Waiting for metadata indexing")
+                        .font(GypsumFont.caption)
+                        .foregroundColor(.secondary)
                 }
             }
             .padding()
@@ -88,8 +132,15 @@ public struct MetadataPanel: View {
         }
         .padding()
         .background(GypsumColor.background)
+        .task(id: image?.url) {
+            await refreshMetadataRecord()
+            updateEditableTags()
+        }
         .onChange(of: image?.rating ?? 0) { _, newValue in
             selectedRating = newValue
+        }
+        .onChange(of: image?.tags) { _, _ in
+            updateEditableTags()
         }
     }
 
@@ -102,10 +153,58 @@ public struct MetadataPanel: View {
             do {
                 let xmpService = XMPService(metadataStore: metadataStoreManager.store)
                 try await xmpService.writeRating(url: image.url, rating: rating)
+                await repository.refreshImages()
+                await refreshMetadataRecord()
             } catch {
                 CoreLog.error("Failed to save rating: \(error.localizedDescription)", category: "MetadataPanel")
             }
         }
+    }
+
+    private func addTag() {
+        guard let _ = image else { return }
+        let trimmed = newTagText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        guard !editableTags.contains(trimmed) else {
+            toastCenter.show(NSLocalizedString("Tag already exists", comment: "Duplicate tag warning"))
+            newTagText = ""
+            return
+        }
+        editableTags.append(trimmed)
+        newTagText = ""
+        writeTags(editableTags)
+    }
+
+    private func removeTag(_ tag: String) {
+        editableTags.removeAll(where: { $0 == tag })
+        writeTags(editableTags)
+    }
+
+    private func updateEditableTags() {
+        editableTags = image?.tags ?? []
+    }
+
+    private func writeTags(_ tags: [String]) {
+        guard let image = image else { return }
+        Task {
+            do {
+                let xmpService = XMPService(metadataStore: metadataStoreManager.store)
+                try await xmpService.writeTags(url: image.url, tags: tags)
+                toastCenter.show(NSLocalizedString("Tags updated", comment: "Tags updated notification"))
+                await repository.refreshImages()
+                await refreshMetadataRecord()
+            } catch {
+                CoreLog.error("Failed to write tags: \(error.localizedDescription)", category: "MetadataPanel")
+            }
+        }
+    }
+
+    private func refreshMetadataRecord() async {
+        guard let image else {
+            metadataRecord = nil
+            return
+        }
+        metadataRecord = await metadataStoreManager.store.record(for: image.url)
     }
 }
 
@@ -127,7 +226,7 @@ struct FlowLayout: Layout {
         }
     }
 
-    struct FlowResult {
+struct FlowResult {
         var size: CGSize
         var placements: [(index: Int, origin: CGPoint)]
     }
@@ -154,6 +253,29 @@ struct FlowLayout: Layout {
 
         let totalHeight = currentY + lineHeight
         return FlowResult(size: CGSize(width: bounds.width, height: totalHeight), placements: placements)
+    }
+}
+
+private struct TagChip: View {
+    let tag: String
+    let onRemove: () -> Void
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Text(tag)
+                .font(GypsumFont.caption)
+                .foregroundColor(GypsumColor.accent)
+            Button(action: onRemove) {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.caption2)
+                    .foregroundColor(GypsumColor.textSecondary)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(GypsumColor.accent.opacity(0.1))
+        .cornerRadius(12)
     }
 }
 
