@@ -4,6 +4,7 @@ import SpectasiaCore
 /// Three-panel layout for Spectasia: Sidebar, Content, Detail
 public struct SpectasiaLayout: View {
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
+    @EnvironmentObject private var repository: ObservableImageRepository
     @State private var showSettings: Bool = false
     @Binding private var images: [SpectasiaImage]
     @Binding private var selectedImage: SpectasiaImage?
@@ -149,11 +150,11 @@ public struct SpectasiaLayout: View {
                               content: {
                 VStack {
                     HStack {
-                        if isLoading {
+                        if isLoading || repository.isBusy {
                             ProgressView()
                                 .scaleEffect(0.8)
                         }
-                        Text(isLoading ? "Loading…" : "Ready")
+                        Text(isLoading ? "Loading…" : (repository.activityMessage ?? "Ready"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                         Spacer()

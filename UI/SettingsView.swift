@@ -7,6 +7,7 @@ public struct SettingsView: View {
     @EnvironmentObject private var appConfig: AppConfig
     @EnvironmentObject private var metadataStoreManager: MetadataStoreManager
     @EnvironmentObject private var toastCenter: ToastCenter
+    @EnvironmentObject private var repository: ObservableImageRepository
     @State private var isStorePickerPresented = false
     
     public init() {}
@@ -47,8 +48,10 @@ public struct SettingsView: View {
                 Toggle("Auto Cleanup Missing Metadata", isOn: $appConfig.isAutoCleanupEnabledPublished)
                 Toggle("Remove Missing Originals", isOn: $appConfig.cleanupRemoveMissingOriginalsPublished)
                 Button("Run Cleanup Now") {
-                    Task { [metadataStoreManager, toastCenter] in
+                    Task { [metadataStoreManager, toastCenter, repository] in
+                        await repository.startActivity(message: NSLocalizedString("Cleaning metadata…", comment: "Cleanup in progress"))
                         let result = await metadataStoreManager.store.cleanupMissingFiles(removeMissingOriginals: appConfig.cleanupRemoveMissingOriginalsPublished)
+                        await repository.finishActivity()
                         let message = String(
                             format: NSLocalizedString("Cleaned metadata: %lld records, %lld files", comment: "Cleanup summary"),
                             result.removedRecords,

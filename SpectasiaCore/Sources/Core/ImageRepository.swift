@@ -417,6 +417,8 @@ public class ObservableImageRepository: ObservableObject {
     public let repository: ImageRepository
     
     @Published public var images: [SpectasiaImage] = []
+    @Published public var activityMessage: String? = nil
+    @Published public var isBusy: Bool = false
     private var refreshTask: Task<Void, Never>?
     
     public init(metadataStore: MetadataStore, repository: ImageRepository? = nil) {
@@ -499,6 +501,18 @@ public class ObservableImageRepository: ObservableObject {
             guard let self else { return }
             await self.refreshImages()
         }
+    }
+
+    @MainActor
+    public func startActivity(message: String) {
+        activityMessage = message
+        isBusy = true
+    }
+
+    @MainActor
+    public func finishActivity() {
+        isBusy = false
+        activityMessage = nil
     }
 }
 

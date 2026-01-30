@@ -33,6 +33,23 @@
         }
       }
     },
+    "Cleaning metadata…" : {
+      "comment" : "Cleanup in progress",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cleaning metadata…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "메타데이터 정리 중…"
+          }
+        }
+      }
+    },
     "Cleaned metadata: %lld records, %lld files" : {
       "comment" : "Cleanup summary notification",
       "localizations" : {
@@ -83,6 +100,23 @@
         }
       }
     },
+    "Refreshing thumbnails…" : {
+      "comment" : "Thumbnail refresh in progress",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refreshing thumbnails…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "썸네일 새로고침 중…"
+          }
+        }
+      }
+    },
     "Regenerate Thumbnails (All Loaded)" : {
       "localizations" : {
         "en" : {
@@ -127,6 +161,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "썸네일 재생성 (현재 폴더)"
+          }
+        }
+      }
+    },
+    "Rescanning…" : {
+      "comment" : "Rescan in progress",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rescanning…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "재스캔 중…"
           }
         }
       }
