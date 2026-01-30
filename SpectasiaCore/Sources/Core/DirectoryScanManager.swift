@@ -78,6 +78,7 @@ public final class DirectoryScanManager: ObservableObject {
         appConfig.addMonitoredDirectory(bookmark)
         watchedDirectories = appConfig.monitoredDirectoryBookmarks
         await metadataIndexStore.updateDirectory(path: url.path, parentPath: url.deletingLastPathComponent().path, status: .idle, fileCount: 0, lastScanDate: nil)
+        await refreshDirectoryTree()
         publishScanMessage(String(format: NSLocalizedString("Watching %@", comment: "Toast when a folder is added to the watch list."), displayName(for: url)))
         startIndexing(bookmark: bookmark)
     }
