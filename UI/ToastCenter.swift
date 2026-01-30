@@ -1,7 +1,14 @@
 import SwiftUI
+import Combine
 
 @MainActor
 final class ToastCenter: ObservableObject {
+    var objectWillChange: ObservableObjectPublisher
+    
+    init() {
+        self.objectWillChange = ObservableObjectPublisher()
+    }
+    
     @Published var message: String?
     @Published var statusMessage: String?
     private var queue: [String] = []
@@ -68,3 +75,4 @@ final class ToastCenter: ObservableObject {
         }
     }
 }
+

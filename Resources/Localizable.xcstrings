@@ -1,323 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "Auto Cleanup Missing Metadata" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Auto Cleanup Missing Metadata"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "누락 메타데이터 자동 정리"
-          }
-        }
-      }
-    },
-    "Cleanup Missing Metadata" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cleanup Missing Metadata"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "누락 메타데이터 정리"
-          }
-        }
-      }
-    },
-    "Cleaning metadata…" : {
-      "comment" : "Cleanup in progress",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cleaning metadata…"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "메타데이터 정리 중…"
-          }
-        }
-      }
-    },
-    "Cleaned metadata: %lld records, %lld files" : {
-      "comment" : "Cleanup summary notification",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cleaned metadata: %lld records, %lld files"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "정리 완료: 레코드 %lld개, 파일 %lld개"
-          }
-        }
-      }
-    },
-    "Maintenance" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Maintenance"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "유지보수"
-          }
-        }
-      }
-    },
-    "Notifications suppressed (+%lld)" : {
-      "comment" : "Toast shown when too many notifications are queued.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Notifications suppressed (+%lld)"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "알림 생략됨 (+%lld)"
-          }
-        }
-      }
-    },
-    "Refreshing thumbnails…" : {
-      "comment" : "Thumbnail refresh in progress",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Refreshing thumbnails…"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "썸네일 새로고침 중…"
-          }
-        }
-      }
-    },
-    "Regenerate Thumbnails (All Loaded)" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Regenerate Thumbnails (All Loaded)"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "썸네일 재생성 (전체)"
-          }
-        }
-      }
-    },
-    "Regenerate Thumbnails" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Regenerate Thumbnails"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "썸네일 재생성"
-          }
-        }
-      }
-    },
-    "Regenerate Thumbnails (Current Directory)" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Regenerate Thumbnails (Current Directory)"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "썸네일 재생성 (현재 폴더)"
-          }
-        }
-      }
-    },
-    "Rescanning…" : {
-      "comment" : "Rescan in progress",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rescanning…"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "재스캔 중…"
-          }
-        }
-      }
-    },
-    "Remove Missing Originals" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remove Missing Originals"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "원본 누락 항목 제거"
-          }
-        }
-      }
-    },
-    "Rescan Current Directory" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rescan Current Directory"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "현재 폴더 재스캔"
-          }
-        }
-      }
-    },
-    "Rescan completed" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rescan completed"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "재스캔 완료"
-          }
-        }
-      }
-    },
-    "Rescan failed" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rescan failed"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "재스캔 실패"
-          }
-        }
-      }
-    },
-    "Run Cleanup Now" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Run Cleanup Now"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "지금 정리 실행"
-          }
-        }
-      }
-    },
-    "Thumbnails refreshed (all)" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Thumbnails refreshed (all)"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "썸네일 새로고침 (전체)"
-          }
-        }
-      }
-    },
-    "Thumbnails refreshed (current)" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Thumbnails refreshed (current)"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "썸네일 새로고침 (현재)"
-          }
-        }
-      }
-    },
-    "Thumbnails refreshed" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Thumbnails refreshed"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "썸네일 새로고침"
-          }
-        }
-      }
-    },
-    "%@" : {
-      "comment" : "The text that appears in the leading column of each row in the images list view. The argument is the ID of the image.",
-      "isCommentAutoGenerated" : true
-    },
-    "%lld bytes" : {
-      "comment" : "A text label displaying the file size of an image. The argument is the file size of the image.",
-      "isCommentAutoGenerated" : true
-    },
     "0%" : {
       "comment" : "A label displaying the current zoom level as a percentage.",
       "extractionState" : "stale",
@@ -356,6 +39,92 @@
         }
       }
     },
+    "AI" : {
+      "comment" : "A section header that indicates settings related to AI analysis.",
+      "isCommentAutoGenerated" : true
+    },
+    "App Language" : {
+      "comment" : "A label for the app language setting in the settings view.",
+      "isCommentAutoGenerated" : true
+    },
+    "Auto Cleanup Missing Metadata" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auto Cleanup Missing Metadata"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "누락 메타데이터 자동 정리"
+          }
+        }
+      }
+    },
+    "Choose…" : {
+      "comment" : "A button that allows the user to choose a directory to use as a protected directory for the metadata cleanup feature.",
+      "isCommentAutoGenerated" : true
+    },
+    "Cleaned metadata: %lld records, %lld files" : {
+      "comment" : "Cleanup summary",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cleaned metadata: %lld records, %lld files"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "정리 완료: 레코드 %lld개, 파일 %lld개"
+          }
+        }
+      }
+    },
+    "Cleaning metadata…" : {
+      "comment" : "Cleanup in progress",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cleaning metadata…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "메타데이터 정리 중…"
+          }
+        }
+      }
+    },
+    "Cleanup Missing Metadata" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cleanup Missing Metadata"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "누락 메타데이터 정리"
+          }
+        }
+      }
+    },
+    "Cleanup Safety" : {
+      "comment" : "A section in the settings view related to file protection.",
+      "isCommentAutoGenerated" : true
+    },
+    "Cleanup will never delete metadata for files inside protected directories." : {
+      "comment" : "A description below the \"Cleanup Safety\" section of the settings view, explaining that cleanup will not delete metadata for files in protected directories.",
+      "isCommentAutoGenerated" : true
+    },
     "Date Range" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -374,6 +143,7 @@
       }
     },
     "Detail Panel" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -388,6 +158,14 @@
           }
         }
       }
+    },
+    "Enable AI Analysis" : {
+      "comment" : "A toggle that enables or disables AI-driven analysis of scanned documents.",
+      "isCommentAutoGenerated" : true
+    },
+    "English" : {
+      "comment" : "A language option in the settings view.",
+      "isCommentAutoGenerated" : true
     },
     "Error" : {
       "localizations" : {
@@ -460,7 +238,6 @@
       }
     },
     "Format" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -514,6 +291,10 @@
         }
       }
     },
+    "Language" : {
+      "comment" : "A section header for the language settings in the app settings.",
+      "isCommentAutoGenerated" : true
+    },
     "Library" : {
       "localizations" : {
         "en" : {
@@ -551,8 +332,27 @@
       "comment" : "A placeholder label while loading content.",
       "isCommentAutoGenerated" : true
     },
+    "Maintenance" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maintenance"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "유지보수"
+          }
+        }
+      }
+    },
+    "Metadata Storage" : {
+      "comment" : "A section header in the settings view for managing where metadata is stored.",
+      "isCommentAutoGenerated" : true
+    },
     "Modified" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -580,19 +380,51 @@
       "comment" : "The text that appears when monitoring is enabled.",
       "isCommentAutoGenerated" : true
     },
+    "Name" : {
+      "comment" : "A column header for the \"Name\" metadata field in the image list view.",
+      "isCommentAutoGenerated" : true
+    },
     "No folder selected" : {
       "comment" : "A message displayed when no folder is selected in the sidebar of Spectasia.",
       "isCommentAutoGenerated" : true
+    },
+    "No image selected" : {
+
     },
     "No images found" : {
       "comment" : "A message displayed when a user has not uploaded any images.",
       "isCommentAutoGenerated" : true
     },
+    "No protected directories configured." : {
+      "comment" : "A message indicating that there are no directories currently protected from cleanup.",
+      "isCommentAutoGenerated" : true
+    },
     "No tags" : {
 
     },
+    "Notifications suppressed (+%lld)" : {
+      "comment" : "Toast shown when too many notifications are queued.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notifications suppressed (+%lld)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "알림 생략됨 (+%lld)"
+          }
+        }
+      }
+    },
     "OK" : {
       "comment" : "A button that dismisses an alert.",
+      "isCommentAutoGenerated" : true
+    },
+    "Protect Directory…" : {
+      "comment" : "A button that lets the user add a directory to a list of protected directories used by the app's metadata cleanup feature.",
       "isCommentAutoGenerated" : true
     },
     "Rating" : {
@@ -619,6 +451,170 @@
       "comment" : "A section header that lists recently accessed directories.",
       "isCommentAutoGenerated" : true
     },
+    "Refreshing thumbnails…" : {
+      "comment" : "Thumbnail refresh in progress",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refreshing thumbnails…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "썸네일 새로고침 중…"
+          }
+        }
+      }
+    },
+    "Regenerate Thumbnails" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regenerate Thumbnails"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "썸네일 재생성"
+          }
+        }
+      }
+    },
+    "Regenerate Thumbnails (All Loaded)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regenerate Thumbnails (All Loaded)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "썸네일 재생성 (전체)"
+          }
+        }
+      }
+    },
+    "Regenerate Thumbnails (Current Directory)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regenerate Thumbnails (Current Directory)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "썸네일 재생성 (현재 폴더)"
+          }
+        }
+      }
+    },
+    "Remove Missing Originals" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove Missing Originals"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "원본 누락 항목 제거"
+          }
+        }
+      }
+    },
+    "Rescan completed" : {
+      "comment" : "Rescan finished",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rescan completed"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "재스캔 완료"
+          }
+        }
+      }
+    },
+    "Rescan Current Directory" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rescan Current Directory"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "현재 폴더 재스캔"
+          }
+        }
+      }
+    },
+    "Rescan failed" : {
+      "comment" : "Rescan failed",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rescan failed"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "재스캔 실패"
+          }
+        }
+      }
+    },
+    "Rescanning…" : {
+      "comment" : "Rescan in progress",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rescanning…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "재스캔 중…"
+          }
+        }
+      }
+    },
+    "Run Cleanup Now" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Run Cleanup Now"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지금 정리 실행"
+          }
+        }
+      }
+    },
     "Search" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -636,8 +632,10 @@
         }
       }
     },
+    "Settings" : {
+
+    },
     "Size" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -652,6 +650,10 @@
           }
         }
       }
+    },
+    "Storage Directory" : {
+      "comment" : "A label displayed above the directory path where metadata is stored.",
+      "isCommentAutoGenerated" : true
     },
     "Tags" : {
       "localizations" : {
@@ -671,6 +673,61 @@
     },
     "Tasks: %lld" : {
       "comment" : "A label displaying the number of background tasks currently running. The argument is the number of such tasks.",
+      "isCommentAutoGenerated" : true
+    },
+    "Thumbnails refreshed" : {
+      "comment" : "Thumbnails refreshed",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thumbnails refreshed"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "썸네일 새로고침"
+          }
+        }
+      }
+    },
+    "Thumbnails refreshed (all)" : {
+      "comment" : "Thumbnails refreshed for all images",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thumbnails refreshed (all)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "썸네일 새로고침 (전체)"
+          }
+        }
+      }
+    },
+    "Thumbnails refreshed (current)" : {
+      "comment" : "Thumbnails refreshed for current directory",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thumbnails refreshed (current)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "썸네일 새로고침 (현재)"
+          }
+        }
+      }
+    },
+    "한국어" : {
+      "comment" : "A Korean translation for \"한국어\".",
       "isCommentAutoGenerated" : true
     }
   },

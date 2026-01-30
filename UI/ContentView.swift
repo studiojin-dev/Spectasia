@@ -168,9 +168,10 @@ struct ContentView: View {
     private func runStartupCleanupIfNeeded() {
         guard appConfig.isAutoCleanupEnabledPublished, !didRunStartupCleanup else { return }
         didRunStartupCleanup = true
-        Task { [metadataStoreManager, toastCenter, repository] in
-            let excludedPaths = await MainActor.run { appConfig.cleanupExcludedPathsPublished }
-            let removeMissing = await MainActor.run { appConfig.cleanupRemoveMissingOriginalsPublished }
+        // Capture current settings on the main actor before doing background work
+        let excludedPaths = appConfig.cleanupExcludedPathsPublished
+        let removeMissing = appConfig.cleanupRemoveMissingOriginalsPublished
+        Task { [metadataStoreManager, toastCenter, repository, excludedPaths, removeMissing] in
             await repository.startActivity(message: NSLocalizedString("Cleaning metadata…", comment: "Cleanup in progress"))
             toastCenter.setStatus(NSLocalizedString("Cleaning metadata…", comment: "Cleanup in progress"))
             let result = await metadataStoreManager.store.cleanupMissingFiles(

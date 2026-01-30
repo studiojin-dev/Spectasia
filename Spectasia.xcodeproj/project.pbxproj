@@ -7,6 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AC0E7D242F2C84EC0083D923 /* SingleImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0E7D212F2C84EC0083D923 /* SingleImageView.swift */; };
+		AC0E7D252F2C84EC0083D923 /* ToastCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0E7D232F2C84EC0083D923 /* ToastCenter.swift */; };
+		AC0E7D262F2C84EC0083D923 /* SpectasiaCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0E7D222F2C84EC0083D923 /* SpectasiaCommands.swift */; };
+		AC0E7D272F2C84EC0083D923 /* ImageListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0E7D202F2C84EC0083D923 /* ImageListView.swift */; };
+		AC0E7D282F2C84EC0083D923 /* SingleImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0E7D212F2C84EC0083D923 /* SingleImageView.swift */; };
+		AC0E7D292F2C84EC0083D923 /* ToastCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0E7D232F2C84EC0083D923 /* ToastCenter.swift */; };
+		AC0E7D2A2F2C84EC0083D923 /* SpectasiaCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0E7D222F2C84EC0083D923 /* SpectasiaCommands.swift */; };
+		AC0E7D2B2F2C84EC0083D923 /* ImageListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0E7D202F2C84EC0083D923 /* ImageListView.swift */; };
+		AC0E7D5D2F2C89E10083D923 /* SpectasiaCore in Frameworks */ = {isa = PBXBuildFile; productRef = AC0E7D5C2F2C89E10083D923 /* SpectasiaCore */; };
+		AC0E7D5F2F2C89E90083D923 /* SpectasiaCore in Frameworks */ = {isa = PBXBuildFile; productRef = AC0E7D5E2F2C89E90083D923 /* SpectasiaCore */; };
 		ACEDCA682F29AB7700B1E22C /* DirectoryPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA602F29AB7700B1E22C /* DirectoryPicker.swift */; };
 		ACEDCA6C2F29AB7700B1E22C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA502F29AB7700B1E22C /* ContentView.swift */; };
 		ACEDCA6D2F29AB7700B1E22C /* SpectasiaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA5E2F29AB7700B1E22C /* SpectasiaApp.swift */; };
@@ -21,29 +31,11 @@
 		ACEDCA7E2F29AB7700B1E22C /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = ACEDCA5B2F29AB7700B1E22C /* Localizable.xcstrings */; };
 		ACEDCA7F2F29AB7700B1E22C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ACEDCA4F2F29AB7700B1E22C /* Assets.xcassets */; };
 		ACEDCA802F29AB7700B1E22C /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = ACEDCA5A2F29AB7700B1E22C /* Info.plist */; };
-		ACEDCA812F29AB7700B1E22C /* DirectoryPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA602F29AB7700B1E22C /* DirectoryPicker.swift */; };
-		ACEDCA852F29AB7700B1E22C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA502F29AB7700B1E22C /* ContentView.swift */; };
-		ACEDCA862F29AB7700B1E22C /* SpectasiaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA5E2F29AB7700B1E22C /* SpectasiaApp.swift */; };
-		ACEDCA892F29AB7700B1E22C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA642F29AB7700B1E22C /* SettingsView.swift */; };
-		ACEDCA8B2F29AB7700B1E22C /* GypsumDesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA612F29AB7700B1E22C /* GypsumDesignSystem.swift */; };
-		ACEDCA8C2F29AB7700B1E22C /* ImageGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA622F29AB7700B1E22C /* ImageGridView.swift */; };
-		ACEDCA8D2F29AB7700B1E22C /* MetadataPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA632F29AB7700B1E22C /* MetadataPanel.swift */; };
-		ACEDCA932F29AB7700B1E22C /* SpectasiaLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA662F29AB7700B1E22C /* SpectasiaLayout.swift */; };
 		ACEDCA942F29AB7700B1E22C /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = ACEDCA5B2F29AB7700B1E22C /* Localizable.xcstrings */; };
 		ACEDCA952F29AB7700B1E22C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ACEDCA4F2F29AB7700B1E22C /* Assets.xcassets */; };
 		ACEDCA962F29AB7700B1E22C /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = ACEDCA5A2F29AB7700B1E22C /* Info.plist */; };
-		ACEDCA972F29AB7700B1E22C /* DirectoryPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA602F29AB7700B1E22C /* DirectoryPicker.swift */; };
-		ACEDCA9B2F29AB7700B1E22C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA502F29AB7700B1E22C /* ContentView.swift */; };
-		ACEDCA9C2F29AB7700B1E22C /* SpectasiaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA5E2F29AB7700B1E22C /* SpectasiaApp.swift */; };
-		ACEDCA9F2F29AB7700B1E22C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA642F29AB7700B1E22C /* SettingsView.swift */; };
-		ACEDCAA12F29AB7700B1E22C /* GypsumDesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA612F29AB7700B1E22C /* GypsumDesignSystem.swift */; };
-		ACEDCAA22F29AB7700B1E22C /* ImageGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA622F29AB7700B1E22C /* ImageGridView.swift */; };
-		ACEDCAA32F29AB7700B1E22C /* MetadataPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA632F29AB7700B1E22C /* MetadataPanel.swift */; };
-		ACEDCAA92F29AB7700B1E22C /* SpectasiaLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA662F29AB7700B1E22C /* SpectasiaLayout.swift */; };
-		ACFCE2CA2F2C26CD001B9220 /* SingleImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACFCE2C92F2C26CD001B9220 /* SingleImageView.swift */; };
-		ACFCE2CB2F2C26CD001B9220 /* SingleImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACFCE2C92F2C26CD001B9220 /* SingleImageView.swift */; };
-		ACFCE2CC2F2C26CD001B9220 /* SingleImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACFCE2C92F2C26CD001B9220 /* SingleImageView.swift */; };
 		ACFCE2FE2F2C2AFC001B9220 /* SpectasiaCore in Frameworks */ = {isa = PBXBuildFile; productRef = ACFCE2FD2F2C2AFC001B9220 /* SpectasiaCore */; };
+		ACFCEF012F2C2AFC001B9220 /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ACFCEF002F2C2AFC001B9220 /* AppIntents.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,6 +56,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		AC0E7D202F2C84EC0083D923 /* ImageListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageListView.swift; sourceTree = "<group>"; };
+		AC0E7D212F2C84EC0083D923 /* SingleImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleImageView.swift; sourceTree = "<group>"; };
+		AC0E7D222F2C84EC0083D923 /* SpectasiaCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectasiaCommands.swift; sourceTree = "<group>"; };
+		AC0E7D232F2C84EC0083D923 /* ToastCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastCenter.swift; sourceTree = "<group>"; };
 		AC7CE7622F28DFFF00E2D895 /* Spectasia.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Spectasia.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC7CE76F2F28E00000E2D895 /* SpectasiaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpectasiaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC7CE7792F28E00000E2D895 /* SpectasiaUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpectasiaUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -79,7 +75,7 @@
 		ACEDCA632F29AB7700B1E22C /* MetadataPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataPanel.swift; sourceTree = "<group>"; };
 		ACEDCA642F29AB7700B1E22C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		ACEDCA662F29AB7700B1E22C /* SpectasiaLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectasiaLayout.swift; sourceTree = "<group>"; };
-		ACFCE2C92F2C26CD001B9220 /* SingleImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleImageView.swift; sourceTree = "<group>"; };
+		ACFCEF002F2C2AFC001B9220 /* AppIntents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = AppIntents.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -101,6 +97,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				ACFCE2FE2F2C2AFC001B9220 /* SpectasiaCore in Frameworks */,
+				ACFCEF012F2C2AFC001B9220 /* AppIntents.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -108,6 +105,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AC0E7D5D2F2C89E10083D923 /* SpectasiaCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -115,6 +113,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AC0E7D5F2F2C89E90083D923 /* SpectasiaCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -158,6 +157,10 @@
 		ACEDCA672F29AB7700B1E22C /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				AC0E7D202F2C84EC0083D923 /* ImageListView.swift */,
+				AC0E7D212F2C84EC0083D923 /* SingleImageView.swift */,
+				AC0E7D222F2C84EC0083D923 /* SpectasiaCommands.swift */,
+				AC0E7D232F2C84EC0083D923 /* ToastCenter.swift */,
 				ACEDCA502F29AB7700B1E22C /* ContentView.swift */,
 				ACEDCA602F29AB7700B1E22C /* DirectoryPicker.swift */,
 				ACEDCA612F29AB7700B1E22C /* GypsumDesignSystem.swift */,
@@ -165,7 +168,6 @@
 				ACEDCA632F29AB7700B1E22C /* MetadataPanel.swift */,
 				ACEDCA642F29AB7700B1E22C /* SettingsView.swift */,
 				ACEDCA662F29AB7700B1E22C /* SpectasiaLayout.swift */,
-				ACFCE2C92F2C26CD001B9220 /* SingleImageView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -173,6 +175,7 @@
 		ACFCE2FC2F2C2AFC001B9220 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				ACFCEF002F2C2AFC001B9220 /* AppIntents.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -218,6 +221,7 @@
 			);
 			name = SpectasiaTests;
 			packageProductDependencies = (
+				AC0E7D5C2F2C89E10083D923 /* SpectasiaCore */,
 			);
 			productName = SpectasiaTests;
 			productReference = AC7CE76F2F28E00000E2D895 /* SpectasiaTests.xctest */;
@@ -241,6 +245,7 @@
 			);
 			name = SpectasiaUITests;
 			packageProductDependencies = (
+				AC0E7D5E2F2C89E90083D923 /* SpectasiaCore */,
 			);
 			productName = SpectasiaUITests;
 			productReference = AC7CE7792F28E00000E2D895 /* SpectasiaUITests.xctest */;
@@ -336,9 +341,12 @@
 				ACEDCA6D2F29AB7700B1E22C /* SpectasiaApp.swift in Sources */,
 				ACEDCA702F29AB7700B1E22C /* SettingsView.swift in Sources */,
 				ACEDCA722F29AB7700B1E22C /* GypsumDesignSystem.swift in Sources */,
+				AC0E7D242F2C84EC0083D923 /* SingleImageView.swift in Sources */,
+				AC0E7D252F2C84EC0083D923 /* ToastCenter.swift in Sources */,
+				AC0E7D262F2C84EC0083D923 /* SpectasiaCommands.swift in Sources */,
+				AC0E7D272F2C84EC0083D923 /* ImageListView.swift in Sources */,
 				ACEDCA732F29AB7700B1E22C /* ImageGridView.swift in Sources */,
 				ACEDCA742F29AB7700B1E22C /* MetadataPanel.swift in Sources */,
-				ACFCE2CB2F2C26CD001B9220 /* SingleImageView.swift in Sources */,
 				ACEDCA7A2F29AB7700B1E22C /* SpectasiaLayout.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -354,6 +362,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AC0E7D282F2C84EC0083D923 /* SingleImageView.swift in Sources */,
+				AC0E7D292F2C84EC0083D923 /* ToastCenter.swift in Sources */,
+				AC0E7D2A2F2C84EC0083D923 /* SpectasiaCommands.swift in Sources */,
+				AC0E7D2B2F2C84EC0083D923 /* ImageListView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -773,6 +785,16 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		AC0E7D5C2F2C89E10083D923 /* SpectasiaCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = ACFCE2F92F2C2989001B9220 /* XCLocalSwiftPackageReference "SpectasiaCore" */;
+			productName = SpectasiaCore;
+		};
+		AC0E7D5E2F2C89E90083D923 /* SpectasiaCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = ACFCE2F92F2C2989001B9220 /* XCLocalSwiftPackageReference "SpectasiaCore" */;
+			productName = SpectasiaCore;
+		};
 		ACFCE2FD2F2C2AFC001B9220 /* SpectasiaCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = ACFCE2F92F2C2989001B9220 /* XCLocalSwiftPackageReference "SpectasiaCore" */;

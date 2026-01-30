@@ -18,6 +18,7 @@ public struct ImageMetadata: Sendable {
 }
 
 /// Service for reading/writing XMP metadata via sidecar files
+@available(macOS 10.15, *)
 public final class XMPService: @unchecked Sendable {
     private let fileManager = FileManager.default
     private let metadataStore: MetadataStore

@@ -505,14 +505,14 @@ public class ObservableImageRepository: ObservableObject {
     }
 
     @MainActor
-    public func startActivity(message: String) {
+    public func startActivity(message: String) async {
         activityCount += 1
         activityMessage = message
         isBusy = true
     }
 
     @MainActor
-    public func finishActivity() {
+    public func finishActivity() async {
         activityCount = max(0, activityCount - 1)
         if activityCount == 0 {
             isBusy = false
