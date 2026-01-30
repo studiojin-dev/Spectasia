@@ -50,9 +50,9 @@ public struct SettingsView: View {
                 Toggle("Auto Cleanup Missing Metadata", isOn: $appConfig.isAutoCleanupEnabledPublished)
                 Toggle("Remove Missing Originals", isOn: $appConfig.cleanupRemoveMissingOriginalsPublished)
                 Button("Run Cleanup Now") {
-                    let excludedPaths = appConfig.cleanupExcludedPathsPublished
-                    let removeMissing = appConfig.cleanupRemoveMissingOriginalsPublished
-                    Task { [metadataStoreManager, toastCenter, repository, excludedPaths, removeMissing] in
+                    Task { [metadataStoreManager, toastCenter, repository] in
+                        let excludedPaths = await MainActor.run { appConfig.cleanupExcludedPathsPublished }
+                        let removeMissing = await MainActor.run { appConfig.cleanupRemoveMissingOriginalsPublished }
                         await repository.startActivity(message: NSLocalizedString("Cleaning metadata…", comment: "Cleanup in progress"))
                         toastCenter.setStatus(NSLocalizedString("Cleaning metadata…", comment: "Cleanup in progress"))
                         let result = await metadataStoreManager.store.cleanupMissingFiles(

@@ -51,9 +51,9 @@ struct SpectasiaCommands: Commands {
             Divider()
 
             Button("Cleanup Missing Metadata") {
-                let excludedPaths = appConfig.cleanupExcludedPathsPublished
-                let removeMissing = appConfig.cleanupRemoveMissingOriginalsPublished
-                Task { [metadataStoreManager, toastCenter, repository, excludedPaths, removeMissing] in
+                Task { [metadataStoreManager, toastCenter, repository] in
+                    let excludedPaths = await MainActor.run { appConfig.cleanupExcludedPathsPublished }
+                    let removeMissing = await MainActor.run { appConfig.cleanupRemoveMissingOriginalsPublished }
                     await repository.startActivity(message: NSLocalizedString("Cleaning metadata…", comment: "Cleanup in progress"))
                     toastCenter.setStatus(NSLocalizedString("Cleaning metadata…", comment: "Cleanup in progress"))
                     let result = await metadataStoreManager.store.cleanupMissingFiles(

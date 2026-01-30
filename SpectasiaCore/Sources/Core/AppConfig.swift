@@ -237,8 +237,11 @@ public class AppConfig: ObservableObject {
     }
 
     public func isCleanupPathProtected(_ url: URL) -> Bool {
-        let normalized = Self.normalizedPath(url.path)
-        return cleanupExcludedPathsPublished.contains(where: { normalized.hasPrefix($0) })
+        let candidateComponents = Self.pathComponents(for: url.path)
+        return cleanupExcludedPathsPublished.contains { exclusion in
+            let protectedComponents = Self.pathComponents(for: exclusion)
+            return candidateComponents.starts(with: protectedComponents)
+        }
     }
 
     // MARK: - Persistence
@@ -280,7 +283,11 @@ public class AppConfig: ObservableObject {
         URL(fileURLWithPath: path).standardizedFileURL.path
     }
 
+    private static func pathComponents(for path: String) -> [String] {
+        URL(fileURLWithPath: path).standardizedFileURL.pathComponents
+    }
+
     private static func defaultCleanupExcludedPaths() -> [String] {
-        [normalizedPath("/Volumes/")]
+        [normalizedPath("/Volumes")]
     }
 }
