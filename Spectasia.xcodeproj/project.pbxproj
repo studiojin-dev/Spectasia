@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		ACEDCA682F29AB7700B1E22C /* DirectoryPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA602F29AB7700B1E22C /* DirectoryPicker.swift */; };
-		ACEDCA6B2F29AB7700B1E22C /* SingleImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA652F29AB7700B1E22C /* SingleImageView.swift */; };
 		ACEDCA6C2F29AB7700B1E22C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA502F29AB7700B1E22C /* ContentView.swift */; };
 		ACEDCA6D2F29AB7700B1E22C /* SpectasiaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA5E2F29AB7700B1E22C /* SpectasiaApp.swift */; };
 		ACEDCA702F29AB7700B1E22C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA642F29AB7700B1E22C /* SettingsView.swift */; };
@@ -23,7 +22,6 @@
 		ACEDCA7F2F29AB7700B1E22C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ACEDCA4F2F29AB7700B1E22C /* Assets.xcassets */; };
 		ACEDCA802F29AB7700B1E22C /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = ACEDCA5A2F29AB7700B1E22C /* Info.plist */; };
 		ACEDCA812F29AB7700B1E22C /* DirectoryPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA602F29AB7700B1E22C /* DirectoryPicker.swift */; };
-		ACEDCA842F29AB7700B1E22C /* SingleImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA652F29AB7700B1E22C /* SingleImageView.swift */; };
 		ACEDCA852F29AB7700B1E22C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA502F29AB7700B1E22C /* ContentView.swift */; };
 		ACEDCA862F29AB7700B1E22C /* SpectasiaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA5E2F29AB7700B1E22C /* SpectasiaApp.swift */; };
 		ACEDCA892F29AB7700B1E22C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA642F29AB7700B1E22C /* SettingsView.swift */; };
@@ -35,7 +33,6 @@
 		ACEDCA952F29AB7700B1E22C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ACEDCA4F2F29AB7700B1E22C /* Assets.xcassets */; };
 		ACEDCA962F29AB7700B1E22C /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = ACEDCA5A2F29AB7700B1E22C /* Info.plist */; };
 		ACEDCA972F29AB7700B1E22C /* DirectoryPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA602F29AB7700B1E22C /* DirectoryPicker.swift */; };
-		ACEDCA9A2F29AB7700B1E22C /* SingleImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA652F29AB7700B1E22C /* SingleImageView.swift */; };
 		ACEDCA9B2F29AB7700B1E22C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA502F29AB7700B1E22C /* ContentView.swift */; };
 		ACEDCA9C2F29AB7700B1E22C /* SpectasiaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA5E2F29AB7700B1E22C /* SpectasiaApp.swift */; };
 		ACEDCA9F2F29AB7700B1E22C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA642F29AB7700B1E22C /* SettingsView.swift */; };
@@ -43,9 +40,9 @@
 		ACEDCAA22F29AB7700B1E22C /* ImageGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA622F29AB7700B1E22C /* ImageGridView.swift */; };
 		ACEDCAA32F29AB7700B1E22C /* MetadataPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA632F29AB7700B1E22C /* MetadataPanel.swift */; };
 		ACEDCAA92F29AB7700B1E22C /* SpectasiaLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA662F29AB7700B1E22C /* SpectasiaLayout.swift */; };
-		ACFCE2CA2F2C26CD001B9220 /* SingleImageView 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACFCE2C92F2C26CD001B9220 /* SingleImageView 2.swift */; };
-		ACFCE2CB2F2C26CD001B9220 /* SingleImageView 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACFCE2C92F2C26CD001B9220 /* SingleImageView 2.swift */; };
-		ACFCE2CC2F2C26CD001B9220 /* SingleImageView 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACFCE2C92F2C26CD001B9220 /* SingleImageView 2.swift */; };
+		ACFCE2CA2F2C26CD001B9220 /* SingleImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACFCE2C92F2C26CD001B9220 /* SingleImageView.swift */; };
+		ACFCE2CB2F2C26CD001B9220 /* SingleImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACFCE2C92F2C26CD001B9220 /* SingleImageView.swift */; };
+		ACFCE2CC2F2C26CD001B9220 /* SingleImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACFCE2C92F2C26CD001B9220 /* SingleImageView.swift */; };
 		ACFCE2FE2F2C2AFC001B9220 /* SpectasiaCore in Frameworks */ = {isa = PBXBuildFile; productRef = ACFCE2FD2F2C2AFC001B9220 /* SpectasiaCore */; };
 /* End PBXBuildFile section */
 
@@ -81,9 +78,8 @@
 		ACEDCA622F29AB7700B1E22C /* ImageGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageGridView.swift; sourceTree = "<group>"; };
 		ACEDCA632F29AB7700B1E22C /* MetadataPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataPanel.swift; sourceTree = "<group>"; };
 		ACEDCA642F29AB7700B1E22C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		ACEDCA652F29AB7700B1E22C /* SingleImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleImageView.swift; sourceTree = "<group>"; };
 		ACEDCA662F29AB7700B1E22C /* SpectasiaLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectasiaLayout.swift; sourceTree = "<group>"; };
-		ACFCE2C92F2C26CD001B9220 /* SingleImageView 2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SingleImageView 2.swift"; sourceTree = "<group>"; };
+		ACFCE2C92F2C26CD001B9220 /* SingleImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleImageView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -168,9 +164,8 @@
 				ACEDCA622F29AB7700B1E22C /* ImageGridView.swift */,
 				ACEDCA632F29AB7700B1E22C /* MetadataPanel.swift */,
 				ACEDCA642F29AB7700B1E22C /* SettingsView.swift */,
-				ACEDCA652F29AB7700B1E22C /* SingleImageView.swift */,
 				ACEDCA662F29AB7700B1E22C /* SpectasiaLayout.swift */,
-				ACFCE2C92F2C26CD001B9220 /* SingleImageView 2.swift */,
+				ACFCE2C92F2C26CD001B9220 /* SingleImageView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -337,14 +332,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				ACEDCA682F29AB7700B1E22C /* DirectoryPicker.swift in Sources */,
-				ACEDCA6B2F29AB7700B1E22C /* SingleImageView.swift in Sources */,
 				ACEDCA6C2F29AB7700B1E22C /* ContentView.swift in Sources */,
 				ACEDCA6D2F29AB7700B1E22C /* SpectasiaApp.swift in Sources */,
 				ACEDCA702F29AB7700B1E22C /* SettingsView.swift in Sources */,
 				ACEDCA722F29AB7700B1E22C /* GypsumDesignSystem.swift in Sources */,
 				ACEDCA732F29AB7700B1E22C /* ImageGridView.swift in Sources */,
 				ACEDCA742F29AB7700B1E22C /* MetadataPanel.swift in Sources */,
-				ACFCE2CB2F2C26CD001B9220 /* SingleImageView 2.swift in Sources */,
+				ACFCE2CB2F2C26CD001B9220 /* SingleImageView.swift in Sources */,
 				ACEDCA7A2F29AB7700B1E22C /* SpectasiaLayout.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -354,14 +348,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				ACEDCA812F29AB7700B1E22C /* DirectoryPicker.swift in Sources */,
-				ACEDCA842F29AB7700B1E22C /* SingleImageView.swift in Sources */,
 				ACEDCA852F29AB7700B1E22C /* ContentView.swift in Sources */,
 				ACEDCA862F29AB7700B1E22C /* SpectasiaApp.swift in Sources */,
 				ACEDCA892F29AB7700B1E22C /* SettingsView.swift in Sources */,
 				ACEDCA8B2F29AB7700B1E22C /* GypsumDesignSystem.swift in Sources */,
 				ACEDCA8C2F29AB7700B1E22C /* ImageGridView.swift in Sources */,
 				ACEDCA8D2F29AB7700B1E22C /* MetadataPanel.swift in Sources */,
-				ACFCE2CA2F2C26CD001B9220 /* SingleImageView 2.swift in Sources */,
+				ACFCE2CA2F2C26CD001B9220 /* SingleImageView.swift in Sources */,
 				ACEDCA932F29AB7700B1E22C /* SpectasiaLayout.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -371,14 +364,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				ACEDCA972F29AB7700B1E22C /* DirectoryPicker.swift in Sources */,
-				ACEDCA9A2F29AB7700B1E22C /* SingleImageView.swift in Sources */,
 				ACEDCA9B2F29AB7700B1E22C /* ContentView.swift in Sources */,
 				ACEDCA9C2F29AB7700B1E22C /* SpectasiaApp.swift in Sources */,
 				ACEDCA9F2F29AB7700B1E22C /* SettingsView.swift in Sources */,
 				ACEDCAA12F29AB7700B1E22C /* GypsumDesignSystem.swift in Sources */,
 				ACEDCAA22F29AB7700B1E22C /* ImageGridView.swift in Sources */,
 				ACEDCAA32F29AB7700B1E22C /* MetadataPanel.swift in Sources */,
-				ACFCE2CC2F2C26CD001B9220 /* SingleImageView 2.swift in Sources */,
+				ACFCE2CC2F2C26CD001B9220 /* SingleImageView.swift in Sources */,
 				ACEDCAA92F29AB7700B1E22C /* SpectasiaLayout.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
