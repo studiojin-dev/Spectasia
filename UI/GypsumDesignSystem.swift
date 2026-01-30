@@ -27,6 +27,7 @@ public enum GypsumFont {
     public static let headline = Font.system(size: 17, weight: .semibold)
     public static let body = Font.system(size: 15, weight: .regular)
     public static let caption = Font.system(size: 13, weight: .regular)
+    public static let caption2 = Font.system(size: 11, weight: .regular)
 }
 
 // MARK: - Gypsum Components

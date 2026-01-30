@@ -1,4 +1,7 @@
 import SwiftUI
+#if canImport(AppKit)
+import AppKit
+#endif
 import SpectasiaCore
 
 /// Grid view for browsing images with thumbnails
@@ -6,17 +9,35 @@ public struct ImageGridView: View {
     let images: [SpectasiaImage]
     let selectedImage: Binding<SpectasiaImage?>
     let backgroundTasks: Binding<Int>
-    let gridSize: CGFloat = 120
+    let sizeOption: ThumbnailSizeOption
     @EnvironmentObject private var metadataStoreManager: MetadataStoreManager
+
+    private var gridSize: CGFloat {
+        switch sizeOption {
+        case .small: return 88
+        case .medium: return 132
+        case .large: return 176
+        }
+    }
+
+    private var thumbnailSize: ThumbnailSize {
+        switch sizeOption {
+        case .small: return .small
+        case .medium: return .medium
+        case .large: return .large
+        }
+    }
 
     public init(
         images: [SpectasiaImage],
         selectedImage: Binding<SpectasiaImage?>,
-        backgroundTasks: Binding<Int>
+        backgroundTasks: Binding<Int>,
+        sizeOption: ThumbnailSizeOption
     ) {
         self.images = images
         self.selectedImage = selectedImage
         self.backgroundTasks = backgroundTasks
+        self.sizeOption = sizeOption
     }
 
     public var body: some View {
@@ -36,11 +57,12 @@ public struct ImageGridView: View {
                     GridItem(.adaptive(minimum: gridSize, maximum: gridSize), spacing: 2)
                 ], spacing: 2) {
                     ForEach(images, id: \.url) { spectasiaImage in
-                        ImageThumbnail(
-                            spectasiaImage: spectasiaImage,
-                            selectedImage: selectedImage,
-                            size: CGSize(width: gridSize, height: gridSize)
-                        )
+                    ImageThumbnail(
+                        spectasiaImage: spectasiaImage,
+                        selectedImage: selectedImage,
+                        size: CGSize(width: gridSize, height: gridSize),
+                        thumbnailSize: thumbnailSize
+                    )
                     }
                 }
                 .padding()
@@ -55,6 +77,7 @@ struct ImageThumbnail: View {
     let spectasiaImage: SpectasiaImage
     @Binding var selectedImage: SpectasiaImage?
     let size: CGSize
+    let thumbnailSize: ThumbnailSize
     @State private var thumbnail: Image?
     @State private var isLoading = true
     @State private var loadTask: Task<Void, Never>?
@@ -114,7 +137,7 @@ struct ImageThumbnail: View {
 
     private func loadThumbnail() {
         // Check if we already have a cached thumbnail
-        if let cachedThumbnailURL = spectasiaImage.thumbnails[.small] {
+        if let cachedThumbnailURL = spectasiaImage.thumbnails[thumbnailSize] {
             // Load from cache
             if let nsImage = NSImage(contentsOf: cachedThumbnailURL) {
                 self.thumbnail = Image(nsImage: nsImage)
@@ -130,7 +153,7 @@ struct ImageThumbnail: View {
             do {
                 let thumbnailURL = try await thumbnailService.generateThumbnail(
                     for: spectasiaImage.url,
-                    size: .small
+                    size: thumbnailSize
                 )
 
                 // Load the generated thumbnail
@@ -156,6 +179,7 @@ struct ImageThumbnail: View {
     ImageGridView(
         images: [],
         selectedImage: .constant(nil),
-        backgroundTasks: .constant(0)
+        backgroundTasks: .constant(0),
+        sizeOption: .medium
     )
 }

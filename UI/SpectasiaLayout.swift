@@ -12,6 +12,8 @@ public struct SpectasiaLayout: View {
     }
     @State private var showSettings: Bool = false
     @State private var directoryToAdd: URL? = nil
+    @State private var thumbnailSizeOption: ThumbnailSizeOption = .medium
+    @State private var lastViewModeMessage: String? = "Ready"
     @Binding private var images: [SpectasiaImage]
     @Binding private var selectedImage: SpectasiaImage?
     @Binding private var selectedDirectory: URL?
@@ -261,6 +263,17 @@ public struct SpectasiaLayout: View {
                             }
                             .pickerStyle(.segmented)
                             .padding(.horizontal)
+                            Text(lastViewModeMessage ?? "")
+                                .font(GypsumFont.caption)
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal)
+                            Picker("Thumbnail size", selection: $thumbnailSizeOption) {
+                                ForEach(ThumbnailSizeOption.allCases) { option in
+                                    Text(option.label).tag(option)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            .padding(.horizontal)
 
                             if isLoading {
                                 ProgressView()
@@ -272,7 +285,8 @@ public struct SpectasiaLayout: View {
                                     ImageGridView(
                                         images: images,
                                         selectedImage: $selectedImage,
-                                        backgroundTasks: $backgroundTasks
+                                        backgroundTasks: $backgroundTasks,
+                                        sizeOption: thumbnailSizeOption
                                     )
                                 case .list:
                                     ImageListView(
