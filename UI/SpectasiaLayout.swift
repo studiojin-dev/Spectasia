@@ -207,21 +207,16 @@ public struct SpectasiaLayout: View {
             },
                               content: {
                 Group {
-                    if selectedDirectory == nil {
-                        VStack(spacing: 12) {
-                            Image(systemName: "folder.badge.plus")
-                                .font(.system(size: 48))
-                                .foregroundColor(GypsumColor.textSecondary)
-                            Text("Add or load a folder")
-                                .font(.headline)
-                            Text("Watch folders in the sidebar to begin indexing and viewing their images.")
-                                .font(GypsumFont.caption)
-                                .foregroundColor(GypsumColor.textSecondary)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 32)
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(GypsumColor.background)
+                    if directoryScanManager.directoryTree.isEmpty {
+                        InitialDirectorySelectionView(
+                            directoryToAdd: $directoryToAdd,
+                            hasWatchDirectories: false
+                        )
+                    } else if selectedDirectory == nil {
+                        InitialDirectorySelectionView(
+                            directoryToAdd: $directoryToAdd,
+                            hasWatchDirectories: true
+                        )
                     } else {
                         let indexingCount = directoryScanManager.activeIndexingPaths.count
                         let activityStatus: String = {
@@ -338,6 +333,56 @@ public struct SpectasiaLayout: View {
         .navigationTitle("Library")
         .sheet(isPresented: $showSettings) {
             SettingsView()
+        }
+    }
+
+    private struct InitialDirectorySelectionView: View {
+        @Binding var directoryToAdd: URL?
+        let hasWatchDirectories: Bool
+
+        private var iconName: String {
+            hasWatchDirectories ? "tray" : "folder.badge.plus"
+        }
+
+        private var titleText: String {
+            hasWatchDirectories ? "Select a watched folder" : "No watch folders configured yet"
+        }
+
+        private var subtitleText: String {
+            if hasWatchDirectories {
+                return "Choose a folder from the directory tree on the left to begin browsing its images."
+            }
+            return "Add a folder to start scanning metadata, generating thumbnails, and running AI analysis."
+        }
+
+        private var manualInstruction: String {
+            hasWatchDirectories
+                ? "Manual selection only — tap a tree node once you've added the folder."
+                : "Manual selection only — the app won’t prompt automatically on launch."
+        }
+
+        var body: some View {
+            VStack(spacing: 16) {
+                Image(systemName: iconName)
+                    .font(.system(size: 48))
+                    .foregroundColor(GypsumColor.textSecondary)
+                Text(titleText)
+                    .font(.title3)
+                Text(subtitleText)
+                    .font(GypsumFont.caption)
+                    .foregroundColor(GypsumColor.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+                DirectoryPicker(
+                    prompt: hasWatchDirectories ? "Add another folder" : "Add folder",
+                    selectedURL: $directoryToAdd
+                )
+                Text(manualInstruction)
+                    .font(GypsumFont.caption)
+                    .foregroundColor(.secondary)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(GypsumColor.background)
         }
     }
 
