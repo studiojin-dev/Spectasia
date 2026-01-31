@@ -83,10 +83,6 @@ struct ImageThumbnail: View {
     @State private var loadTask: Task<Void, Never>?
     @EnvironmentObject private var metadataStoreManager: MetadataStoreManager
 
-    private var thumbnailService: ThumbnailService {
-        ThumbnailService(metadataStore: metadataStoreManager.store)
-    }
-
     private var isSelected: Bool {
         selectedImage?.url == spectasiaImage.url
     }
@@ -149,20 +145,25 @@ struct ImageThumbnail: View {
         // Generate thumbnail using ThumbnailService
         isLoading = true
         loadTask?.cancel()
-        loadTask = Task {
+        let metadataStore = metadataStoreManager.store
+        let sourceURL = spectasiaImage.url
+        let size = thumbnailSize
+        loadTask = Task(priority: .userInitiated) {
             do {
-                let thumbnailURL = try await thumbnailService.generateThumbnail(
-                    for: spectasiaImage.url,
-                    size: thumbnailSize
-                )
+                let thumbnailURL = try await Task.detached(priority: .utility) {
+                    let service = ThumbnailService(metadataStore: metadataStore)
+                    return try await service.generateThumbnail(for: sourceURL, size: size)
+                }.value
 
-                // Load the generated thumbnail
+                try Task.checkCancellation()
+
                 if let nsImage = NSImage(contentsOf: thumbnailURL) {
-                    if Task.isCancelled {
-                        return
-                    }
                     await MainActor.run {
                         self.thumbnail = Image(nsImage: nsImage)
+                        self.isLoading = false
+                    }
+                } else {
+                    await MainActor.run {
                         self.isLoading = false
                     }
                 }

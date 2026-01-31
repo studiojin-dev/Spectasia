@@ -260,10 +260,6 @@ private struct FilmstripThumb: View {
 
     private let thumbSize: CGFloat = 70
 
-    private var thumbnailService: ThumbnailService {
-        ThumbnailService(metadataStore: metadataStoreManager.store)
-    }
-
     private var thumbnailSize: ThumbnailSize {
         .medium
     }
@@ -321,12 +317,18 @@ private struct FilmstripThumb: View {
 
         isLoading = true
         loadTask?.cancel()
-        loadTask = Task {
+        let metadataStore = metadataStoreManager.store
+        let sourceURL = image.url
+        let size = thumbnailSize
+        loadTask = Task(priority: .userInitiated) {
             do {
-                let thumbnailURL = try await thumbnailService.generateThumbnail(
-                    for: image.url,
-                    size: thumbnailSize
-                )
+                let thumbnailURL = try await Task.detached(priority: .utility) {
+                    let service = ThumbnailService(metadataStore: metadataStore)
+                    return try await service.generateThumbnail(for: sourceURL, size: size)
+                }.value
+
+                try Task.checkCancellation()
+
                 if let fetched = NSImage(contentsOf: thumbnailURL) {
                     await MainActor.run {
                         thumbnail = Image(nsImage: fetched)

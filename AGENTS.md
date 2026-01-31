@@ -143,6 +143,7 @@ If create new file(s), tell the user to add the files to the xcode project manua
 - [x] EXIF 오버레이 (위치 선택: 상/하/좌/우)
 - [x] 뷰 모드 전환 State Machine
 - [x] 썸네일 크기 조절 UI (작음/중간/큼)
+- [x] 썸네일/로딩 작업을 `Task.detached`으로 백그라운드 실행해 뷰 모드 전환 중 UI 블로킹 최소화
 
 #### Phase 3: AI 기능 확장
 
@@ -155,13 +156,13 @@ If create new file(s), tell the user to add the files to the xcode project manua
 
 #### Phase 4: 앨범 시스템
 
-- [ ] XMP 앨범 메타데이터 확장
-- [ ] 태그 기반 앨범
-- [ ] 날짜 기반 앨범 (연도/월/일)
-- [ ] 위치 기반 앨범 (GPS)
-- [ ] 사람 기반 앨범 (얼굴 감지 활용)
-- [ ] 반려동물 기반 앨범
-- [ ] 앨범 편집 (삭제/이름변경/병합/커버)
+- [x] XMP 앨범 메타데이터 확장
+- [x] 태그 기반 앨범
+- [x] 날짜 기반 앨범 (연도/월/일)
+- [x] 위치 기반 앨범 (GPS)
+- [x] 사람 기반 앨범 (얼굴 감지 활용)
+- [x] 반려동물 기반 앨범
+- [x] 앨범 편집 (삭제/이름변경/병합/커버)
 
 #### Phase 5: UX 향상
 
@@ -177,17 +178,6 @@ If create new file(s), tell the user to add the files to the xcode project manua
 - [ ] HDR 이미지 지원 및 톤 매핑
 - [ ] 캐시 정리 전략 (LRU, 크기 제한)
 - [ ] XMP 파싱 개선 (XMLParser 사용)
-
----
-
-### ⚠️ 알려진 빌드 이슈
-
-**Xcode 빌드 실패 (CRITICAL)**
-
-- 링커 오류: `symbol(s) not found for architecture arm64`
-- 상태: 미해결 (30+ 빌드 시도)
-- 원인 추정: Xcode 프로젝트 설정 문제 또는 파일 경로 불일치
-- 권장 조치: Xcode IDE에서 프로젝트 파일 참조 수정 필요
 
 ---
 
