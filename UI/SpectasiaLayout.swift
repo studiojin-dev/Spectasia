@@ -8,6 +8,8 @@ public struct SpectasiaLayout: View {
     @EnvironmentObject private var repository: ObservableImageRepository
     @EnvironmentObject private var directoryScanManager: DirectoryScanManager
     @EnvironmentObject private var permissionManager: PermissionManager
+    @EnvironmentObject private var albumManager: AlbumManager
+    @EnvironmentObject private var toastCenter: ToastCenter
     private var accessibleDirectories: [String] {
         permissionManager.grantedDirectories.sorted()
     }
@@ -203,6 +205,31 @@ public struct SpectasiaLayout: View {
                                                 .truncationMode(.middle)
                                         }
                                     }
+                                }
+                            }
+                        }
+
+                        let derivedAlbums = albumManager.derivedAlbums(from: repository.images)
+                        if !albumManager.albums.isEmpty || !derivedAlbums.isEmpty {
+                            Divider()
+                            GypsumCard {
+                                VStack(alignment: .leading, spacing: 10) {
+                                    Text("Albums")
+                                        .font(GypsumFont.headline)
+                                        .foregroundColor(GypsumColor.text)
+                                    AlbumListView(onAlbumSelect: { album, matches in
+                                        if let first = matches.first {
+                                            selectedImage = first
+                                        }
+                                        toastCenter.show(
+                                            String(
+                                                format: NSLocalizedString("Album %@ selected (%d images)", comment: "Album toast"),
+                                                album.name,
+                                                matches.count
+                                            )
+                                        )
+                                    })
+                                        .frame(maxHeight: 220)
                                 }
                             }
                         }
@@ -519,6 +546,8 @@ public struct SpectasiaLayout: View {
             appConfig: appConfig,
             permissionManager: permissionManager
         )
+        let albumManager = AlbumManager(rootDirectory: metadataManager.rootDirectory)
+        let toastCenter = ToastCenter()
 
         return SpectasiaLayout(
             images: .constant(repository.images),
@@ -531,5 +560,8 @@ public struct SpectasiaLayout: View {
         )
         .environmentObject(repository)
         .environmentObject(scanManager)
+        .environmentObject(permissionManager)
+        .environmentObject(albumManager)
+        .environmentObject(toastCenter)
     }
 }
