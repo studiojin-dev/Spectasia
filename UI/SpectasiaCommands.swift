@@ -3,10 +3,22 @@ import SwiftUI
 import SpectasiaCore
 
 struct SpectasiaCommands: Commands {
-    @EnvironmentObject private var repository: ObservableImageRepository
-    @EnvironmentObject private var toastCenter: ToastCenter
-    @EnvironmentObject private var metadataStoreManager: MetadataStoreManager
-    @EnvironmentObject private var appConfig: AppConfig
+    @ObservedObject private var repository: ObservableImageRepository
+    private let toastCenter: ToastCenter
+    private let metadataStoreManager: MetadataStoreManager
+    private let appConfig: AppConfig
+
+    init(
+        repository: ObservableImageRepository,
+        toastCenter: ToastCenter,
+        metadataStoreManager: MetadataStoreManager,
+        appConfig: AppConfig
+    ) {
+        self.repository = repository
+        self.toastCenter = toastCenter
+        self.metadataStoreManager = metadataStoreManager
+        self.appConfig = appConfig
+    }
 
     var body: some Commands {
         CommandMenu("File") {

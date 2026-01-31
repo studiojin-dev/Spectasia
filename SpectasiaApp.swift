@@ -49,7 +49,12 @@ struct SpectasiaApp: App {
                 .environmentObject(albumManager)
         }
         .commands {
-            SpectasiaCommands()
+            SpectasiaCommands(
+                repository: repository,
+                toastCenter: toastCenter,
+                metadataStoreManager: metadataStoreManager,
+                appConfig: appConfig
+            )
         }
     }
 }
