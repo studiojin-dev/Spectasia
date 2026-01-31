@@ -167,13 +167,15 @@ public final class DirectoryScanManager: ObservableObject {
         let metadataIndexRef = metadataIndexStore
         let extensions = imageExtensions
 
+        let autoAIEnabled = appConfig.isAutoAIEnabledPublished
         let scanTask = Task.detached(priority: .background) {
             await DirectoryScanManager.performScan(
                 root: directoryURL,
                 metadataStore: metadataStoreRef,
                 metadataIndexStore: metadataIndexRef,
                 imageExtensions: extensions,
-                language: language
+                language: language,
+                autoAIEnabled: autoAIEnabled
             )
         }
 
@@ -269,7 +271,8 @@ public final class DirectoryScanManager: ObservableObject {
         metadataStore: MetadataStore,
         metadataIndexStore: MetadataIndexStore,
         imageExtensions: Set<String>,
-        language: AppLanguage
+        language: AppLanguage,
+        autoAIEnabled: Bool
     ) async {
         var queue: [URL] = [root]
         while !queue.isEmpty {
@@ -286,7 +289,8 @@ public final class DirectoryScanManager: ObservableObject {
                             metadataStore: metadataStore,
                             metadataIndexStore: metadataIndexStore,
                             imageExtensions: imageExtensions,
-                            language: language
+                            language: language,
+                            autoAIEnabled: autoAIEnabled
                         )
                     }
                 }
@@ -302,7 +306,8 @@ public final class DirectoryScanManager: ObservableObject {
         metadataStore: MetadataStore,
         metadataIndexStore: MetadataIndexStore,
         imageExtensions: Set<String>,
-        language: AppLanguage
+        language: AppLanguage,
+        autoAIEnabled: Bool
     ) async -> [URL] {
         var discoveredDirectories: [URL] = []
         let fileManager = FileManager.default
@@ -354,13 +359,14 @@ public final class DirectoryScanManager: ObservableObject {
                 size: size,
                 modificationDate: modificationDate
             )
-            await MetadataTaskRunner.scheduleTasks(
-                fileURL: url,
-                modificationDate: modificationDate,
-                metadataStore: metadataStore,
-                metadataIndexStore: metadataIndexStore,
-                language: language
-            )
+                await MetadataTaskRunner.scheduleTasks(
+                    fileURL: url,
+                    modificationDate: modificationDate,
+                    metadataStore: metadataStore,
+                    metadataIndexStore: metadataIndexStore,
+                    language: language,
+                    autoAIEnabled: autoAIEnabled
+                )
         }
 
         await metadataIndexStore.updateDirectory(
@@ -379,7 +385,8 @@ public final class DirectoryScanManager: ObservableObject {
             modificationDate: Date,
             metadataStore: MetadataStore,
             metadataIndexStore: MetadataIndexStore,
-            language: AppLanguage
+            language: AppLanguage,
+            autoAIEnabled: Bool
         ) async {
             if await metadataIndexStore.needsThumbnail(for: fileURL, since: modificationDate) {
                 Task.detached(priority: .background) {
@@ -390,7 +397,7 @@ public final class DirectoryScanManager: ObservableObject {
                     )
                 }
             }
-            if await metadataIndexStore.needsAIAnalysis(for: fileURL, since: modificationDate) {
+            if autoAIEnabled, await metadataIndexStore.needsAIAnalysis(for: fileURL, since: modificationDate) {
                 Task.detached(priority: .background) {
                     await runAITask(
                         fileURL: fileURL,
@@ -423,9 +430,11 @@ public final class DirectoryScanManager: ObservableObject {
             language: AppLanguage
         ) async {
             let aiService = AIService()
+            let xmpService = XMPService(metadataStore: metadataStore)
             do {
-                _ = try aiService.analyze(imageAt: fileURL, language: language)
-                await metadataIndexStore.markAIAnalyzed(for: fileURL, at: Date())
+                let result = try aiService.analyzeDetailed(imageAt: fileURL, language: language)
+                try await xmpService.writeTags(url: fileURL, tags: result.tags)
+                await metadataIndexStore.updateAIAnalysis(for: fileURL, result: result, at: Date())
             } catch {
                 CoreLog.error("AI analysis failed for \(fileURL.path): \(error.localizedDescription)", category: "DirectoryScanManager")
             }

@@ -34,6 +34,32 @@ public struct DirectoryRecord: Codable, Sendable {
 
 /// Metadata for files discovered during indexing.
 @available(macOS 10.15, *)
+public struct AIAnalysisSnapshot: Codable, Sendable {
+    public let tags: [String]
+    public let animals: [String]
+    public let objects: [String]
+    public let faceCount: Int
+    public let mood: String?
+    public let analyzedAt: Date
+
+    public init(
+        tags: [String],
+        animals: [String],
+        objects: [String],
+        faceCount: Int,
+        mood: String?,
+        analyzedAt: Date
+    ) {
+        self.tags = tags
+        self.animals = animals
+        self.objects = objects
+        self.faceCount = faceCount
+        self.mood = mood
+        self.analyzedAt = analyzedAt
+    }
+}
+
+@available(macOS 10.15, *)
 public struct FileRecord: Codable, Sendable {
     public let path: String
     public var directoryPath: String
@@ -41,6 +67,7 @@ public struct FileRecord: Codable, Sendable {
     public var modificationDate: Date
     public var thumbnailGeneratedAt: Date?
     public var aiAnalyzedAt: Date?
+    public var aiSnapshot: AIAnalysisSnapshot?
 
     public init(
         path: String,
@@ -48,7 +75,8 @@ public struct FileRecord: Codable, Sendable {
         size: Int64,
         modificationDate: Date,
         thumbnailGeneratedAt: Date? = nil,
-        aiAnalyzedAt: Date? = nil
+        aiAnalyzedAt: Date? = nil,
+        aiSnapshot: AIAnalysisSnapshot? = nil
     ) {
         self.path = path
         self.directoryPath = directoryPath
@@ -56,6 +84,7 @@ public struct FileRecord: Codable, Sendable {
         self.modificationDate = modificationDate
         self.thumbnailGeneratedAt = thumbnailGeneratedAt
         self.aiAnalyzedAt = aiAnalyzedAt
+        self.aiSnapshot = aiSnapshot
     }
 }
 
@@ -155,6 +184,24 @@ public actor MetadataIndexStore {
     public func markAIAnalyzed(for fileURL: URL, at date: Date) {
         updateFileRecord(fileURL: fileURL) { record in
             record.aiAnalyzedAt = date
+        }
+    }
+
+    public func updateAIAnalysis(
+        for fileURL: URL,
+        result: AIAnalysisResult,
+        at date: Date
+    ) {
+        updateFileRecord(fileURL: fileURL) { record in
+            record.aiAnalyzedAt = date
+            record.aiSnapshot = AIAnalysisSnapshot(
+                tags: result.tags,
+                animals: result.animals,
+                objects: result.objects,
+                faceCount: result.faceCount,
+                mood: result.mood,
+                analyzedAt: date
+            )
         }
     }
 

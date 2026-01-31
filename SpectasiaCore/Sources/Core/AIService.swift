@@ -4,13 +4,40 @@ import Vision
 // MARK: - Constants
 
 /// Maximum number of classification labels to return
-private let maxClassificationLabels = 5
+private let maxClassificationLabels = 6
+
+// MARK: - Models
+
+/// Represents the detailed output of an AI analysis run
+@available(macOS 10.15, *)
+public struct AIAnalysisResult: Sendable {
+    public let tags: [String]
+    public let animals: [String]
+    public let objects: [String]
+    public let faceCount: Int
+    public let mood: String?
+
+    public init(
+        tags: [String],
+        animals: [String],
+        objects: [String],
+        faceCount: Int,
+        mood: String?
+    ) {
+        self.tags = tags
+        self.animals = animals
+        self.objects = objects
+        self.faceCount = faceCount
+        self.mood = mood
+    }
+}
 
 // MARK: - Protocol
 
 /// Protocol for image analysis (allows mocking in tests)
+@available(macOS 10.15, *)
 public protocol ImageAnalyzing {
-    func analyze(imageAt url: URL, language: AppLanguage) throws -> [String]
+    func analyze(imageAt url: URL, language: AppLanguage) throws -> AIAnalysisResult
 }
 
 // MARK: - Service
@@ -21,18 +48,17 @@ public class AIService {
     private let analyzer: ImageAnalyzing
 
     public init(analyzer: ImageAnalyzing? = nil) {
-        // Use provided analyzer or create default
         self.analyzer = analyzer ?? VisionImageAnalyzer()
     }
 
     /// Analyze an image and return tags
-    /// - Parameters:
-    ///   - url: URL of the image file
-    ///   - language: Language for tags
-    /// - Returns: Array of tag strings
-    /// - Throws: AIServiceError if analysis fails
     public func analyze(imageAt url: URL, language: AppLanguage = .english) throws -> [String] {
-        return try analyzer.analyze(imageAt: url, language: language)
+        try analyzer.analyze(imageAt: url, language: language).tags
+    }
+
+    /// Analyze an image and return the full AI analysis result
+    public func analyzeDetailed(imageAt url: URL, language: AppLanguage = .english) throws -> AIAnalysisResult {
+        try analyzer.analyze(imageAt: url, language: language)
     }
 }
 
@@ -41,55 +67,102 @@ public class AIService {
 /// Default implementation using Vision Framework
 @available(macOS 10.15, *)
 class VisionImageAnalyzer: ImageAnalyzing {
-    func analyze(imageAt url: URL, language: AppLanguage) throws -> [String] {
-        // Check if file exists
+    func analyze(imageAt url: URL, language: AppLanguage) throws -> AIAnalysisResult {
         guard FileManager.default.fileExists(atPath: url.path) else {
             throw AIServiceError.fileNotFound
         }
 
-        // Load image
         guard let image = UIImage(contentsOfFile: url.path) else {
             throw AIServiceError.cannotLoadImage
         }
 
-        // Perform classification
-        return try performClassification(on: image.cgImage, language: language)
+        return try performDetailedAnalysis(on: image.cgImage, language: language)
     }
 
-    private func performClassification(on cgImage: CGImage, language: AppLanguage) throws -> [String] {
-        var tags: [String] = []
-
-        // Create classification request
-        let request = VNClassifyImageRequest()
-        request.revision = VNClassifyImageRequestRevision1
-
-        // Create handler
+    private func performDetailedAnalysis(on cgImage: CGImage, language: AppLanguage) throws -> AIAnalysisResult {
         let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
 
-        // Perform request
-        try handler.perform([request])
+        let classificationRequest = VNClassifyImageRequest()
+        classificationRequest.revision = VNClassifyImageRequestRevision1
 
-        // Extract results
-        guard let observations = request.results else {
-            return tags
+        let faceRequest = VNDetectFaceRectanglesRequest()
+
+        var animalRequest: VNRecognizeAnimalsRequest?
+        if #available(macOS 12.0, *) {
+            let request = VNRecognizeAnimalsRequest()
+            request.revision = VNRecognizeAnimalsRequestRevision1
+            animalRequest = request
         }
 
-        // Convert observations to tags
-        for observation in observations.prefix(maxClassificationLabels) {
-            let label = observation.identifier
-            tags.append(label.lowercased())
-        }
+        var requests: [VNRequest] = [classificationRequest, faceRequest]
+        if let animalRequest { requests.append(animalRequest) }
 
-        // Localize if needed
-        if language == .korean {
-            tags = tags.map { localizeTag($0, to: .korean) }
-        }
+        try handler.perform(requests)
 
-        return tags
+        let tags = extractClassificationTags(from: classificationRequest, language: language)
+        let faceCount = faceRequest.results?.count ?? 0
+        let animals = (animalRequest?.results as? [VNRecognizedObjectObservation])?
+            .compactMap { $0.labels.first?.identifier.lowercased() } ?? []
+        let objects = deriveObjectTags(from: tags, excluding: animals)
+
+        let mood = determineMood(from: tags, language: language)
+
+        return AIAnalysisResult(
+            tags: Array(tags.prefix(maxClassificationLabels)),
+            animals: Array(Set(animals)).sorted(),
+            objects: Array(Set(objects)).sorted(),
+            faceCount: faceCount,
+            mood: mood
+        )
     }
 
-    private func localizeTag(_ tag: String, to language: AppLanguage) -> String {
-        // Simple tag localization (in production, use proper localization)
+    private func extractClassificationTags(from request: VNClassifyImageRequest, language: AppLanguage) -> [String] {
+        let observations = request.results ?? []
+        let rawTags = observations.prefix(maxClassificationLabels).map { $0.identifier.lowercased() }
+        if language == .korean {
+            return rawTags.map { localizeTag($0) }
+        }
+        return rawTags
+    }
+
+    private func determineMood(from tags: [String], language: AppLanguage) -> String? {
+        let moodMap: [String: (english: String, korean: String)] = [
+            "sunset": ("Quiet", "고요함"),
+            "sunrise": ("Fresh", "상쾌함"),
+            "night": ("Moody", "몽환적"),
+            "storm": ("Dramatic", "극적인"),
+            "snow": ("Calm", "차분한"),
+            "rain": ("Cozy", "포근한"),
+            "smile": ("Joyful", "기쁨"),
+            "party": ("Lively", "활기찬"),
+            "city": ("Urban", "도시적인"),
+            "beach": ("Relaxed", "편안한"),
+            "mountain": ("Adventurous", "모험적인"),
+            "forest": ("Wild", "야생의"),
+            "dog": ("Playful", "명랑한"),
+            "cat": ("Serene", "평온한"),
+        ]
+
+        for tag in tags {
+            if let mood = moodMap[tag.lowercased()] {
+                return language == .korean ? mood.korean : mood.english
+            }
+        }
+
+        return nil
+    }
+
+    private func deriveObjectTags(from tags: [String], excluding animals: [String]) -> [String] {
+        let animalSet = Set(animals.map { $0.lowercased() })
+        let objectVocabulary: Set<String> = [
+            "car", "building", "tree", "computer", "phone", "boat", "bicycle", "chair",
+            "table", "door", "window", "bag", "cup", "bottle", "desk", "camera", "lamp"
+        ]
+        return Array(Set(tags.filter { objectVocabulary.contains($0.lowercased()) && !animalSet.contains($0.lowercased()) }))
+            .sorted()
+    }
+
+    private func localizeTag(_ tag: String) -> String {
         let translations: [String: String] = [
             "nature": "자연",
             "landscape": "풍경",

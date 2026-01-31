@@ -146,12 +146,12 @@ If create new file(s), tell the user to add the files to the xcode project manua
 
 #### Phase 3: AI 기능 확장
 
-- [ ] 얼굴 감지 (`VNDetectHumanFaceRectanglesRequest`)
-- [ ] 동물 감지 (`VNRecognizeAnimalsRequest`)
-- [ ] 객체 감지/태깅
-- [ ] 분위기/카테고리 분석
-- [ ] AI 자동 분석 모드 (`aiAutoAnalysis` 토글)
-- [ ] AI 분석 진행 추적 UI
+- [x] 얼굴 감지 (`VNDetectHumanFaceRectanglesRequest`)
+- [x] 동물 감지 (`VNRecognizeAnimalsRequest`)
+- [x] 객체 감지/태깅
+- [x] 분위기/카테고리 분석
+- [x] AI 자동 분석 모드 (`aiAutoAnalysis` 토글)
+- [x] AI 분석 진행 추적 UI
 
 #### Phase 4: 앨범 시스템
 

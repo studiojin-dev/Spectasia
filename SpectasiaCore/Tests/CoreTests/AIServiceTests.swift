@@ -4,13 +4,23 @@ import XCTest
 // Mock Analyzer for testing
 class MockImageAnalyzer: ImageAnalyzing {
     var mockTags: [String] = []
+    var mockAnimals: [String] = []
+    var mockObjects: [String] = []
+    var mockFaces = 0
+    var mockMood: String? = nil
     var mockShouldThrow = false
 
-    func analyze(imageAt url: URL, language: AppLanguage) throws -> [String] {
+    func analyze(imageAt url: URL, language: AppLanguage) throws -> AIAnalysisResult {
         if mockShouldThrow {
             throw AIServiceError.analysisFailed
         }
-        return mockTags
+        return AIAnalysisResult(
+            tags: mockTags,
+            animals: mockAnimals,
+            objects: mockObjects,
+            faceCount: mockFaces,
+            mood: mockMood
+        )
     }
 }
 
@@ -92,6 +102,24 @@ final class AIServiceTests: XCTestCase {
         XCTAssertEqual(tags, [], "Should return empty tags when no results")
     }
 
+    func testDetailedAnalysisIncludesExtraInsights() throws {
+        let mockAnalyzer = MockImageAnalyzer()
+        mockAnalyzer.mockTags = ["nature"]
+        mockAnalyzer.mockAnimals = ["dog"]
+        mockAnalyzer.mockObjects = ["car"]
+        mockAnalyzer.mockFaces = 2
+        mockAnalyzer.mockMood = "Calm"
+        aiService = AIService(analyzer: mockAnalyzer)
+
+        let result = try aiService.analyzeDetailed(imageAt: testImageFile, language: .english)
+
+        XCTAssertEqual(result.tags, ["nature"])
+        XCTAssertEqual(result.animals, ["dog"])
+        XCTAssertEqual(result.objects, ["car"])
+        XCTAssertEqual(result.faceCount, 2)
+        XCTAssertEqual(result.mood, "Calm")
+    }
+
     func testDefaultAnalyzerUsed() throws {
         // Given: AIService without custom analyzer
         aiService = AIService()
@@ -149,5 +177,6 @@ final class AIServiceTests: XCTestCase {
         ("testHandlesNonExistentFile", testHandlesNonExistentFile),
         ("testReturnsEmptyTagsWhenNoAnalysis", testReturnsEmptyTagsWhenNoAnalysis),
         ("testDefaultAnalyzerUsed", testDefaultAnalyzerUsed),
+        ("testDetailedAnalysisIncludesExtraInsights", testDetailedAnalysisIncludesExtraInsights),
     ]
 }

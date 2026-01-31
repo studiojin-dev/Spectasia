@@ -120,6 +120,35 @@ public struct MetadataPanel: View {
                             .font(GypsumFont.caption2)
                             .foregroundColor(.secondary)
                     }
+                    if let snapshot = fileRecord?.aiSnapshot {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("AI insights")
+                                .font(GypsumFont.caption)
+                                .foregroundColor(GypsumColor.text)
+                            HStack {
+                                Text("Faces: \(snapshot.faceCount)")
+                                    .font(GypsumFont.caption2)
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                if let mood = snapshot.mood {
+                                    Text("Mood: \(mood)")
+                                        .font(GypsumFont.caption2)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                            if !snapshot.animals.isEmpty {
+                                Text("Animals: \(snapshot.animals.joined(separator: ", "))")
+                                    .font(GypsumFont.caption2)
+                                    .foregroundColor(.secondary)
+                            }
+                            if !snapshot.objects.isEmpty {
+                                Text("Objects: \(snapshot.objects.joined(separator: ", "))")
+                                    .font(GypsumFont.caption2)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        .padding(.top, 4)
+                    }
                 } else {
                     Text("Waiting for metadata indexing")
                         .font(GypsumFont.caption)
