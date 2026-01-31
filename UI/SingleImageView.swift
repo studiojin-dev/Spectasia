@@ -132,6 +132,23 @@ public struct SingleImageView: View {
                     resetZoom()
                 }
         )
+        #if os(macOS)
+        .overlay(
+            TrackpadSwipeDetector(
+                onSwipeLeft: {
+                    if let next = next {
+                        onSelectImage(next)
+                    }
+                },
+                onSwipeRight: {
+                    if let previous = previous {
+                        onSelectImage(previous)
+                    }
+                }
+            )
+            .allowsHitTesting(false)
+        )
+        #endif
     }
 }
 
@@ -418,3 +435,67 @@ private enum OverlayPosition: CaseIterable {
         return all.first ?? self
     }
 }
+
+#if os(macOS)
+private struct TrackpadSwipeDetector: NSViewRepresentable {
+    let onSwipeLeft: () -> Void
+    let onSwipeRight: () -> Void
+
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView(frame: .zero)
+        context.coordinator.install()
+        return view
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) {
+        // No dynamic updates needed.
+    }
+
+    func dismantleNSView(_ nsView: NSView, coordinator: Coordinator) {
+        Task { coordinator.cleanup() }
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onSwipeLeft: onSwipeLeft, onSwipeRight: onSwipeRight)
+    }
+
+    @MainActor
+    final class Coordinator {
+        let onSwipeLeft: () -> Void
+        let onSwipeRight: () -> Void
+        private var monitor: Any?
+
+        init(onSwipeLeft: @escaping () -> Void, onSwipeRight: @escaping () -> Void) {
+            self.onSwipeLeft = onSwipeLeft
+            self.onSwipeRight = onSwipeRight
+        }
+
+        func install() {
+            guard monitor == nil else { return }
+            monitor = NSEvent.addLocalMonitorForEvents(matching: .swipe) { [weak self] event in
+                guard let self = self else { return event }
+                if event.momentumPhase != [] {
+                    return event
+                }
+                if abs(event.deltaX) > abs(event.deltaY) {
+                    if event.deltaX < 0 {
+                        self.onSwipeLeft()
+                    } else if event.deltaX > 0 {
+                        self.onSwipeRight()
+                    }
+                    return nil
+                }
+                return event
+            }
+        }
+
+        func cleanup() {
+            if let monitor = monitor {
+                NSEvent.removeMonitor(monitor)
+                self.monitor = nil
+            }
+        }
+
+    }
+}
+#endif

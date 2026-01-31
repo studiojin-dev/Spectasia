@@ -39,12 +39,32 @@ public struct SpectasiaImage: Sendable, Identifiable, Equatable {
 
 /// Protocol for background task coordination
 @available(macOS 10.15, *)
+public struct BackgroundQueueSummary: Sendable, Equatable {
+    public let thumbnailTasks: Int
+    public let aiTasks: Int
+    public let isProcessing: Bool
+
+    public init(thumbnailTasks: Int, aiTasks: Int, isProcessing: Bool) {
+        self.thumbnailTasks = thumbnailTasks
+        self.aiTasks = aiTasks
+        self.isProcessing = isProcessing
+    }
+
+    public var totalTasks: Int { thumbnailTasks + aiTasks }
+
+    public var description: String {
+        "Queue: \(thumbnailTasks) thumbnail task(s), \(aiTasks) AI task(s)"
+    }
+}
+
+@available(macOS 10.15, *)
 public protocol BackgroundCoordinating: Actor {
     func queueThumbnailGeneration(for url: URL, size: ThumbnailSize, priority: TaskPriority, regenerate: Bool)
     func queueAIAnalysis(for url: URL, priority: TaskPriority)
     func startProcessing()
     func pauseProcessing()
     func getProcessingStatus() -> String
+    func queueSummary() -> BackgroundQueueSummary
 }
 
 /// Task priority for background processing
@@ -109,6 +129,14 @@ public actor BackgroundCoordinator: BackgroundCoordinating {
     public func getProcessingStatus() -> String {
         let totalTasks = thumbnailQueue.count + aiQueue.count
         return "Processing \(totalTasks) tasks"
+    }
+
+    public func queueSummary() -> BackgroundQueueSummary {
+        BackgroundQueueSummary(
+            thumbnailTasks: thumbnailQueue.count,
+            aiTasks: aiQueue.count,
+            isProcessing: isProcessing
+        )
     }
 
     // MARK: - Private Methods
@@ -281,6 +309,10 @@ public actor ImageRepository {
         return await backgroundCoordinator.getProcessingStatus()
     }
 
+    public func queueSummary() async -> BackgroundQueueSummary {
+        return await backgroundCoordinator.queueSummary()
+    }
+
     public func thumbnailURL(for url: URL, size: ThumbnailSize) async throws -> URL {
         return try await thumbnailService.generateThumbnail(for: url, size: size, regenerate: false)
     }
@@ -424,7 +456,9 @@ public class ObservableImageRepository: ObservableObject {
     @Published public var activityMessage: String? = nil
     @Published public var isBusy: Bool = false
     @Published public var activityCount: Int = 0
+    @Published public var queueSummary: BackgroundQueueSummary = .init(thumbnailTasks: 0, aiTasks: 0, isProcessing: false)
     private var refreshTask: Task<Void, Never>?
+    private var queueMonitorTask: Task<Void, Never>?
     
     public init(metadataStore: MetadataStore, repository: ImageRepository? = nil) {
         let repo = repository ?? ImageRepository(metadataStore: metadataStore)
@@ -433,6 +467,7 @@ public class ObservableImageRepository: ObservableObject {
         Task {
             await observeChanges()
         }
+        startQueueMonitoring()
     }
     
     public func refreshImages() async {
@@ -497,6 +532,25 @@ public class ObservableImageRepository: ObservableObject {
         for await _ in stream {
             scheduleRefresh()
         }
+    }
+
+    private func startQueueMonitoring() {
+        queueMonitorTask?.cancel()
+        queueMonitorTask = Task { [weak self] in
+            while !Task.isCancelled {
+                guard let self = self else { break }
+                let summary = await self.repository.queueSummary()
+                await MainActor.run {
+                    self.queueSummary = summary
+                }
+                try? await Task.sleep(nanoseconds: 700_000_000)
+            }
+        }
+    }
+
+    deinit {
+        refreshTask?.cancel()
+        queueMonitorTask?.cancel()
     }
 
     private func scheduleRefresh() {

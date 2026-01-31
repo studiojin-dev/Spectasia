@@ -296,6 +296,13 @@ public struct SpectasiaLayout: View {
                             .padding(.horizontal)
                             .padding(.top, 8)
 
+                            let queueSummary = repository.queueSummary
+                            if queueSummary.totalTasks > 0 || queueSummary.isProcessing {
+                                QueueSummaryView(summary: queueSummary)
+                                    .transition(.opacity)
+                                    .padding(.top, 4)
+                            }
+
                             Picker("View mode", selection: viewModeBinding) {
                                 ForEach(ViewMode.allCases) { mode in
                                     Text(mode.title)
@@ -391,6 +398,14 @@ public struct SpectasiaLayout: View {
                 }
             case .failure(let error):
                 CoreLog.error("Directory selection failed: \(error.localizedDescription)", category: "SpectasiaLayout")
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .SpectasiaOpenSettings)) { _ in
+            showSettings = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .SpectasiaChangeViewMode)) { notification in
+            if let mode = notification.object as? ViewMode {
+                handleViewModeChange(to: mode)
             }
         }
         .onAppear {
@@ -522,6 +537,45 @@ public struct SpectasiaLayout: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(GypsumColor.background)
+        }
+    }
+
+    private struct QueueSummaryView: View {
+        let summary: BackgroundQueueSummary
+
+        var body: some View {
+            VStack(spacing: 6) {
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .progressViewStyle(.linear)
+                        .tint(GypsumColor.primary)
+                        .frame(height: 3)
+                        .frame(maxWidth: 80)
+                    Text("Processing \(summary.totalTasks) background task\(summary.totalTasks == 1 ? "" : "s")")
+                        .font(GypsumFont.caption2)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                }
+                HStack(spacing: 8) {
+                    QueueBadge(label: "Thumbnails \(summary.thumbnailTasks)")
+                    QueueBadge(label: "AI \(summary.aiTasks)")
+                }
+            }
+            .padding(.horizontal)
+        }
+    }
+
+    private struct QueueBadge: View {
+        let label: String
+
+        var body: some View {
+            Text(label)
+                .font(GypsumFont.caption2.bold())
+                .foregroundColor(.white)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(GypsumColor.primary)
+                .cornerRadius(12)
         }
     }
 

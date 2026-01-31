@@ -25,6 +25,8 @@
 		AC0E7D882F2D6EA20083D923 /* ThumbnailSizeOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0E7D862F2D6EA20083D923 /* ThumbnailSizeOption.swift */; };
 		AC0E7D8A2F2D82FF0083D923 /* AlbumListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0E7D892F2D82FF0083D923 /* AlbumListView.swift */; };
 		AC0E7D8B2F2D82FF0083D923 /* AlbumListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0E7D892F2D82FF0083D923 /* AlbumListView.swift */; };
+		AC0E7D8E2F2D8CA90083D923 /* SpectasiaNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0E7D8D2F2D8CA90083D923 /* SpectasiaNotifications.swift */; };
+		AC0E7D902F2D8CA90083D923 /* SpectasiaNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0E7D8D2F2D8CA90083D923 /* SpectasiaNotifications.swift */; };
 		ACEDCA682F29AB7700B1E22C /* DirectoryPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA602F29AB7700B1E22C /* DirectoryPicker.swift */; };
 		ACEDCA6C2F29AB7700B1E22C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA502F29AB7700B1E22C /* ContentView.swift */; };
 		ACEDCA6D2F29AB7700B1E22C /* SpectasiaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEDCA5E2F29AB7700B1E22C /* SpectasiaApp.swift */; };
@@ -69,6 +71,7 @@
 		AC0E7D672F2CD8CC0083D923 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AC0E7D862F2D6EA20083D923 /* ThumbnailSizeOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThumbnailSizeOption.swift; sourceTree = "<group>"; };
 		AC0E7D892F2D82FF0083D923 /* AlbumListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumListView.swift; sourceTree = "<group>"; };
+		AC0E7D8D2F2D8CA90083D923 /* SpectasiaNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectasiaNotifications.swift; sourceTree = "<group>"; };
 		AC7CE7622F28DFFF00E2D895 /* Spectasia.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Spectasia.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC7CE76F2F28E00000E2D895 /* SpectasiaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpectasiaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC7CE7792F28E00000E2D895 /* SpectasiaUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpectasiaUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -131,16 +134,16 @@
 		AC7CE7592F28DFFF00E2D895 = {
 			isa = PBXGroup;
 			children = (
+				ACEDCA4F2F29AB7700B1E22C /* Assets.xcassets */,
+				ACFCE2FC2F2C2AFC001B9220 /* Frameworks */,
 				AC0E7D672F2CD8CC0083D923 /* Info.plist */,
+				AC7CE7632F28DFFF00E2D895 /* Products */,
+				ACEDCA5C2F29AB7700B1E22C /* Resources */,
+				ACB87DC42F29B26700DC38B0 /* Spectasia.entitlements */,
+				ACEDCA5E2F29AB7700B1E22C /* SpectasiaApp.swift */,
 				AC7CE7722F28E00000E2D895 /* SpectasiaTests */,
 				AC7CE77C2F28E00000E2D895 /* SpectasiaUITests */,
-				AC7CE7632F28DFFF00E2D895 /* Products */,
-				ACEDCA4F2F29AB7700B1E22C /* Assets.xcassets */,
-				ACEDCA5C2F29AB7700B1E22C /* Resources */,
-				ACEDCA5E2F29AB7700B1E22C /* SpectasiaApp.swift */,
-				ACB87DC42F29B26700DC38B0 /* Spectasia.entitlements */,
 				ACEDCA672F29AB7700B1E22C /* UI */,
-				ACFCE2FC2F2C2AFC001B9220 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -166,19 +169,20 @@
 			isa = PBXGroup;
 			children = (
 				AC0E7D892F2D82FF0083D923 /* AlbumListView.swift */,
-				AC0E7D202F2C84EC0083D923 /* ImageListView.swift */,
-				AC0E7D212F2C84EC0083D923 /* SingleImageView.swift */,
-				AC0E7D222F2C84EC0083D923 /* SpectasiaCommands.swift */,
-				AC0E7D232F2C84EC0083D923 /* ToastCenter.swift */,
 				ACEDCA502F29AB7700B1E22C /* ContentView.swift */,
 				ACEDCA602F29AB7700B1E22C /* DirectoryPicker.swift */,
+				AC0E7D602F2C9B0B0083D923 /* DirectoryTreeView.swift */,
 				ACEDCA612F29AB7700B1E22C /* GypsumDesignSystem.swift */,
 				ACEDCA622F29AB7700B1E22C /* ImageGridView.swift */,
+				AC0E7D202F2C84EC0083D923 /* ImageListView.swift */,
 				ACEDCA632F29AB7700B1E22C /* MetadataPanel.swift */,
 				ACEDCA642F29AB7700B1E22C /* SettingsView.swift */,
+				AC0E7D212F2C84EC0083D923 /* SingleImageView.swift */,
+				AC0E7D222F2C84EC0083D923 /* SpectasiaCommands.swift */,
 				ACEDCA662F29AB7700B1E22C /* SpectasiaLayout.swift */,
-				AC0E7D602F2C9B0B0083D923 /* DirectoryTreeView.swift */,
+				AC0E7D8D2F2D8CA90083D923 /* SpectasiaNotifications.swift */,
 				AC0E7D862F2D6EA20083D923 /* ThumbnailSizeOption.swift */,
+				AC0E7D232F2C84EC0083D923 /* ToastCenter.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -362,6 +366,7 @@
 				ACEDCA742F29AB7700B1E22C /* MetadataPanel.swift in Sources */,
 				ACEDCA7A2F29AB7700B1E22C /* SpectasiaLayout.swift in Sources */,
 				AC0E7D8B2F2D82FF0083D923 /* AlbumListView.swift in Sources */,
+				AC0E7D902F2D8CA90083D923 /* SpectasiaNotifications.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -378,6 +383,7 @@
 			files = (
 				AC0E7D282F2C84EC0083D923 /* SingleImageView.swift in Sources */,
 				AC0E7D292F2C84EC0083D923 /* ToastCenter.swift in Sources */,
+				AC0E7D8E2F2D8CA90083D923 /* SpectasiaNotifications.swift in Sources */,
 				AC0E7D2A2F2C84EC0083D923 /* SpectasiaCommands.swift in Sources */,
 				AC0E7D2B2F2C84EC0083D923 /* ImageListView.swift in Sources */,
 				AC0E7D8A2F2D82FF0083D923 /* AlbumListView.swift in Sources */,

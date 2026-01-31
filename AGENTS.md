@@ -165,12 +165,12 @@ If create new file(s), tell the user to add the files to the xcode project manua
 - [x] 앨범 편집 (삭제/이름변경/병합/커버)
 
 #### Phase 5: UX 향상
-
-- [ ] 트랙패드 제스처 (two-finger swipe, double-tap)
-- [ ] 메뉴바 통합 (File/View/Tools/Help)
-- [ ] 백그라운드 작업 진행 상태 UI
-- [ ] 작업 큐 표시
-- [ ] 메뉴바 진행 요약 ("N/M 완료")
+ 
+- [x] 트랙패드 제스처 (two-finger swipe navigation + double-tap zoom reset) in `SingleImageView`
+- [x] 메뉴바 통합 (File/View/Tools/Help) with view-mode shortcuts, settings, cleanup, and status hooks
+- [x] 백그라운드 작업 진행 상태 UI and queue chips inside the viewer status area
+- [x] 작업 큐 표시 via `QueueSummaryView` plus queue count badges
+- [x] 메뉴바 진행 요약 ("Queue: …") surfaced in the Tools menu summary block
 
 #### Phase 6: 기술적 개선
 
