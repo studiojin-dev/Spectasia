@@ -6,7 +6,7 @@ import AppKit
 import UIKit
 #endif
 
-public struct SingleImageView: View {
+    public struct SingleImageView: View {
     public let image: SpectasiaImage
     public let gallery: [SpectasiaImage]
     public let onSelectImage: (SpectasiaImage) -> Void
@@ -17,6 +17,7 @@ public struct SingleImageView: View {
     @State private var translation: CGSize = .zero
     @GestureState private var dragOffset: CGSize = .zero
     @GestureState private var magnifyBy: CGFloat = 1.0
+    @State private var lastFitScale: CGFloat = 1.0
     @State private var overlayPosition: OverlayPosition = .bottom
     @EnvironmentObject private var metadataStoreManager: MetadataStoreManager
 
@@ -39,7 +40,7 @@ public struct SingleImageView: View {
         }
         .navigationTitle(image.url.lastPathComponent)
         .toolbar {
-#if os(macOS)
+            #if os(macOS)
             ToolbarItemGroup(placement: .automatic) {
                 Button(action: previousImage) {
                     Label("Previous", systemImage: "arrow.left")
@@ -79,7 +80,13 @@ public struct SingleImageView: View {
                     Label("Overlay", systemImage: "info.circle")
                 }
             }
-#endif
+            #endif
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .SpectasiaSingleImageZoomFit)) { _ in
+            resetZoom()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .SpectasiaSingleImageZoomActual)) { _ in
+            zoomToActual()
         }
     }
 
@@ -116,6 +123,9 @@ public struct SingleImageView: View {
 
     private func imageView(_ platformImage: PlatformImage) -> some View {
         GeometryReader { geometry in
+            let imageSize = platformImage.size
+            let fitScale = calculateFitScale(for: geometry.size, imageSize: imageSize)
+            let _ = updateFitScaleIfNeeded(fitScale)
             imageViewContent(for: platformImage)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
@@ -123,34 +133,38 @@ public struct SingleImageView: View {
                 .offset(x: translation.width + dragOffset.width, y: translation.height + dragOffset.height)
                 .frame(width: geometry.size.width, height: geometry.size.height)
                 .background(Color.black.opacity(0.02))
-        .gesture(
-            simultaneousGestures
-        )
-        .highPriorityGesture(
-            TapGesture(count: 2)
-                .onEnded {
-                    resetZoom()
-                }
-        )
-        #if os(macOS)
-        .overlay(
-            TrackpadSwipeDetector(
-                onSwipeLeft: {
-                    if let next = next {
-                        onSelectImage(next)
+                .gesture(simultaneousGestures)
+                .highPriorityGesture(
+                    TapGesture(count: 2)
+                        .onEnded {
+                            resetZoom()
+                        }
+                )
+            #if os(macOS)
+            .overlay(
+                TrackpadSwipeDetector(
+                    onSwipeLeft: {
+                        if let next = next {
+                            onSelectImage(next)
+                        }
+                    },
+                    onSwipeRight: {
+                        if let previous = previous {
+                            onSelectImage(previous)
+                        }
                     }
-                },
-                onSwipeRight: {
-                    if let previous = previous {
-                        onSelectImage(previous)
-                    }
-                }
+                )
+                .allowsHitTesting(false)
             )
-            .allowsHitTesting(false)
-        )
-        #endif
+            #endif
+        }
     }
-}
+
+    @MainActor
+    private func updateFitScaleIfNeeded(_ fitScale: CGFloat) {
+        guard abs(lastFitScale - fitScale) > 0.01 else { return }
+        lastFitScale = fitScale
+    }
 
     private func imageViewContent(for platformImage: PlatformImage) -> Image {
         #if canImport(AppKit)
@@ -261,6 +275,19 @@ public struct SingleImageView: View {
     private func resetZoom() {
         zoomScale = 1.0
         translation = .zero
+    }
+
+    private func calculateFitScale(for container: CGSize, imageSize: CGSize) -> CGFloat {
+        guard imageSize.width > 0, imageSize.height > 0 else { return 1 }
+        let widthScale = container.width / imageSize.width
+        let heightScale = container.height / imageSize.height
+        return min(widthScale, heightScale)
+    }
+
+    private func zoomToActual() {
+        guard lastFitScale > 0 else { return }
+        resetZoom()
+        zoomScale = max(1, 1 / lastFitScale)
     }
 }
 
@@ -486,9 +513,9 @@ private struct TrackpadSwipeDetector: NSViewRepresentable {
                         return nil
                     }
                     return event
-                }
-            }
         }
+    }
+}
 
         func cleanup() {
             DispatchQueue.main.async {

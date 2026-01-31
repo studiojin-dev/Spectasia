@@ -314,6 +314,19 @@ public struct SpectasiaLayout: View {
                                 .font(GypsumFont.caption)
                                 .foregroundColor(.secondary)
                                 .padding(.horizontal)
+                            if currentViewMode == .singleImage {
+                                HStack(spacing: 12) {
+                                    Button("Reset zoom") {
+                                        NotificationCenter.default.post(name: .SpectasiaSingleImageZoomFit, object: nil)
+                                    }
+                                    .buttonStyle(.bordered)
+                                    Button("Actual size") {
+                                        NotificationCenter.default.post(name: .SpectasiaSingleImageZoomActual, object: nil)
+                                    }
+                                    .buttonStyle(.bordered)
+                                }
+                                .padding(.horizontal)
+                            }
                             Picker("Thumbnail size", selection: $thumbnailSizeOption) {
                                 ForEach(ThumbnailSizeOption.allCases) { option in
                                     Text(option.label).tag(option)

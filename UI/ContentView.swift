@@ -10,7 +10,6 @@ import SpectasiaCore
 
 /// Main view for Spectasia image viewer
 struct ContentView: View {
-    @State private var selectedImageID: String? = nil
     @State private var selectedDirectory: URL? = nil
     @State private var backgroundTasks: Int = 0
     @State private var currentViewMode: SpectasiaLayout.ViewMode = .thumbnailGrid
@@ -25,16 +24,17 @@ struct ContentView: View {
     @EnvironmentObject var metadataStoreManager: MetadataStoreManager
     @EnvironmentObject var toastCenter: ToastCenter
     @EnvironmentObject var directoryScanManager: DirectoryScanManager
+    @EnvironmentObject private var selectionStore: SelectionStore
 
     private var selectedImage: SpectasiaImage? {
-        repository.images.first { $0.id == selectedImageID }
+        repository.images.first { $0.id == selectionStore.selectedImageID }
     }
 
     private var selectedImageBinding: Binding<SpectasiaImage?> {
         Binding(
-            get: { repository.images.first(where: { $0.id == selectedImageID }) },
+            get: { repository.images.first(where: { $0.id == selectionStore.selectedImageID }) },
             set: { newValue in
-                selectedImageID = newValue?.id
+                selectionStore.selectedImageID = newValue?.id
             }
         )
     }
@@ -190,11 +190,11 @@ struct ContentView: View {
 
     @MainActor
     private func alignSelectedImage(with images: [SpectasiaImage]) {
-        guard let currentID = selectedImageID else { return }
+        guard let currentID = selectionStore.selectedImageID else { return }
         if images.contains(where: { $0.id == currentID }) {
             return
         }
-        selectedImageID = nil
+        selectionStore.selectedImageID = nil
     }
 }
 

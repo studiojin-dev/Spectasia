@@ -35,6 +35,10 @@ If create new file(s), tell the user to add the files to the xcode project manua
 
 ## TODO LIST (2026-01-30 통합)
 
+### 🧪 최근 수정
+- [x] `CommandMenu("Rating")` now applies `.disabled` directly to buttons instead of the menu so the commands compile and stay responsive when no image is selected.
+- [x] `SingleImageView` tracks fit-scale updates via a helper method, avoiding inline `DispatchQueue` calls inside `ViewBuilder` blocks.
+
 ### ✅ 완료된 기능
 
 #### Core 서비스

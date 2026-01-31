@@ -7,17 +7,29 @@ struct SpectasiaCommands: Commands {
     private let toastCenter: ToastCenter
     private let metadataStoreManager: MetadataStoreManager
     private let appConfig: AppConfig
+    private let selectionStore: SelectionStore
+
+    private var selectedImage: SpectasiaImage? {
+        repository.images.first(where: { $0.id == selectionStore.selectedImageID })
+    }
+
+    private var selectedIndex: Int? {
+        guard let selected = selectedImage else { return nil }
+        return repository.images.firstIndex(where: { $0.id == selected.id })
+    }
 
     init(
         repository: ObservableImageRepository,
         toastCenter: ToastCenter,
         metadataStoreManager: MetadataStoreManager,
-        appConfig: AppConfig
+        appConfig: AppConfig,
+        selectionStore: SelectionStore
     ) {
         self.repository = repository
         self.toastCenter = toastCenter
         self.metadataStoreManager = metadataStoreManager
         self.appConfig = appConfig
+        self.selectionStore = selectionStore
     }
 
     var body: some Commands {
@@ -52,6 +64,64 @@ struct SpectasiaCommands: Commands {
                 postViewMode(.singleImage)
             }
             .keyboardShortcut("3", modifiers: .command)
+
+            Divider()
+
+            Button("Toggle Full Screen") {
+                toggleFullScreen()
+            }
+            .keyboardShortcut("f", modifiers: .command)
+
+            Button("Exit Full Screen") {
+                exitFullScreen()
+            }
+            .keyboardShortcut(.escape, modifiers: [])
+
+            Divider()
+
+            Button("Fit to Window") {
+                postZoomFit()
+            }
+            .keyboardShortcut("0", modifiers: .command)
+            .disabled(selectedImage == nil)
+
+            Button("Actual Size") {
+                postZoomActual()
+            }
+            .keyboardShortcut("9", modifiers: .command)
+            .disabled(selectedImage == nil)
+        }
+
+        CommandMenu("Rating") {
+            Button("Clear Rating") {
+                setRating(0)
+            }
+            .keyboardShortcut(.init("0"), modifiers: .control)
+            .disabled(selectedImage == nil)
+
+            Divider()
+
+            ForEach(1...5, id: \.self) { rating in
+                Button(String(repeating: "★", count: rating)) {
+                    setRating(rating)
+                }
+                .keyboardShortcut(.init(Character("\(rating)")), modifiers: .control)
+                .disabled(selectedImage == nil)
+            }
+        }
+
+        CommandMenu("Navigate") {
+            Button("Previous Image") {
+                goToImage(delta: -1)
+            }
+            .keyboardShortcut(.leftArrow, modifiers: [])
+            .disabled(selectedImage == nil || selectedIndex == nil || selectedIndex == 0)
+
+            Button("Next Image") {
+                goToImage(delta: 1)
+            }
+            .keyboardShortcut(.rightArrow, modifiers: [])
+            .disabled(selectedImage == nil || selectedIndex == nil || selectedIndex == repository.images.count - 1)
         }
 
         CommandMenu("Tools") {
@@ -148,5 +218,55 @@ struct SpectasiaCommands: Commands {
     private func openHelpLink() {
         guard let url = URL(string: "https://spectasia.app/help") else { return }
         NSWorkspace.shared.open(url)
+    }
+
+    private func setRating(_ rating: Int) {
+        guard let image = selectedImage else { return }
+        Task {
+            do {
+                let xmpService = XMPService(metadataStore: metadataStoreManager.store)
+                try await xmpService.writeRating(url: image.url, rating: rating)
+                await repository.refreshImages()
+                await MainActor.run {
+                    toastCenter.show(NSLocalizedString("Rating updated", comment: "Rating saved message"))
+                }
+            } catch {
+                await MainActor.run {
+                    toastCenter.show(NSLocalizedString("Failed to save rating", comment: "Rating failure"))
+                }
+                CoreLog.error("Failed to save rating: \(error.localizedDescription)", category: "SpectasiaCommands")
+            }
+        }
+    }
+
+    private func goToImage(delta: Int) {
+        guard let index = selectedIndex else { return }
+        let newIndex = index + delta
+        guard repository.images.indices.contains(newIndex) else { return }
+        selectionStore.selectedImageID = repository.images[newIndex].id
+    }
+
+    private func toggleFullScreen() {
+        #if os(macOS)
+        NSApp.keyWindow?.toggleFullScreen(nil)
+        #endif
+    }
+
+    private func exitFullScreen() {
+        #if os(macOS)
+        if NSApp.keyWindow?.styleMask.contains(.fullScreen) == true {
+            NSApp.keyWindow?.toggleFullScreen(nil)
+        }
+        #endif
+    }
+
+    private func postZoomFit() {
+        guard selectedImage != nil else { return }
+        NotificationCenter.default.post(name: .SpectasiaSingleImageZoomFit, object: nil)
+    }
+
+    private func postZoomActual() {
+        guard selectedImage != nil else { return }
+        NotificationCenter.default.post(name: .SpectasiaSingleImageZoomActual, object: nil)
     }
 }

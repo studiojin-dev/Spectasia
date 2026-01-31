@@ -6,7 +6,16 @@
 //
 
 import SwiftUI
+import Combine
 import SpectasiaCore
+
+final class SelectionStore: ObservableObject {
+    @Published var selectedImageID: String?
+
+    init(selectedImageID: String? = nil) {
+        self.selectedImageID = selectedImageID
+    }
+}
 
 @main
 struct SpectasiaApp: App {
@@ -17,6 +26,7 @@ struct SpectasiaApp: App {
     @StateObject private var directoryScanManager: DirectoryScanManager
     @StateObject private var albumManager: AlbumManager
     @StateObject private var toastCenter = ToastCenter()
+    @StateObject private var selectionStore = SelectionStore()
 
     init() {
         let config = AppConfig()
@@ -47,13 +57,15 @@ struct SpectasiaApp: App {
                 .environmentObject(directoryScanManager)
                 .environmentObject(toastCenter)
                 .environmentObject(albumManager)
+                .environmentObject(selectionStore)
         }
         .commands {
             SpectasiaCommands(
                 repository: repository,
                 toastCenter: toastCenter,
                 metadataStoreManager: metadataStoreManager,
-                appConfig: appConfig
+                appConfig: appConfig,
+                selectionStore: selectionStore
             )
         }
     }
