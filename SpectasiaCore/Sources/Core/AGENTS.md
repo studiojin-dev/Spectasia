@@ -56,9 +56,9 @@ SpectasiaCore/Sources/Core/
 ## CURRENT IMPLEMENTATION STATUS (2026-01-30)
 - **Implemented**: AppConfig, PermissionManager, FileMonitorService, ThumbnailService, XMPService (ratings/tags), AIService (basic classification), MetadataStore + manager, ImageRepository + ObservableImageRepository, MetadataIndexStore, DirectoryScanManager for background scanning/indexing.
 - **Partial**: BackgroundCoordinator status is string-based; DirectoryScanManager still needs more UI commands for tree editing.
-- **Missing**: XMP albums/EXIF/GPS, ICC/HDR preservation in thumbnails, AI faces/objects/mood, search/filter, progress reporting model.
+- **Missing**: XMP albums/EXIF/GPS, AI faces/objects/mood, search/filter, progress reporting model.
 
 ## PLAN SUMMARY
 - **Short-term**: Ship DirectoryScanManager metadata index + tree view updates (Phase 1), polish UI wiring.
 - **Mid-term**: Expand AI requests (faces/animals/objects/mood) and add auto-analysis flow.
-- **Long-term**: Album metadata in XMP, cache cleanup/LRU, robust XML parsing, and continued metadata index refinements.
+- **Long-term**: Album metadata in XMP and continued metadata index refinements (cache cleanup and XML parsing upgrades are now in place).

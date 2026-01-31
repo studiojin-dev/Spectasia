@@ -1,6 +1,8 @@
+import CoreImage
 import Foundation
 import CoreGraphics
 import ImageIO
+import CoreServices
 
 // MARK: - Constants
 
@@ -37,16 +39,30 @@ public enum ThumbnailSize: String, Sendable, Codable {
 /// Service for generating and caching image thumbnails
 @available(macOS 10.15, *)
 public final class ThumbnailService: @unchecked Sendable {
+    private static let defaultMaxCacheSizeBytes: Int64 = 1 * 1024 * 1024 * 1024 // 1 GiB
+
     private let metadataStore: MetadataStore
     private let fileManager = FileManager.default
+    private let maxCacheSizeBytes: Int64
+    private let ciContext: CIContext
 
-    public init(metadataStore: MetadataStore) {
+    public init(metadataStore: MetadataStore, maxCacheSizeBytes: Int64) {
         self.metadataStore = metadataStore
+        self.maxCacheSizeBytes = maxCacheSizeBytes
+        self.ciContext = CIContext(options: [.priorityRequestLow: true])
+    }
+
+    public convenience init(metadataStore: MetadataStore) {
+        self.init(metadataStore: metadataStore, maxCacheSizeBytes: Self.defaultMaxCacheSizeBytes)
     }
 
     public convenience init(cacheDirectory: String) {
+        self.init(cacheDirectory: cacheDirectory, maxCacheSizeBytes: Self.defaultMaxCacheSizeBytes)
+    }
+
+    public convenience init(cacheDirectory: String, maxCacheSizeBytes: Int64) {
         let store = MetadataStore(rootDirectory: URL(fileURLWithPath: cacheDirectory))
-        self.init(metadataStore: store)
+        self.init(metadataStore: store, maxCacheSizeBytes: maxCacheSizeBytes)
     }
 
     @MainActor
@@ -83,6 +99,19 @@ public final class ThumbnailService: @unchecked Sendable {
             try? fileManager.removeItem(at: previousURL)
         }
 
+        let prunePlan = await metadataStore.cachePrunePlan(maxBytes: maxCacheSizeBytes)
+        if !prunePlan.entries.isEmpty {
+            let entries = prunePlan.entries
+            let metadataStoreRef = metadataStore
+            Task.detached(priority: .background) {
+                let cleanupManager = FileManager.default
+                for entry in entries {
+                    try? cleanupManager.removeItem(at: entry.url)
+                }
+                await metadataStoreRef.applyPrunedEntries(entries)
+            }
+        }
+
         return cacheURL
     }
 
@@ -107,34 +136,63 @@ public final class ThumbnailService: @unchecked Sendable {
             throw ThumbnailError.cannotCreateThumbnail
         }
 
-        // Convert CGImage to JPEG data
-        guard let data = cgImage.jpegData() else {
+        let properties = CGImageSourceCopyPropertiesAtIndex(imageSource, 0, nil) as? [CFString: Any]
+        let metadata = CGImageSourceCopyMetadataAtIndex(imageSource, 0, nil)
+        let shouldToneMap = shouldToneMapThumbnail(from: properties, cgImage: cgImage)
+        let finalImage = shouldToneMap ? toneMapImage(cgImage) ?? cgImage : cgImage
+
+        let output = NSMutableData()
+        guard let destination = CGImageDestinationCreateWithData(
+            output as CFMutableData,
+            kUTTypeJPEG,
+            1,
+            nil
+        ) else {
             throw ThumbnailError.cannotEncodeThumbnail
         }
 
-        return data
+        let finalMetadata = metadata ?? CGImageMetadataCreateMutable()
+        let destinationOptions: CFDictionary = [
+            kCGImageDestinationLossyCompressionQuality: 0.8
+        ] as CFDictionary
+
+        CGImageDestinationAddImageAndMetadata(destination, finalImage, finalMetadata, destinationOptions)
+        guard CGImageDestinationFinalize(destination) else {
+            throw ThumbnailError.cannotEncodeThumbnail
+        }
+
+        return output as Data
+    }
+
+    private func shouldToneMapThumbnail(from properties: [CFString: Any]?, cgImage: CGImage) -> Bool {
+        if cgImage.bitsPerComponent > 8 {
+            return true
+        }
+        if cgImage.bitmapInfo.contains(.floatComponents) {
+            return true
+        }
+        if let depth = properties?[kCGImagePropertyDepth] as? Int, depth > 8 {
+            return true
+        }
+        if let colorSpaceName = cgImage.colorSpace?.name as String?,
+           colorSpaceName.localizedCaseInsensitiveContains("p3") ||
+           colorSpaceName.localizedCaseInsensitiveContains("extended") {
+            return true
+        }
+        return false
+    }
+    private func toneMapImage(_ cgImage: CGImage) -> CGImage? {
+        let input = CIImage(cgImage: cgImage)
+        guard let filter = CIFilter(name: "CIHighlightShadowAdjust") else { return nil }
+        filter.setValue(input, forKey: kCIInputImageKey)
+        filter.setValue(0.75, forKey: "inputHighlightAmount")
+        filter.setValue(0.35, forKey: "inputShadowAmount")
+
+        guard let output = filter.outputImage else { return nil }
+        let targetColorSpace = cgImage.colorSpace ?? CGColorSpace(name: CGColorSpace.sRGB)
+        return ciContext.createCGImage(output, from: output.extent, format: .RGBA8, colorSpace: targetColorSpace)
     }
 }
-
-// MARK: - CGImage Extension
-
-extension CGImage {
-    func jpegData(compressionQuality: CGFloat = 0.8) -> Data? {
-        let data = NSMutableData()
-        guard let destination = CGImageDestinationCreateWithData(
-            data as CFMutableData,
-            "public.jpeg" as CFString,
-            1,
-            nil
-        ) else { return nil }
-
-        CGImageDestinationAddImage(destination, self, nil)
-        guard CGImageDestinationFinalize(destination) else { return nil }
-
-        return data as Data
-    }
-}
-
 // MARK: - Errors
 
 public enum ThumbnailError: Error {

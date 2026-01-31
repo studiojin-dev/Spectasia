@@ -49,7 +49,15 @@ public final class XMPService: @unchecked Sendable {
 
         // Parse XMP from sidecar
         let xmpContent = try String(contentsOf: sidecarURL, encoding: .utf8)
-        return metadataWithFileInfo(from: parseXMP(xmpContent), url: url)
+        let parsed = parseXMP(xmpContent)
+        if parsed.didFail {
+            CoreLog.warning("XMP parse failed for \(url.path), resetting metadata", category: "XMPService")
+            try? fileManager.removeItem(at: sidecarURL)
+            let resetMetadata = metadataWithFileInfo(from: ImageMetadata(), url: url)
+            try await writeMetadata(url: url, metadata: ImageMetadata())
+            return resetMetadata
+        }
+        return metadataWithFileInfo(from: parsed.metadata, url: url)
     }
 
     /// Write rating to XMP sidecar
@@ -82,40 +90,20 @@ public final class XMPService: @unchecked Sendable {
         try xmpContent.write(to: sidecarURL, atomically: true, encoding: .utf8)
     }
 
-    private func parseXMP(_ xmpContent: String) -> ImageMetadata {
-        var rating = 0
-        var tags: [String] = []
-
-        // Simple XML parsing for XMP
-        // In production, use proper XML parser
-        if let ratingRange = xmpContent.range(of: "xmp:Rating=\"", options: .caseInsensitive) {
-            let start = ratingRange.upperBound
-            if let endRange = xmpContent[start...].range(of: "\"") {
-                let ratingString = String(xmpContent[start..<endRange.lowerBound])
-                rating = Int(ratingString) ?? 0
-            }
+    private func parseXMP(_ xmpContent: String) -> ParsedXMP {
+        guard let data = xmpContent.data(using: .utf8) else {
+            return ParsedXMP(metadata: ImageMetadata(), didFail: true)
         }
 
-        // Parse Dublin Core subjects (tags)
-        if let subjectStart = xmpContent.range(of: "<dc:subject>") {
-            let start = subjectStart.upperBound
-            if let subjectEnd = xmpContent[start...].range(of: "</dc:subject>") {
-                let subjectContent = String(xmpContent[start..<subjectEnd.lowerBound])
-                // Extract individual tags from <rdf:li> elements
-                let liPattern = "<rdf:li>(.*?)</rdf:li>"
-                if let regex = try? NSRegularExpression(pattern: liPattern, options: []) {
-                    let matches = regex.matches(in: subjectContent, options: [], range: NSRange(subjectContent.startIndex..., in: subjectContent))
-                    tags = matches.compactMap { match in
-                        if let range = Range(match.range(at: 1), in: subjectContent) {
-                            return String(subjectContent[range])
-                        }
-                        return nil
-                    }
-                }
-            }
-        }
+        let parser = XMLParser(data: data)
+        parser.shouldProcessNamespaces = true
+        let delegate = XMPParserDelegate()
+        parser.delegate = delegate
+        let success = parser.parse()
 
-        return ImageMetadata(rating: rating, tags: tags)
+        let metadata = ImageMetadata(rating: delegate.rating, tags: delegate.tags)
+        let failed = !success || delegate.encounteredError
+        return ParsedXMP(metadata: metadata, didFail: failed)
     }
 
     private func metadataWithFileInfo(from metadata: ImageMetadata, url: URL) -> ImageMetadata {
@@ -163,6 +151,54 @@ public final class XMPService: @unchecked Sendable {
         """
 
         return xmp
+    }
+}
+
+private struct ParsedXMP {
+    let metadata: ImageMetadata
+    let didFail: Bool
+}
+
+private final class XMPParserDelegate: NSObject, XMLParserDelegate {
+    var rating: Int = 0
+    var tags: [String] = []
+
+    private var collectingTag = false
+    private var currentTag = ""
+    private(set) var encounteredError: Bool = false
+
+    func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String: String] = [:]) {
+        if elementName == "Description" && (qName == "rdf:Description" || attributeDict.keys.contains("xmp:Rating") || attributeDict.keys.contains("Rating")) {
+            if let ratingString = attributeDict["xmp:Rating"] ?? attributeDict["Rating"] {
+                rating = Int(ratingString) ?? rating
+            }
+        }
+
+        if elementName == "li" || qName == "rdf:li" {
+            collectingTag = true
+            currentTag = ""
+        }
+    }
+
+    func parser(_ parser: XMLParser, foundCharacters string: String) {
+        guard collectingTag else { return }
+        currentTag += string
+    }
+
+    func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
+        if (elementName == "li" || qName == "rdf:li") && collectingTag {
+            let trimmed = currentTag.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty {
+                tags.append(trimmed)
+            }
+            collectingTag = false
+            currentTag = ""
+        }
+    }
+
+    func parser(_ parser: XMLParser, parseErrorOccurred error: Error) {
+        CoreLog.error("XMP parse error: \(error.localizedDescription)", category: "XMPService")
+        encounteredError = true
     }
 }
 

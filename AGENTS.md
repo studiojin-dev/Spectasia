@@ -1,7 +1,7 @@
 # PROJECT KNOWLEDGE BASE
 
 **Generated:** 2026-01-28
-**Last Updated:** 2026-01-30
+**Last Updated:** 2026-01-31
 **Commit:** n/a
 **Branch:** n/a
 
@@ -174,10 +174,10 @@ If create new file(s), tell the user to add the files to the xcode project manua
 
 #### Phase 6: 기술적 개선
 
-- [ ] ICC 프로필 보존 (색상 관리)
-- [ ] HDR 이미지 지원 및 톤 매핑
-- [ ] 캐시 정리 전략 (LRU, 크기 제한)
-- [ ] XMP 파싱 개선 (XMLParser 사용)
+- [x] ICC 프로필 보존 (색상 관리)
+- [x] HDR 이미지 지원 및 톤 매핑
+- [x] 캐시 정리 전략 (LRU, 크기 제한)
+- [x] XMP 파싱 개선 (XMLParser 사용)
 
 ---
 
