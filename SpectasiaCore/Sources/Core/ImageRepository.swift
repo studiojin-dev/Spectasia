@@ -539,7 +539,9 @@ public class ObservableImageRepository: ObservableObject {
         queueMonitorTask = Task { [weak self] in
             while !Task.isCancelled {
                 guard let self = self else { break }
+                if Task.isCancelled { break }
                 let summary = await self.repository.queueSummary()
+                if Task.isCancelled { break }
                 await MainActor.run {
                     self.queueSummary = summary
                 }

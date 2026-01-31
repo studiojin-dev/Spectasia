@@ -448,22 +448,23 @@ private struct TrackpadSwipeDetector: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: NSView, context: Context) {
-        // No dynamic updates needed.
+        context.coordinator.setActive(true)
     }
 
     func dismantleNSView(_ nsView: NSView, coordinator: Coordinator) {
-        Task { coordinator.cleanup() }
+        coordinator.setActive(false)
+        coordinator.cleanup()
     }
 
     func makeCoordinator() -> Coordinator {
         Coordinator(onSwipeLeft: onSwipeLeft, onSwipeRight: onSwipeRight)
     }
 
-    @MainActor
     final class Coordinator {
         let onSwipeLeft: () -> Void
         let onSwipeRight: () -> Void
         private var monitor: Any?
+        private var isActive = false
 
         init(onSwipeLeft: @escaping () -> Void, onSwipeRight: @escaping () -> Void) {
             self.onSwipeLeft = onSwipeLeft
@@ -471,31 +472,38 @@ private struct TrackpadSwipeDetector: NSViewRepresentable {
         }
 
         func install() {
-            guard monitor == nil else { return }
-            monitor = NSEvent.addLocalMonitorForEvents(matching: .swipe) { [weak self] event in
-                guard let self = self else { return event }
-                if event.momentumPhase != [] {
+            DispatchQueue.main.async {
+                guard self.monitor == nil else { return }
+                self.monitor = NSEvent.addLocalMonitorForEvents(matching: .swipe) { [weak self] event in
+                    guard let self = self else { return event }
+                    guard self.isActive else { return event }
+                    if abs(event.deltaX) > abs(event.deltaY) {
+                        if event.deltaX < 0 {
+                            self.onSwipeLeft()
+                        } else if event.deltaX > 0 {
+                            self.onSwipeRight()
+                        }
+                        return nil
+                    }
                     return event
                 }
-                if abs(event.deltaX) > abs(event.deltaY) {
-                    if event.deltaX < 0 {
-                        self.onSwipeLeft()
-                    } else if event.deltaX > 0 {
-                        self.onSwipeRight()
-                    }
-                    return nil
-                }
-                return event
             }
         }
 
         func cleanup() {
-            if let monitor = monitor {
-                NSEvent.removeMonitor(monitor)
-                self.monitor = nil
+            DispatchQueue.main.async {
+                if let monitor = self.monitor {
+                    NSEvent.removeMonitor(monitor)
+                    self.monitor = nil
+                }
             }
         }
 
+        func setActive(_ active: Bool) {
+            DispatchQueue.main.async {
+                self.isActive = active
+            }
+        }
     }
 }
 #endif
