@@ -25,6 +25,28 @@ The following terms are to be interpreted as described in RFC 2119:
    Architectural decisions MUST be recorded in ADRs.
    AGENTS.md MAY contain only links to ADRs or brief summaries.
 
+### ADR Detection Rule
+
+If you make or rely on a decision that:
+
+- introduces architectural constraints,
+- involves trade-offs,
+- or is not obvious from code alone,
+
+you MUST pause and explicitly state:
+"An ADR is required for this decision."
+
+### ADR Detection Rule
+
+If you make or rely on a decision that:
+
+- introduces architectural constraints,
+- involves trade-offs,
+- or is not obvious from code alone,
+
+you MUST pause and explicitly state:
+"An ADR is required for this decision."
+
 ## RULE
 
 If create new file(s), tell the user to add the files to the xcode project manually. Agent are hard to add the new files into the xcode project
